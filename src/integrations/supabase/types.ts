@@ -14,16 +14,291 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      assignments: {
+        Row: {
+          assigned_at: string | null
+          assigned_substitute_id: string | null
+          assignment_date: string
+          compensation: string | null
+          created_at: string
+          description: string | null
+          end_time: string
+          id: string
+          published_at: string | null
+          school_id: string
+          start_time: string
+          status: Database["public"]["Enums"]["assignment_status"]
+          subject: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_substitute_id?: string | null
+          assignment_date: string
+          compensation?: string | null
+          created_at?: string
+          description?: string | null
+          end_time: string
+          id?: string
+          published_at?: string | null
+          school_id: string
+          start_time: string
+          status?: Database["public"]["Enums"]["assignment_status"]
+          subject: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_substitute_id?: string | null
+          assignment_date?: string
+          compensation?: string | null
+          created_at?: string
+          description?: string | null
+          end_time?: string
+          id?: string
+          published_at?: string | null
+          school_id?: string
+          start_time?: string
+          status?: Database["public"]["Enums"]["assignment_status"]
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignments_assigned_substitute_id_fkey"
+            columns: ["assigned_substitute_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignments_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          assignment_id: string
+          created_at: string
+          id: string
+          substitute_id: string
+        }
+        Insert: {
+          assignment_id: string
+          created_at?: string
+          id?: string
+          substitute_id: string
+        }
+        Update: {
+          assignment_id?: string
+          created_at?: string
+          id?: string
+          substitute_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_substitute_id_fkey"
+            columns: ["substitute_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          approved: boolean
+          availability: string | null
+          background_file_path: string | null
+          background_status: Database["public"]["Enums"]["background_status"]
+          created_at: string
+          email: string
+          full_name: string
+          graduation_year: number | null
+          id: string
+          phone: string | null
+          school_name: string | null
+          subjects: string[]
+        }
+        Insert: {
+          approved?: boolean
+          availability?: string | null
+          background_file_path?: string | null
+          background_status?: Database["public"]["Enums"]["background_status"]
+          created_at?: string
+          email?: string
+          full_name?: string
+          graduation_year?: number | null
+          id: string
+          phone?: string | null
+          school_name?: string | null
+          subjects?: string[]
+        }
+        Update: {
+          approved?: boolean
+          availability?: string | null
+          background_file_path?: string | null
+          background_status?: Database["public"]["Enums"]["background_status"]
+          created_at?: string
+          email?: string
+          full_name?: string
+          graduation_year?: number | null
+          id?: string
+          phone?: string | null
+          school_name?: string | null
+          subjects?: string[]
+        }
+        Relationships: []
+      }
+      ratings: {
+        Row: {
+          assignment_id: string | null
+          comment: string | null
+          created_at: string
+          id: string
+          score: number
+          substitute_id: string
+        }
+        Insert: {
+          assignment_id?: string | null
+          comment?: string | null
+          created_at?: string
+          id?: string
+          score: number
+          substitute_id: string
+        }
+        Update: {
+          assignment_id?: string | null
+          comment?: string | null
+          created_at?: string
+          id?: string
+          score?: number
+          substitute_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ratings_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ratings_substitute_id_fkey"
+            columns: ["substitute_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      school_requests: {
+        Row: {
+          contact_email: string | null
+          contact_person: string
+          contact_phone: string | null
+          created_at: string
+          description: string
+          handled: boolean
+          id: string
+          school_name: string
+        }
+        Insert: {
+          contact_email?: string | null
+          contact_person: string
+          contact_phone?: string | null
+          created_at?: string
+          description: string
+          handled?: boolean
+          id?: string
+          school_name: string
+        }
+        Update: {
+          contact_email?: string | null
+          contact_person?: string
+          contact_phone?: string | null
+          created_at?: string
+          description?: string
+          handled?: boolean
+          id?: string
+          school_name?: string
+        }
+        Relationships: []
+      }
+      schools: {
+        Row: {
+          contact_person: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+        }
+        Insert: {
+          contact_person?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+        }
+        Update: {
+          contact_person?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      claim_assignment: { Args: { p_assignment_id: string }; Returns: string }
+      claim_first_admin: { Args: never; Returns: boolean }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin: { Args: never; Returns: boolean }
+      publish_assignment: { Args: { p_assignment_id: string }; Returns: number }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "substitute"
+      assignment_status: "open" | "filled" | "expired"
+      background_status: "pending" | "approved" | "needs_renewal"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +425,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "substitute"],
+      assignment_status: ["open", "filled", "expired"],
+      background_status: ["pending", "approved", "needs_renewal"],
+    },
   },
 } as const
