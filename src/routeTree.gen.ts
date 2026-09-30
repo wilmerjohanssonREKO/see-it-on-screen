@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
 import { Route as AuthenticatedUppdragRouteImport } from './routes/_authenticated/uppdrag'
 
 const IndexRoute = IndexRouteImport.update({
@@ -28,6 +29,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedProfilRoute = AuthenticatedProfilRouteImport.update({
+  id: '/profil',
+  path: '/profil',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedUppdragRoute = AuthenticatedUppdragRouteImport.update({
   id: '/uppdrag',
   path: '/uppdrag',
@@ -37,11 +43,13 @@ const AuthenticatedUppdragRoute = AuthenticatedUppdragRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/profil': typeof AuthenticatedProfilRoute
   '/uppdrag': typeof AuthenticatedUppdragRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/profil': typeof AuthenticatedProfilRoute
   '/uppdrag': typeof AuthenticatedUppdragRoute
 }
 export interface FileRoutesById {
@@ -49,14 +57,21 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/profil': typeof AuthenticatedProfilRoute
   '/_authenticated/uppdrag': typeof AuthenticatedUppdragRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/uppdrag'
+  fullPaths: '/' | '/auth' | '/profil' | '/uppdrag'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/uppdrag'
-  id: '__root__' | '/' | '/_authenticated' | '/auth' | '/_authenticated/uppdrag'
+  to: '/' | '/auth' | '/profil' | '/uppdrag'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/profil'
+    | '/_authenticated/uppdrag'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -88,6 +103,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/profil': {
+      id: '/_authenticated/profil'
+      path: '/profil'
+      fullPath: '/profil'
+      preLoaderRoute: typeof AuthenticatedProfilRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/uppdrag': {
       id: '/_authenticated/uppdrag'
       path: '/uppdrag'
@@ -99,10 +121,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
   AuthenticatedUppdragRoute: typeof AuthenticatedUppdragRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedProfilRoute: AuthenticatedProfilRoute,
   AuthenticatedUppdragRoute: AuthenticatedUppdragRoute,
 }
 
