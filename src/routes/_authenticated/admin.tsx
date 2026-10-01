@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -24,6 +24,34 @@ import { Textarea } from "@/components/ui/textarea";
 import { BACKGROUND_LABELS, STATUS_LABELS, SUBJECTS, formatTime } from "@/lib/subjects";
 
 export const Route = createFileRoute("/_authenticated/admin")({
+  ssr: false,
+  beforeLoad: async () => {
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+
+    if (error || !user) {
+      throw redirect({ to: "/auth" });
+    }
+
+    const { data: adminRole, error: adminRoleError } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("role", "admin")
+      .maybeSingle();
+
+    if (adminRoleError) {
+      throw adminRoleError;
+    }
+
+    if (!adminRole) {
+      throw redirect({ to: "/uppdrag" });
+    }
+
+    return { user };
+  },
   head: () => ({
     meta: [
       { title: "Adminpanel — REKO UF" },
