@@ -1,9 +1,8 @@
-import type { Database } from "@/integrations/supabase/types";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Check, Plus, Send, Star } from "lucide-react";
+import { Check, Plus, Send, Star, Trash2, Beaker } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { AppHeader } from "@/components/AppHeader";
@@ -79,6 +78,7 @@ function AdminPage() {
             <TabsTrigger value="forfragningar">Skolförfrågningar</TabsTrigger>
             <TabsTrigger value="vikarier">Vikarier</TabsTrigger>
             <TabsTrigger value="skolor">Skolor</TabsTrigger>
+            <TabsTrigger value="testdata">Testdata</TabsTrigger>
           </TabsList>
           <TabsContent value="behov">
             <AssignmentsTab />
@@ -91,6 +91,9 @@ function AdminPage() {
           </TabsContent>
           <TabsContent value="skolor">
             <SchoolsTab />
+          </TabsContent>
+          <TabsContent value="testdata">
+            <TestDataTab />
           </TabsContent>
         </Tabs>
       </main>
@@ -105,6 +108,7 @@ function AssignmentsTab() {
   const [subject, setSubject] = useState("");
   const [schoolId, setSchoolId] = useState("");
   const [saving, setSaving] = useState(false);
+  const [desiredDate, setDesiredDate] = useState("");
 
   const { data: schools } = useQuery({
     queryKey: ["schools"],
@@ -175,6 +179,7 @@ function AssignmentsTab() {
     else toast.success(`Publicerat — ${count ?? 0} matchande vikarier notifierade`);
     (e.target as HTMLFormElement).reset();
     setSubject("");
+    setDesiredDate("");
     qc.invalidateQueries({ queryKey: ["assignments"] });
     qc.invalidateQueries({ queryKey: ["notif-counts"] });
   }
@@ -411,6 +416,15 @@ function RequestsTab() {
     else qc.invalidateQueries({ queryKey: ["school-requests"] });
   }
 
+  async function deleteRequest(id: string) {
+    const { error } = await supabase.from("school_requests").delete().eq("id", id);
+    if (error) toast.error("Kunde inte ta bort");
+    else {
+      toast.success("Förfrågan borttagen");
+      qc.invalidateQueries({ queryKey: ["school-requests"] });
+    }
+  }
+
   return (
     <div className="mt-4 grid gap-3">
       {(data?.length ?? 0) === 0 && (
@@ -429,10 +443,13 @@ function RequestsTab() {
               {r.contact_person} · {r.contact_email ?? ""} {r.contact_phone ?? ""}
             </p>
             <p className="text-sm">{r.description}</p>
-            <div>
+            <div className="flex flex-wrap gap-2">
               <Button size="sm" variant="outline" onClick={() => toggle(r.id, !r.handled)}>
                 <Check className="h-4 w-4" />
                 {r.handled ? "Markera som ny" : "Markera som behandlad"}
+              </Button>
+              <Button size="sm" variant="destructive" onClick={() => deleteRequest(r.id)}>
+                <Trash2 className="h-4 w-4" /> Radera
               </Button>
             </div>
           </CardContent>
@@ -471,14 +488,20 @@ function SubstitutesTab() {
     },
   });
 
-  async function update(
-    id: string,
-    patch: Database["public"]["Tables"]["profiles"]["Update"],
-  ) {
+  async function update(id: string, patch: Record<string, unknown>) {
     const { error } = await supabase.from("profiles").update(patch).eq("id", id);
     if (error) toast.error("Kunde inte uppdatera");
     else {
       toast.success("Uppdaterat");
+      qc.invalidateQueries({ queryKey: ["substitutes"] });
+    }
+  }
+
+  async function deleteSubstitute(id: string) {
+    const { error } = await supabase.from("profiles").delete().eq("id", id);
+    if (error) toast.error("Kunde inte ta bort vikarien");
+    else {
+      toast.success("Vikarie borttagen");
       qc.invalidateQueries({ queryKey: ["substitutes"] });
     }
   }
@@ -524,11 +547,7 @@ function SubstitutesTab() {
               </Button>
               <Select
                 value={p.background_status}
-                onValueChange={(v) =>
-                  update(p.id, {
-                    background_status: v as Database["public"]["Enums"]["background_status"],
-                  })
-                }
+                onValueChange={(v) => update(p.id, { background_status: v })}
               >
                 <SelectTrigger className="h-8 w-56">
                   <SelectValue />
@@ -544,6 +563,9 @@ function SubstitutesTab() {
                   Visa utdrag
                 </Button>
               )}
+              <Button size="sm" variant="destructive" onClick={() => deleteSubstitute(p.id)}>
+                <Trash2 className="h-4 w-4" /> Radera
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -578,6 +600,15 @@ function SchoolsTab() {
     else {
       toast.success("Skola tillagd");
       (e.target as HTMLFormElement).reset();
+      qc.invalidateQueries({ queryKey: ["schools"] });
+    }
+  }
+
+  async function deleteSchool(id: string) {
+    const { error } = await supabase.from("schools").delete().eq("id", id);
+    if (error) toast.error("Kunde inte ta bort skolan");
+    else {
+      toast.success("Skola borttagen");
       qc.invalidateQueries({ queryKey: ["schools"] });
     }
   }
@@ -617,15 +648,90 @@ function SchoolsTab() {
         {data?.map((s) => (
           <Card key={s.id}>
             <CardContent className="pt-6">
-              <p className="font-semibold">{s.name}</p>
-              <p className="text-sm text-muted-foreground">
-                {s.contact_person ?? "—"} {s.email ? `· ${s.email}` : ""}{" "}
-                {s.phone ? `· ${s.phone}` : ""}
-              </p>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <p className="font-semibold">{s.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {s.contact_person ?? "—"} {s.email ? `· ${s.email}` : ""}{" "}
+                    {s.phone ? `· ${s.phone}` : ""}
+                  </p>
+                </div>
+                <Button size="sm" variant="destructive" onClick={() => deleteSchool(s.id)}>
+                  <Trash2 className="h-4 w-4" /> Radera
+                </Button>
+              </div>
             </CardContent>
           </Card>
         ))}
       </div>
+    </div>
+  );
+}
+
+/* ---------------- Testdata ---------------- */
+
+function TestDataTab() {
+  const qc = useQueryClient();
+  const [loading, setLoading] = useState(false);
+
+  const testSchools = [
+    { name: "Donner Gymnasium", contact_person: "Anna Svensson", email: "anna@donner.se", phone: "070-123 45 67" },
+    { name: "Praktiska Gymnasiet", contact_person: "Bo Lundberg", email: "bo@praktiska.se", phone: "070-234 56 78" },
+    { name: "Nti Gymnasiet", contact_person: "Cecilia Bergman", email: "cecilia@nti.se", phone: "070-345 67 89" },
+  ];
+
+  async function createTestSchools() {
+    setLoading(true);
+    try {
+      for (const school of testSchools) {
+        await supabase.from("schools").insert(school);
+      }
+      toast.success("Testskolor tillagda");
+      qc.invalidateQueries({ queryKey: ["schools"] });
+    } catch (err) {
+      toast.error("Kunde inte skapa testskolor");
+    }
+    setLoading(false);
+  }
+
+  async function clearAllData() {
+    if (!confirm("Radera ALLT (skolor, vikarier, behov, förfrågningar)? Denna åtgärd kan inte ångras.")) {
+      return;
+    }
+    setLoading(true);
+    try {
+      await supabase.from("notifications").delete().neq("id", "");
+      await supabase.from("ratings").delete().neq("id", "");
+      await supabase.from("assignments").delete().neq("id", "");
+      await supabase.from("school_requests").delete().neq("id", "");
+      await supabase.from("profiles").delete().neq("id", "");
+      await supabase.from("schools").delete().neq("id", "");
+      toast.success("All data raderad");
+      qc.invalidateQueries();
+    } catch (err) {
+      toast.error("Kunde inte radera data");
+    }
+    setLoading(false);
+  }
+
+  return (
+    <div className="mt-4 grid gap-6">
+      <Card className="border-blue-200 bg-blue-50 shadow-soft">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-blue-900">
+            <Beaker className="h-5 w-5" /> Testdata
+          </CardTitle>
+          <CardDescription>Använd dessa verktyg under utveckling.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-3">
+          <Button onClick={createTestSchools} disabled={loading} className="justify-start">
+            {loading ? "Arbetar..." : "Skapa testskolor"}
+          </Button>
+          <Button onClick={clearAllData} disabled={loading} variant="destructive" className="justify-start">
+            <Trash2 className="h-4 w-4" /> Radera all data
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }
