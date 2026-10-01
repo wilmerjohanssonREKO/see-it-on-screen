@@ -470,7 +470,10 @@ function SubstitutesTab() {
     },
   });
 
-  async function update(id: string, patch: Record<string, unknown>) {
+  async function update(
+    id: string,
+    patch: Database["public"]["Tables"]["profiles"]["Update"],
+  ) {
     const { error } = await supabase.from("profiles").update(patch).eq("id", id);
     if (error) toast.error("Kunde inte uppdatera");
     else {
