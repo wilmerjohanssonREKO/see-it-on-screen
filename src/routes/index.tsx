@@ -103,8 +103,8 @@ function Index() {
         <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 md:grid-cols-2 md:py-20">
           <div className="flex flex-col justify-center">
             <span className="w-fit rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground">Vikarieförmedling för gymnasiet</span>
-            <h1 className="mt-4 text-4xl font-bold leading-tight md:text-5xl">Sjuk lärare i morgon? Vi hittar vikarien.</h1>
-            <p className="mt-4 text-base text-muted-foreground md:text-lg">REKO UF kopplar ihop gymnasieskolor med granskade vikarier — oftast före detta elever från er egen skola. Ni hör av er, vi matchar, första vikarien som kan tar uppdraget.</p>
+            <h1 className="mt-4 text-4xl font-bold leading-tight md:text-5xl">Sjuk lärare? <br />Vi hittar vikarien.</h1>
+            <p className="mt-4 text-base text-muted-foreground md:text-lg">REKO UF kopplar ihop gymnasieskolor med granskade vikarier. Ni hör av er, vi matchar, första vikarien som kan tar uppdraget.</p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Button asChild size="lg"><a href="#behov">Anmäl ett vikariebehov <ArrowRight className="h-4 w-4" /></a></Button>
               <Button asChild size="lg" variant="outline"><Link to="/auth">Bli vikarie</Link></Button>
@@ -115,7 +115,7 @@ function Index() {
               { icon: Clock, title: "Snabbt svar", text: "Matchande vikarier notifieras direkt när behovet läggs upp." },
               { icon: ShieldCheck, title: "Granskade vikarier", text: "Utdrag ur belastningsregistret kontrolleras innan någon matchas." },
               { icon: Users, title: "Egna elever", text: "Vikarier som redan känner skolan, ämnena och kulturen." },
-              { icon: CheckCircle2, title: "Ingen inloggning för skolan", text: "Vi sköter administrationen åt er — ni får ett besked." },
+              { icon: CheckCircle2, title: "Ingen inloggning för skolan", text: "Vi sköter administrationen åt er." },
             ].map((f) => <Card key={f.title} className="border-border/70 shadow-soft"><CardContent className="pt-6"><f.icon className="h-6 w-6 text-primary" /><h3 className="mt-3 text-base font-semibold">{f.title}</h3><p className="mt-1 text-sm text-muted-foreground">{f.text}</p></CardContent></Card>)}
           </div>
         </div>
