@@ -1,3 +1,4 @@
+import type { Database } from "@/integrations/supabase/types";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -470,7 +471,10 @@ function SubstitutesTab() {
     },
   });
 
-  async function update(id: string, patch: Record<string, unknown>) {
+  async function update(
+    id: string,
+    patch: Database["public"]["Tables"]["profiles"]["Update"],
+  ) {
     const { error } = await supabase.from("profiles").update(patch).eq("id", id);
     if (error) toast.error("Kunde inte uppdatera");
     else {
@@ -520,7 +524,11 @@ function SubstitutesTab() {
               </Button>
               <Select
                 value={p.background_status}
-                onValueChange={(v) => update(p.id, { background_status: v })}
+                onValueChange={(v) =>
+                  update(p.id, {
+                    background_status: v as Database["public"]["Enums"]["background_status"],
+                  })
+                }
               >
                 <SelectTrigger className="h-8 w-56">
                   <SelectValue />
