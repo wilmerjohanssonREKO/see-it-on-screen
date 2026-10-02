@@ -96,6 +96,9 @@ function AdminPage() {
           <TabsContent value="testdata">
             <TestDataTab />
           </TabsContent>
+          <TabsContent value="feedback">
+            <FeedbackTab />
+          </TabsContent>
         </Tabs>
       </main>
     </div>
