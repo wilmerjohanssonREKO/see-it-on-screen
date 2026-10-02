@@ -563,7 +563,9 @@ function SubstitutesTab() {
               </Button>
               <Select
                 value={p.background_status}
-                onValueChange={(v) => update(p.id, { background_status: v })}
+                onValueChange={(v) =>
+                  update(p.id, { background_status: v as "pending" | "approved" | "needs_renewal" })
+                }
               >
                 <SelectTrigger className="h-8 w-56">
                   <SelectValue />
