@@ -79,6 +79,7 @@ function AdminPage() {
             <TabsTrigger value="vikarier">Vikarier</TabsTrigger>
             <TabsTrigger value="skolor">Skolor</TabsTrigger>
             <TabsTrigger value="testdata">Testdata</TabsTrigger>
+            <TabsTrigger value="feedback">Feedback</TabsTrigger>
           </TabsList>
           <TabsContent value="behov">
             <AssignmentsTab />
