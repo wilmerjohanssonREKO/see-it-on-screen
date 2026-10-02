@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Check, Plus, Send, Star, Trash2, Beaker, Copy, Download } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
+import type { TablesUpdate } from "@/integrations/supabase/types";
 import { AppHeader } from "@/components/AppHeader";
 import { useAuth, useIsAdmin } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";

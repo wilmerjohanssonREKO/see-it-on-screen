@@ -81,12 +81,21 @@ function Index() {
   }
 
   async function handleAdminLogin(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault(); setAdminLogging(true);
+    e.preventDefault();
+    setAdminLogging(true);
     const { data, error } = await supabase.auth.signInWithPassword({ email: adminEmail, password: adminPassword });
-    if (error || !data.user) { setAdminLogging(false); return toast.error("Felaktig e-post eller lösenord"); }
+    if (error || !data.user) {
+      setAdminLogging(false);
+      toast.error("Felaktig e-post eller lösenord");
+      return;
+    }
     const { data: admin, error: roleError } = await supabase.rpc("is_admin");
     setAdminLogging(false);
-    if (roleError || !admin) { await supabase.auth.signOut(); return toast.error("Kontot har inte adminbehörighet"); }
+    if (roleError || !admin) {
+      await supabase.auth.signOut();
+      toast.error("Kontot har inte adminbehörighet");
+      return;
+    }
     window.location.href = "/admin";
   }
 
