@@ -49,20 +49,34 @@ function Index() {
       desired_date: String(fd.get("desired_date") ?? ""),
       description: String(fd.get("description") ?? ""),
     });
-    if (!parsed.success) return toast.error(parsed.error.issues[0]?.message ?? "Kontrollera fälten");
-    if (!parsed.data.contact_email && !parsed.data.contact_phone) return toast.error("Ange e-post eller telefonnummer så vi kan nå er");
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0]?.message ?? "Kontrollera fälten");
+      return;
+    }
+    if (!parsed.data.contact_email && !parsed.data.contact_phone) {
+      toast.error("Ange e-post eller telefonnummer så vi kan nå er");
+      return;
+    }
     setSaving(true);
+    const details = [
+      parsed.data.subject ? `Ämne: ${parsed.data.subject}` : "",
+      parsed.data.desired_date ? `Önskat datum: ${parsed.data.desired_date}` : "",
+      parsed.data.description,
+    ]
+      .filter(Boolean)
+      .join("\n");
     const { error } = await supabase.from("school_requests").insert({
       school_name: parsed.data.school_name,
       contact_person: parsed.data.contact_person,
       contact_email: parsed.data.contact_email || null,
       contact_phone: parsed.data.contact_phone || null,
-      subject: parsed.data.subject || null,
-      preferred_date: parsed.data.desired_date || null,
-      description: parsed.data.description,
+      description: details,
     });
     setSaving(false);
-    if (error) return toast.error("Något gick fel. Kontrollera att migrationen är körd.");
+    if (error) {
+      toast.error("Något gick fel. Försök igen om en stund.");
+      return;
+    }
     setSent(true);
   }
 

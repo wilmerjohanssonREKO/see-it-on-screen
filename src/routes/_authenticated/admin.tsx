@@ -503,7 +503,7 @@ function SubstitutesTab() {
     },
   });
 
-  async function update(id: string, patch: Record<string, unknown>) {
+  async function update(id: string, patch: TablesUpdate<"profiles">) {
     const { error } = await supabase.from("profiles").update(patch).eq("id", id);
     if (error) toast.error("Kunde inte uppdatera");
     else {
@@ -731,7 +731,7 @@ function TestDataTab() {
     try {
       for (const sub of testSubstitutes) {
         // Skapa auth-konto
-        const { data: authData, error: authError } = await supabase.auth.signUpWithPassword({
+        const { data: authData, error: authError } = await supabase.auth.signUp({
           email: sub.email,
           password: "TestPassword123!", // Test-lösenord (ändra vid produktion)
         });
