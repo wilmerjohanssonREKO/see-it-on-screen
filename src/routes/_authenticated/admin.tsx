@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { createSchoolLogin } from "@/lib/school-admin.functions";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Check, Plus, Send, Star, Trash2, Beaker, Copy, Download } from "lucide-react";
@@ -994,5 +996,40 @@ function FeedbackTab() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function SchoolLoginForm({ schoolId, defaultEmail }: { schoolId: string; defaultEmail: string }) {
+  const create = useServerFn(createSchoolLogin);
+  const [busy, setBusy] = useState(false);
+  async function submit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+    setBusy(true);
+    try {
+      await create({
+        data: {
+          schoolId,
+          email: String(fd.get("email") ?? ""),
+          password: String(fd.get("password") ?? ""),
+        },
+      });
+      toast.success("Inlogg skapat! Skicka uppgifterna till skolan.");
+      form.reset();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Kunde inte skapa inlogg");
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <form onSubmit={submit} className="mt-4 grid gap-2 border-t border-border pt-4 sm:grid-cols-[1fr_1fr_auto]">
+      <Input name="email" type="email" placeholder="Skolans inlogg (e-post)" defaultValue={defaultEmail} required maxLength={255} />
+      <Input name="password" type="text" placeholder="Lösenord (minst 8 tecken)" required minLength={8} maxLength={72} />
+      <Button type="submit" size="sm" disabled={busy}>
+        {busy ? "Skapar…" : "Skapa skolinlogg"}
+      </Button>
+    </form>
   );
 }
