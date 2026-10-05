@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedFeedbackRouteImport } from './routes/_authenticated/feedback'
 import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
+import { Route as AuthenticatedSkolaRouteImport } from './routes/_authenticated/skola'
 import { Route as AuthenticatedUppdragRouteImport } from './routes/_authenticated/uppdrag'
 
 const IndexRoute = IndexRouteImport.update({
@@ -46,6 +47,11 @@ const AuthenticatedProfilRoute = AuthenticatedProfilRouteImport.update({
   path: '/profil',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSkolaRoute = AuthenticatedSkolaRouteImport.update({
+  id: '/skola',
+  path: '/skola',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedUppdragRoute = AuthenticatedUppdragRouteImport.update({
   id: '/uppdrag',
   path: '/uppdrag',
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/feedback': typeof AuthenticatedFeedbackRoute
   '/profil': typeof AuthenticatedProfilRoute
+  '/skola': typeof AuthenticatedSkolaRoute
   '/uppdrag': typeof AuthenticatedUppdragRoute
 }
 export interface FileRoutesByTo {
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/feedback': typeof AuthenticatedFeedbackRoute
   '/profil': typeof AuthenticatedProfilRoute
+  '/skola': typeof AuthenticatedSkolaRoute
   '/uppdrag': typeof AuthenticatedUppdragRoute
 }
 export interface FileRoutesById {
@@ -76,13 +84,15 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/feedback': typeof AuthenticatedFeedbackRoute
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
+  '/_authenticated/skola': typeof AuthenticatedSkolaRoute
   '/_authenticated/uppdrag': typeof AuthenticatedUppdragRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/admin' | '/feedback' | '/profil' | '/uppdrag'
+  fullPaths:
+    '/' | '/auth' | '/admin' | '/feedback' | '/profil' | '/skola' | '/uppdrag'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/admin' | '/feedback' | '/profil' | '/uppdrag'
+  to: '/' | '/auth' | '/admin' | '/feedback' | '/profil' | '/skola' | '/uppdrag'
   id:
     | '__root__'
     | '/'
@@ -91,6 +101,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/feedback'
     | '/_authenticated/profil'
+    | '/_authenticated/skola'
     | '/_authenticated/uppdrag'
   fileRoutesById: FileRoutesById
 }
@@ -144,6 +155,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfilRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/skola': {
+      id: '/_authenticated/skola'
+      path: '/skola'
+      fullPath: '/skola'
+      preLoaderRoute: typeof AuthenticatedSkolaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/uppdrag': {
       id: '/_authenticated/uppdrag'
       path: '/uppdrag'
@@ -158,6 +176,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedFeedbackRoute: typeof AuthenticatedFeedbackRoute
   AuthenticatedProfilRoute: typeof AuthenticatedProfilRoute
+  AuthenticatedSkolaRoute: typeof AuthenticatedSkolaRoute
   AuthenticatedUppdragRoute: typeof AuthenticatedUppdragRoute
 }
 
@@ -165,6 +184,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedFeedbackRoute: AuthenticatedFeedbackRoute,
   AuthenticatedProfilRoute: AuthenticatedProfilRoute,
+  AuthenticatedSkolaRoute: AuthenticatedSkolaRoute,
   AuthenticatedUppdragRoute: AuthenticatedUppdragRoute,
 }
 
