@@ -238,6 +238,32 @@ export type Database = {
           },
         ]
       }
+      school_members: {
+        Row: {
+          created_at: string
+          school_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          school_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          school_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_members_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       school_requests: {
         Row: {
           contact_email: string | null
@@ -331,7 +357,24 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      my_school_id: { Args: never; Returns: string }
       publish_assignment: { Args: { p_assignment_id: string }; Returns: number }
+      school_assignments: {
+        Args: never
+        Returns: {
+          assignment_date: string
+          compensation: string
+          created_at: string
+          description: string
+          end_time: string
+          id: string
+          start_time: string
+          status: Database["public"]["Enums"]["assignment_status"]
+          subject: string
+          substitute_name: string
+          substitute_phone: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "substitute"
