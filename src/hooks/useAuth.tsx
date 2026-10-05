@@ -54,3 +54,14 @@ export function useIsAdmin(userId: string | undefined) {
     },
   });
 }
+
+export function useMySchoolId(userId: string | undefined) {
+  return useQuery({
+    queryKey: ["my-school-id", userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data } = await supabase.rpc("my_school_id");
+      return (data as string | null) ?? null;
+    },
+  });
+}

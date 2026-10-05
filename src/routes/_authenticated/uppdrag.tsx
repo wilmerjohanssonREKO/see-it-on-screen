@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { CalendarDays, Clock, MapPin, Wallet } from "lucide-react";
@@ -12,6 +12,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { STATUS_LABELS, formatTime } from "@/lib/subjects";
 
 export const Route = createFileRoute("/_authenticated/uppdrag")({
+  beforeLoad: async () => {
+    const { data } = await supabase.rpc("my_school_id");
+    if (data) throw redirect({ to: "/skola" });
+  },
   head: () => ({
     meta: [
       { title: "Mina förfrågningar — REKO UF" },

@@ -2,7 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { GraduationCap, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { useAuth, useIsAdmin } from "@/hooks/useAuth";
+import { useAuth, useIsAdmin, useMySchoolId } from "@/hooks/useAuth";
 
 export function Brand({ className = "" }: { className?: string }) {
   return (
@@ -18,6 +18,7 @@ export function Brand({ className = "" }: { className?: string }) {
 export function AppHeader() {
   const { session } = useAuth();
   const { data: isAdmin } = useIsAdmin(session?.user.id);
+  const { data: schoolId } = useMySchoolId(session?.user.id);
   const navigate = useNavigate();
 
   return (
@@ -27,6 +28,16 @@ export function AppHeader() {
         <nav className="flex items-center gap-1 text-sm">
           {session ? (
             <>
+              {schoolId ? (
+                <Link
+                  to="/skola"
+                  className="rounded-md px-3 py-2 font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                activeProps={{ className: "bg-secondary text-foreground" }}
+                >
+                  Vikariebehov
+                </Link>
+              ) : (
+                <>
               <Link
                 to="/uppdrag"
                 className="rounded-md px-3 py-2 font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
@@ -41,6 +52,8 @@ export function AppHeader() {
               >
                 Min profil
               </Link>
+                </>
+              )}
               <Link
                 to="/feedback"
                 className="rounded-md px-3 py-2 font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
