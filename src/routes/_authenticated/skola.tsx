@@ -61,7 +61,7 @@ function SchoolPage() {
     e.preventDefault();
     const form = e.currentTarget;
     const fd = new FormData(form);
-    if (!subject) return toast.error("Välj ämne");
+    if (!subject) { toast.error("Välj ämne"); return; }
     setBusy(true);
     const { data: a, error } = await supabase
       .from("assignments")
@@ -78,13 +78,13 @@ function SchoolPage() {
       .single();
     if (error || !a) {
       setBusy(false);
-      return toast.error("Kunde inte spara behovet");
+      toast.error("Kunde inte spara behovet"); return;
     }
     const { data: count, error: pErr } = await supabase.rpc("publish_assignment", {
       p_assignment_id: a.id,
     });
     setBusy(false);
-    if (pErr) return toast.error("Sparat men kunde inte publiceras");
+    if (pErr) { toast.error("Sparat men kunde inte publiceras"); return; }
     toast.success(`Publicerat! ${count ?? 0} vikarier har fått notis.`);
     form.reset();
     setSubject("");
