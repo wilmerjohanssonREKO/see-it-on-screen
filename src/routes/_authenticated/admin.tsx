@@ -678,6 +678,7 @@ function SchoolsTab() {
                   <Trash2 className="h-4 w-4" /> Radera
                 </Button>
               </div>
+              <SchoolLoginForm schoolId={s.id} defaultEmail={s.email ?? ""} />
             </CardContent>
           </Card>
         ))}
