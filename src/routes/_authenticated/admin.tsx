@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { createSchoolLogin } from "@/lib/school-admin.functions";
+import { deleteUserCompletely } from "@/lib/user-admin.functions";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Check, Plus, Send, Star, Trash2, Beaker, Copy, Download } from "lucide-react";
@@ -480,6 +481,7 @@ function RequestsTab() {
 /* ---------------- Vikarier ---------------- */
 
 function SubstitutesTab() {
+  const deleteUser = useServerFn(deleteUserCompletely);
   const qc = useQueryClient();
   const { data } = useQuery({
     queryKey: ["substitutes"],
@@ -516,11 +518,13 @@ function SubstitutesTab() {
   }
 
   async function deleteSubstitute(id: string) {
-    const { error } = await supabase.from("profiles").delete().eq("id", id);
-    if (error) toast.error("Kunde inte ta bort vikarien");
-    else {
+    if (!window.confirm("Ta bort vikarien helt, inklusive inlogg? Det går inte att ångra.")) return;
+    try {
+      await deleteUser({ data: { userId: id } });
       toast.success("Vikarie borttagen");
       qc.invalidateQueries({ queryKey: ["substitutes"] });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Kunde inte ta bort vikarien");
     }
   }
 

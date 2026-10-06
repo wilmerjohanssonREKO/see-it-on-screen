@@ -8,6 +8,13 @@
       "when": 1791189460126,
       "tag": "0000_school_logins",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791294175752,
+      "tag": "0001_school_decline_substitute",
+      "breakpoints": true
     }
   ]
 }
