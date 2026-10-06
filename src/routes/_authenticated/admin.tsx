@@ -516,11 +516,13 @@ function SubstitutesTab() {
   }
 
   async function deleteSubstitute(id: string) {
-    const { error } = await supabase.from("profiles").delete().eq("id", id);
-    if (error) toast.error("Kunde inte ta bort vikarien");
-    else {
+    if (!window.confirm("Ta bort vikarien helt, inklusive inlogg? Det går inte att ångra.")) return;
+    try {
+      await deleteUser({ data: { userId: id } });
       toast.success("Vikarie borttagen");
       qc.invalidateQueries({ queryKey: ["substitutes"] });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Kunde inte ta bort vikarien");
     }
   }
 

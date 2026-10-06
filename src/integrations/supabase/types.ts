@@ -349,6 +349,10 @@ export type Database = {
     Functions: {
       claim_assignment: { Args: { p_assignment_id: string }; Returns: string }
       claim_first_admin: { Args: never; Returns: boolean }
+      decline_substitute: {
+        Args: { p_assignment_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
