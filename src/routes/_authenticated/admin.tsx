@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { createSchoolLogin } from "@/lib/school-admin.functions";
+import { deleteUserCompletely } from "@/lib/user-admin.functions";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Check, Plus, Send, Star, Trash2, Beaker, Copy, Download } from "lucide-react";
@@ -480,6 +481,7 @@ function RequestsTab() {
 /* ---------------- Vikarier ---------------- */
 
 function SubstitutesTab() {
+  const deleteUser = useServerFn(deleteUserCompletely);
   const qc = useQueryClient();
   const { data } = useQuery({
     queryKey: ["substitutes"],

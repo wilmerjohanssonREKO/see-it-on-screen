@@ -91,6 +91,14 @@ function SchoolPage() {
     qc.invalidateQueries({ queryKey: ["school-assignments"] });
   }
 
+  async function decline(id: string) {
+    if (!window.confirm("Tacka nej till vikarien? Uppdraget blir öppet igen för andra vikarier.")) return;
+    const { error } = await supabase.rpc("decline_substitute", { p_assignment_id: id });
+    if (error) { toast.error("Kunde inte tacka nej"); return; }
+    toast.success("Vikarien är borttagen från uppdraget — det är öppet igen.");
+    qc.invalidateQueries({ queryKey: ["school-assignments"] });
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
@@ -156,9 +164,16 @@ function SchoolPage() {
                     {a.substitute_name ? ` · Vikarie: ${a.substitute_name}${a.substitute_phone ? ` (${a.substitute_phone})` : ""}` : ""}
                   </p>
                 </div>
-                <Badge variant={a.status === "open" ? "secondary" : "default"}>
-                  {STATUS_LABELS[a.status as keyof typeof STATUS_LABELS] ?? a.status}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  {a.status === "filled" && a.substitute_name && (
+                    <Button size="sm" variant="outline" onClick={() => decline(a.id)}>
+                      Tacka nej
+                    </Button>
+                  )}
+                  <Badge variant={a.status === "open" ? "secondary" : "default"}>
+                    {STATUS_LABELS[a.status as keyof typeof STATUS_LABELS] ?? a.status}
+                  </Badge>
+                </div>
               </CardContent>
             </Card>
           ))}
