@@ -26,6 +26,11 @@ export function AppHeader() {
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4">
         <Brand />
         <nav className="flex items-center gap-1 text-sm">
+          {!session && (
+            <Link to="/kontakt" className="rounded-md px-3 py-2 font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground" activeProps={{ className: "bg-secondary text-foreground" }}>
+              Kontakt
+            </Link>
+          )}
           {session ? (
             <>
               {schoolId ? (
