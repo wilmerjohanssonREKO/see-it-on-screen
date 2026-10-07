@@ -22,8 +22,8 @@ function KontaktPage() {
       <AppHeader />
       <main className="mx-auto max-w-3xl px-4 py-14 md:py-20">
         <span className="inline-block rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground">För gymnasieskolor</span>
-        <h1 className="mt-4 text-4xl font-bold text-foreground">Kontakta REKO UF</h1>
-        <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground">Vill din skola använda REKO UF? Kontakta oss så sätter vi upp ett konto åt er.</p>
+        <h1 className="mt-4 text-4xl font-bold text-foreground">Bli skolpartner</h1>
+        <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground">Vill din skola använda REKO? Kontakta oss så bokar vi in ett möte</p>
         <dl className="mt-10 divide-y divide-border border-y border-border">
           {[
             { icon: UserRound, label: "Kontaktperson", value: "[ERT NAMN]" },
