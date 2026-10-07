@@ -34,7 +34,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
       {
         name: "description",
         content:
-          "Lägg upp vikariebehov, godkänn vikarier, hantera skolförfrågningar och sätt betyg i REKO UF:s adminpanel.",
+          "Lägg upp vikariebehov, godkänn vikarier, hantera skolkonton och sätt betyg i REKO UF:s adminpanel.",
       },
       { property: "og:title", content: "Adminpanel — REKO UF" },
       { property: "og:description", content: "Intern översikt för REKO UF-teamet." },
@@ -79,7 +79,6 @@ function AdminPage() {
         <Tabs defaultValue="behov" className="mt-6">
           <TabsList className="flex-wrap">
             <TabsTrigger value="behov">Vikariebehov</TabsTrigger>
-            <TabsTrigger value="forfragningar">Skolförfrågningar</TabsTrigger>
             <TabsTrigger value="vikarier">Vikarier</TabsTrigger>
             <TabsTrigger value="skolor">Skolor</TabsTrigger>
             <TabsTrigger value="testdata">Testdata</TabsTrigger>
@@ -87,9 +86,6 @@ function AdminPage() {
           </TabsList>
           <TabsContent value="behov">
             <AssignmentsTab />
-          </TabsContent>
-          <TabsContent value="forfragningar">
-            <RequestsTab />
           </TabsContent>
           <TabsContent value="vikarier">
             <SubstitutesTab />
@@ -414,69 +410,6 @@ function RatingForm({ substituteId, assignmentId }: { substituteId: string; assi
 }
 
 /* ---------------- Skolförfrågningar ---------------- */
-
-function RequestsTab() {
-  const qc = useQueryClient();
-  const { data } = useQuery({
-    queryKey: ["school-requests"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("school_requests")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  async function toggle(id: string, handled: boolean) {
-    const { error } = await supabase.from("school_requests").update({ handled }).eq("id", id);
-    if (error) toast.error("Kunde inte uppdatera");
-    else qc.invalidateQueries({ queryKey: ["school-requests"] });
-  }
-
-  async function deleteRequest(id: string) {
-    const { error } = await supabase.from("school_requests").delete().eq("id", id);
-    if (error) toast.error("Kunde inte ta bort");
-    else {
-      toast.success("Förfrågan borttagen");
-      qc.invalidateQueries({ queryKey: ["school-requests"] });
-    }
-  }
-
-  return (
-    <div className="mt-4 grid gap-3">
-      {(data?.length ?? 0) === 0 && (
-        <p className="text-muted-foreground">Inga förfrågningar än.</p>
-      )}
-      {data?.map((r) => (
-        <Card key={r.id}>
-          <CardContent className="grid gap-2 pt-6">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="font-semibold">{r.school_name}</p>
-              <Badge variant={r.handled ? "secondary" : "default"}>
-                {r.handled ? "Behandlad" : "Ny"}
-              </Badge>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              {r.contact_person} · {r.contact_email ?? ""} {r.contact_phone ?? ""}
-            </p>
-            <p className="text-sm">{r.description}</p>
-            <div className="flex flex-wrap gap-2">
-              <Button size="sm" variant="outline" onClick={() => toggle(r.id, !r.handled)}>
-                <Check className="h-4 w-4" />
-                {r.handled ? "Markera som ny" : "Markera som behandlad"}
-              </Button>
-              <Button size="sm" variant="destructive" onClick={() => deleteRequest(r.id)}>
-                <Trash2 className="h-4 w-4" /> Radera
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
-}
 
 /* ---------------- Vikarier ---------------- */
 

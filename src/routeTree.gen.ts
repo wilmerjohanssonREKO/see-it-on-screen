@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as KontaktRouteImport } from './routes/kontakt'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedFeedbackRouteImport } from './routes/_authenticated/feedback'
 import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
@@ -30,6 +31,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KontaktRoute = KontaktRouteImport.update({
+  id: '/kontakt',
+  path: '/kontakt',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
@@ -61,6 +67,7 @@ const AuthenticatedUppdragRoute = AuthenticatedUppdragRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/kontakt': typeof KontaktRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/feedback': typeof AuthenticatedFeedbackRoute
   '/profil': typeof AuthenticatedProfilRoute
@@ -70,6 +77,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/kontakt': typeof KontaktRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/feedback': typeof AuthenticatedFeedbackRoute
   '/profil': typeof AuthenticatedProfilRoute
@@ -81,6 +89,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/kontakt': typeof KontaktRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/feedback': typeof AuthenticatedFeedbackRoute
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
@@ -90,14 +99,30 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/admin' | '/feedback' | '/profil' | '/skola' | '/uppdrag'
+    | '/'
+    | '/auth'
+    | '/kontakt'
+    | '/admin'
+    | '/feedback'
+    | '/profil'
+    | '/skola'
+    | '/uppdrag'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/admin' | '/feedback' | '/profil' | '/skola' | '/uppdrag'
+  to:
+    | '/'
+    | '/auth'
+    | '/kontakt'
+    | '/admin'
+    | '/feedback'
+    | '/profil'
+    | '/skola'
+    | '/uppdrag'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/kontakt'
     | '/_authenticated/admin'
     | '/_authenticated/feedback'
     | '/_authenticated/profil'
@@ -109,6 +134,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  KontaktRoute: typeof KontaktRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -132,6 +158,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kontakt': {
+      id: '/kontakt'
+      path: '/kontakt'
+      fullPath: '/kontakt'
+      preLoaderRoute: typeof KontaktRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -195,6 +228,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  KontaktRoute: KontaktRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
