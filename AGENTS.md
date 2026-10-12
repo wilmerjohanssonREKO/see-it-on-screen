@@ -11,3 +11,4 @@
 
 - Keep public school onboarding on the information-only `/kontakt` route; leave authenticated school publishing and account creation separate so public visitors cannot submit assignment requests.
 - Retire the school-request admin view without migrations or data deletion to preserve historical requests.
+- Teacher accounts are school_members rows with member_type='teacher'; school codes are PBKDF2-hashed in school_codes and verified only in server functions (teacher.functions.ts), so the code check cannot be bypassed in the browser.
