@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { createSchoolLogin } from "@/lib/school-admin.functions";
 import { deleteUserCompletely } from "@/lib/user-admin.functions";
+import { generateSchoolCode, listTeachers, removeTeacher } from "@/lib/teacher.functions";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Check, Plus, Send, Star, Trash2, Beaker, Copy, Download } from "lucide-react";
@@ -81,6 +82,7 @@ function AdminPage() {
             <TabsTrigger value="behov">Vikariebehov</TabsTrigger>
             <TabsTrigger value="vikarier">Vikarier</TabsTrigger>
             <TabsTrigger value="skolor">Skolor</TabsTrigger>
+            <TabsTrigger value="larare">Lärare</TabsTrigger>
             <TabsTrigger value="testdata">Testdata</TabsTrigger>
             <TabsTrigger value="feedback">Feedback</TabsTrigger>
           </TabsList>
@@ -92,6 +94,9 @@ function AdminPage() {
           </TabsContent>
           <TabsContent value="skolor">
             <SchoolsTab />
+          </TabsContent>
+          <TabsContent value="larare">
+            <TeachersTab />
           </TabsContent>
           <TabsContent value="testdata">
             <TestDataTab />
@@ -618,6 +623,7 @@ function SchoolsTab() {
                 </Button>
               </div>
               <SchoolLoginForm schoolId={s.id} defaultEmail={s.email ?? ""} />
+              <SchoolCodeButton schoolId={s.id} />
             </CardContent>
           </Card>
         ))}
