@@ -18,6 +18,7 @@ import { Route as AuthenticatedFeedbackRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated/profil'
 import { Route as AuthenticatedSkolaRouteImport } from './routes/_authenticated/skola'
 import { Route as AuthenticatedUppdragRouteImport } from './routes/_authenticated/uppdrag'
+import { Route as LarareRegistreraRouteImport } from './routes/larare.registrera'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -63,6 +64,11 @@ const AuthenticatedUppdragRoute = AuthenticatedUppdragRouteImport.update({
   path: '/uppdrag',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const LarareRegistreraRoute = LarareRegistreraRouteImport.update({
+  id: '/larare/registrera',
+  path: '/larare/registrera',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -73,6 +79,7 @@ export interface FileRoutesByFullPath {
   '/profil': typeof AuthenticatedProfilRoute
   '/skola': typeof AuthenticatedSkolaRoute
   '/uppdrag': typeof AuthenticatedUppdragRoute
+  '/larare/registrera': typeof LarareRegistreraRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -83,6 +90,7 @@ export interface FileRoutesByTo {
   '/profil': typeof AuthenticatedProfilRoute
   '/skola': typeof AuthenticatedSkolaRoute
   '/uppdrag': typeof AuthenticatedUppdragRoute
+  '/larare/registrera': typeof LarareRegistreraRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -95,6 +103,7 @@ export interface FileRoutesById {
   '/_authenticated/profil': typeof AuthenticatedProfilRoute
   '/_authenticated/skola': typeof AuthenticatedSkolaRoute
   '/_authenticated/uppdrag': typeof AuthenticatedUppdragRoute
+  '/larare/registrera': typeof LarareRegistreraRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/profil'
     | '/skola'
     | '/uppdrag'
+    | '/larare/registrera'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/profil'
     | '/skola'
     | '/uppdrag'
+    | '/larare/registrera'
   id:
     | '__root__'
     | '/'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/_authenticated/profil'
     | '/_authenticated/skola'
     | '/_authenticated/uppdrag'
+    | '/larare/registrera'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -135,6 +147,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   KontaktRoute: typeof KontaktRoute
+  LarareRegistreraRoute: typeof LarareRegistreraRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -202,6 +215,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUppdragRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/larare/registrera': {
+      id: '/larare/registrera'
+      path: '/larare/registrera'
+      fullPath: '/larare/registrera'
+      preLoaderRoute: typeof LarareRegistreraRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -229,6 +249,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   KontaktRoute: KontaktRoute,
+  LarareRegistreraRoute: LarareRegistreraRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { createSchoolLogin } from "@/lib/school-admin.functions";
 import { deleteUserCompletely } from "@/lib/user-admin.functions";
+import { generateSchoolCode, listTeachers, removeTeacher } from "@/lib/teacher.functions";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Check, Plus, Send, Star, Trash2, Beaker, Copy, Download } from "lucide-react";
@@ -81,6 +82,7 @@ function AdminPage() {
             <TabsTrigger value="behov">Vikariebehov</TabsTrigger>
             <TabsTrigger value="vikarier">Vikarier</TabsTrigger>
             <TabsTrigger value="skolor">Skolor</TabsTrigger>
+            <TabsTrigger value="larare">Lärare</TabsTrigger>
             <TabsTrigger value="testdata">Testdata</TabsTrigger>
             <TabsTrigger value="feedback">Feedback</TabsTrigger>
           </TabsList>
@@ -92,6 +94,9 @@ function AdminPage() {
           </TabsContent>
           <TabsContent value="skolor">
             <SchoolsTab />
+          </TabsContent>
+          <TabsContent value="larare">
+            <TeachersTab />
           </TabsContent>
           <TabsContent value="testdata">
             <TestDataTab />
@@ -618,6 +623,7 @@ function SchoolsTab() {
                 </Button>
               </div>
               <SchoolLoginForm schoolId={s.id} defaultEmail={s.email ?? ""} />
+              <SchoolCodeButton schoolId={s.id} />
             </CardContent>
           </Card>
         ))}
@@ -968,5 +974,73 @@ function SchoolLoginForm({ schoolId, defaultEmail }: { schoolId: string; default
         {busy ? "Skapar…" : "Skapa skolinlogg"}
       </Button>
     </form>
+  );
+}
+
+function SchoolCodeButton({ schoolId }: { schoolId: string }) {
+  const gen = useServerFn(generateSchoolCode);
+  const [code, setCode] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  async function run() {
+    if (!window.confirm("Generera ny skolkod? Den gamla koden slutar fungera för nya lärare (redan registrerade lärare behåller åtkomst).")) return;
+    setBusy(true);
+    try {
+      const res = await gen({ data: { schoolId } });
+      setCode(res.code);
+    } catch {
+      toast.error("Kunde inte generera kod");
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-border pt-4">
+      <Button type="button" size="sm" variant="outline" onClick={run} disabled={busy}>
+        {busy ? "Genererar…" : "Generera ny kod"}
+      </Button>
+      {code ? (
+        <span className="text-sm">
+          Skolkod: <code className="rounded bg-secondary px-2 py-1 font-mono font-semibold">{code}</code>{" "}
+          <span className="text-muted-foreground">— visas bara nu, ge den till skolan.</span>
+        </span>
+      ) : (
+        <span className="text-sm text-muted-foreground">Lärare använder skolkoden för att skapa konto.</span>
+      )}
+    </div>
+  );
+}
+
+function TeachersTab() {
+  const qc = useQueryClient();
+  const fetchTeachers = useServerFn(listTeachers);
+  const remove = useServerFn(removeTeacher);
+  const { data } = useQuery({ queryKey: ["admin-teachers"], queryFn: () => fetchTeachers() });
+  async function del(userId: string) {
+    if (!window.confirm("Ta bort läraren från skolan? Hen kan inte längre publicera vikariebehov.")) return;
+    try {
+      await remove({ data: { userId } });
+      toast.success("Läraren är borttagen från skolan");
+      qc.invalidateQueries({ queryKey: ["admin-teachers"] });
+    } catch {
+      toast.error("Kunde inte ta bort läraren");
+    }
+  }
+  return (
+    <div className="mt-4 grid gap-3">
+      {data?.length === 0 && <p className="text-muted-foreground">Inga lärarkonton än.</p>}
+      {data?.map((t) => (
+        <Card key={t.userId}>
+          <CardContent className="flex flex-wrap items-center justify-between gap-2 pt-6">
+            <div>
+              <p className="font-semibold">{t.name || "—"} · {t.schoolName}</p>
+              <p className="text-sm text-muted-foreground">{t.email}{t.phone ? ` · ${t.phone}` : ""}</p>
+            </div>
+            <Button size="sm" variant="destructive" onClick={() => del(t.userId)}>
+              <Trash2 className="h-4 w-4" /> Ta bort
+            </Button>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
   );
 }

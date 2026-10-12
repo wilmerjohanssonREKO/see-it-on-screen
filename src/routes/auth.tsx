@@ -160,6 +160,9 @@ function AuthPage() {
               ? "Har du inget konto? Bli vikarie"
               : "Har du redan ett konto? Logga in"}
           </button>
+          <a href="/larare/registrera" className="text-center text-sm text-muted-foreground hover:text-foreground">
+            Är du lärare? Skapa lärarkonto med skolkod
+          </a>
         </CardContent>
       </Card>
     </div>

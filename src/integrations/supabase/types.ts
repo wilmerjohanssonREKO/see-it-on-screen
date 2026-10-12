@@ -21,6 +21,7 @@ export type Database = {
           assignment_date: string
           compensation: string | null
           created_at: string
+          created_by: string | null
           description: string | null
           end_time: string
           id: string
@@ -36,6 +37,7 @@ export type Database = {
           assignment_date: string
           compensation?: string | null
           created_at?: string
+          created_by?: string | null
           description?: string | null
           end_time: string
           id?: string
@@ -51,6 +53,7 @@ export type Database = {
           assignment_date?: string
           compensation?: string | null
           created_at?: string
+          created_by?: string | null
           description?: string | null
           end_time?: string
           id?: string
@@ -238,19 +241,51 @@ export type Database = {
           },
         ]
       }
+      school_codes: {
+        Row: {
+          code_hash: string
+          salt: string
+          school_id: string
+          updated_at: string
+        }
+        Insert: {
+          code_hash: string
+          salt: string
+          school_id: string
+          updated_at?: string
+        }
+        Update: {
+          code_hash?: string
+          salt?: string
+          school_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_codes_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: true
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       school_members: {
         Row: {
           created_at: string
+          member_type: string
           school_id: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          member_type?: string
           school_id: string
           user_id: string
         }
         Update: {
           created_at?: string
+          member_type?: string
           school_id?: string
           user_id?: string
         }
@@ -321,6 +356,27 @@ export type Database = {
           id?: string
           name?: string
           phone?: string | null
+        }
+        Relationships: []
+      }
+      teacher_code_attempts: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          ip: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          ip: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          ip?: string
         }
         Relationships: []
       }
