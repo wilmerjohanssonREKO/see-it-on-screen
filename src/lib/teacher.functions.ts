@@ -91,6 +91,7 @@ export const registerTeacher = createServerFn({ method: "POST" })
       user_metadata: { full_name: data.fullName },
     });
     if (error || !created.user) {
+      console.error("registerTeacher createUser failed:", error?.message, error);
       const exists = error?.message?.toLowerCase().includes("already");
       return { ok: false as const, error: exists ? "Det finns redan ett konto med den e-postadressen." : "Kunde inte skapa kontot." };
     }
