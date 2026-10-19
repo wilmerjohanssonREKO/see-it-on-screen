@@ -320,29 +320,15 @@ function ProfilPage() {
           <CardHeader>
             <CardTitle>Utdrag ur belastningsregistret</CardTitle>
             <CardDescription>
-              Ladda upp ditt utdrag som PDF eller bild. Endast du och REKO UF-teamet kan se filen.
+              Vi sparar inte ditt utdrag. Visa upp originalet (det oöppnade kuvertet eller
+              den digitala versionen) för REKO UF-teamet — vi noterar bara att det är kontrollerat
+              och datumet.
             </CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-3">
+          <CardContent>
             <p className="text-sm">
               Status: <strong>{BACKGROUND_LABELS[profile?.background_status ?? "pending"]}</strong>
-              {profile?.background_file_path ? " · fil uppladdad" : " · ingen fil uppladdad"}
             </p>
-            <div>
-              <input
-                id="bgfile"
-                type="file"
-                accept="application/pdf,image/*"
-                className="hidden"
-                onChange={handleUpload}
-              />
-              <Button asChild variant="outline" disabled={uploading}>
-                <label htmlFor="bgfile" className="cursor-pointer">
-                  <Upload className="h-4 w-4" />
-                  {uploading ? "Laddar upp…" : "Ladda upp fil"}
-                </label>
-              </Button>
-            </div>
           </CardContent>
         </Card>
 

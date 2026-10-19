@@ -395,14 +395,6 @@ function SubstitutesTab() {
     }
   }
 
-  async function openFile(path: string) {
-    const { data, error } = await supabase.storage
-      .from("background-checks")
-      .createSignedUrl(path, 60);
-    if (error || !data) toast.error("Kunde inte öppna filen");
-    else window.open(data.signedUrl, "_blank", "noopener");
-  }
-
   async function openCv(substituteId: string) {
     try {
       const { url } = await getCvUrl({ data: { substituteId } });
@@ -448,15 +440,15 @@ function SubstitutesTab() {
               <Button
                 size="sm"
                 variant="outline"
-                disabled={!p.approved && (!p.background_file_path || !p.phone || !p.full_name)}
-                title={!p.background_file_path ? "Vikarien har inte laddat upp något utdrag" : undefined}
+                disabled={!p.approved && (p.background_status !== "approved" || !p.phone || !p.full_name)}
+                title={p.background_status !== "approved" ? "Kontrollera utdraget och sätt status till Godkänd först" : undefined}
                 onClick={() => update(p.id, { approved: !p.approved })}
               >
                 {p.approved
                   ? "Ta bort godkännande"
-                  : p.background_file_path
+                  : p.background_status === "approved"
                     ? "Godkänn vikarie"
-                    : "Saknar utdrag"}
+                    : "Utdrag ej kontrollerat"}
               </Button>
               <Select
                 value={p.background_status}
@@ -469,15 +461,10 @@ function SubstitutesTab() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="pending">Väntar granskning</SelectItem>
-                  <SelectItem value="approved">Godkänd</SelectItem>
+                  <SelectItem value="approved">Utdrag kontrollerat</SelectItem>
                   <SelectItem value="needs_renewal">Behöver förnyas</SelectItem>
                 </SelectContent>
               </Select>
-              {p.background_file_path && (
-                <Button size="sm" variant="ghost" onClick={() => openFile(p.background_file_path!)}>
-                  Visa utdrag
-                </Button>
-              )}
               {p.cv_file_path && (
                 <Button size="sm" variant="ghost" onClick={() => openCv(p.id)}>
                   <FileText className="h-4 w-4" /> Visa CV

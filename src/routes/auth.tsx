@@ -153,6 +153,12 @@ function AuthPage() {
               <Label htmlFor="password">Lösenord</Label>
               <Input id="password" name="password" type="password" maxLength={72} required />
             </div>
+            {mode === "signup" && (
+              <label className="flex items-start gap-2 text-sm font-medium text-foreground">
+                <input type="checkbox" name="adult" required className="mt-0.5 h-4 w-4 accent-primary" />
+                <span>Jag är 18 år eller äldre</span>
+              </label>
+            )}
             {mode === "signup" && <PolicyCheckbox />}
             <Button type="submit" disabled={busy}>
               {busy ? "Vänta…" : mode === "signin" ? "Logga in" : "Skapa konto"}
