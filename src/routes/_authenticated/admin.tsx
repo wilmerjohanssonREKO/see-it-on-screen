@@ -826,7 +826,7 @@ function TeachersTab() {
       return;
     try {
       await remove({ data: { userId } });
-      toast.success("Läraren är borttagen från skolan");
+      toast.success("Läraren är borttagen. Generera gärna en ny skolkod så att koden inte kan användas igen.");
       qc.invalidateQueries({ queryKey: ["admin-teachers"] });
     } catch {
       toast.error("Kunde inte ta bort läraren");
