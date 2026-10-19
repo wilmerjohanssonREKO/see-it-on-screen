@@ -1,3 +1,4 @@
+import { PolicyCheckbox } from "@/components/PolicyCheckbox";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
@@ -152,6 +153,7 @@ function AuthPage() {
               <Label htmlFor="password">Lösenord</Label>
               <Input id="password" name="password" type="password" maxLength={72} required />
             </div>
+            {mode === "signup" && <PolicyCheckbox />}
             <Button type="submit" disabled={busy}>
               {busy ? "Vänta…" : mode === "signin" ? "Logga in" : "Skapa konto"}
             </Button>

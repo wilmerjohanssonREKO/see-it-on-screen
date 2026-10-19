@@ -1,3 +1,4 @@
+import { PolicyCheckbox } from "@/components/PolicyCheckbox";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -153,6 +154,7 @@ function TeacherSignup() {
               <Label htmlFor="code">Skolkod</Label>
               <Input id="code" name="code" required maxLength={40} autoComplete="off" />
             </div>
+            <PolicyCheckbox />
             {error && (
               <p className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</p>
             )}
