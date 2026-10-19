@@ -215,7 +215,7 @@ function SchoolPage() {
                   <p className="text-sm text-muted-foreground">
                     {formatTime(a.start_time)}–{formatTime(a.end_time)}
                     {a.substitute_name
-                      ? ` · Vikarie: ${a.substitute_name}${a.substitute_phone ? ` (${a.substitute_phone})` : ""}${a.substitute_distance_km != null ? ` · ca ${a.substitute_distance_km} km` : ""}`
+                      ? ` · Vikarie: ${a.substitute_name}${a.substitute_phone ? ` (${a.substitute_phone})` : ""}${a.substitute_distance_km != null ? ` · ca ${Number(a.substitute_distance_km).toLocaleString("sv-SE")} km` : ""}`
                       : ""}
                   </p>
                 </div>

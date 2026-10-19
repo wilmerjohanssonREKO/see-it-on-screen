@@ -156,7 +156,8 @@ function UppdragPage() {
                     )}
                     {a.distance_km != null && (
                       <span className="flex items-center gap-1">
-                        <MapPin className="h-4 w-4" /> ca {a.distance_km} km från skolan
+                        <MapPin className="h-4 w-4" /> ca{" "}
+                        {a.distance_km.toLocaleString("sv-SE")} km från skolan
                       </span>
                     )}
                   </div>
