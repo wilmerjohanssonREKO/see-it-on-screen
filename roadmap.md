@@ -7,3 +7,4 @@
 - [ ] Email to school + substitute on match — blocked: needs a sender email domain owned by the user
 
 - [x] MVP cleanup: remove admin test tools, substitute ratings/statistics, profile admin promotion and duplicate homepage admin login; preserve existing data and core flows
+- [x] Add school/substitute addresses and require essential contact details; preserve existing accounts

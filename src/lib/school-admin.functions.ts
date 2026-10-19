@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { schoolContactSchema } from "./contact-schemas";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const input = z.object({
@@ -17,8 +18,13 @@ export const createSchoolLogin = createServerFn({ method: "POST" })
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: school } = await supabaseAdmin
-      .from("schools").select("name").eq("id", data.schoolId).maybeSingle();
+      .from("schools")
+      .select("*")
+      .eq("id", data.schoolId)
+      .maybeSingle();
     if (!school) throw new Error("Skolan finns inte");
+    if (!schoolContactSchema.safeParse(school).success)
+      throw new Error("Fyll i skolans kontaktuppgifter och adress innan du skapar inlogg.");
 
     const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
       email: data.email,
@@ -30,9 +36,20 @@ export const createSchoolLogin = createServerFn({ method: "POST" })
 
     const uid = created.user.id;
     await supabaseAdmin.from("user_roles").delete().eq("user_id", uid);
-    await supabaseAdmin.from("profiles").update({ school_name: school.name }).eq("id", uid);
+    const { error: profileError } = await supabaseAdmin
+      .from("profiles")
+      .update({ school_name: school.name })
+      .eq("id", uid);
+    if (profileError) {
+      await supabaseAdmin.auth.admin.deleteUser(uid);
+      throw new Error("Kunde inte spara skolkontot");
+    }
     const { error: mErr } = await supabaseAdmin
-      .from("school_members").insert({ user_id: uid, school_id: data.schoolId });
-    if (mErr) throw new Error(mErr.message);
+      .from("school_members")
+      .insert({ user_id: uid, school_id: data.schoolId });
+    if (mErr) {
+      await supabaseAdmin.auth.admin.deleteUser(uid);
+      throw new Error("Kunde inte koppla kontot till skolan");
+    }
     return { ok: true };
   });

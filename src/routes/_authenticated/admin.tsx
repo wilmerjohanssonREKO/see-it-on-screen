@@ -10,6 +10,9 @@ import { Check, Plus, Send, Star, Trash2 } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import type { TablesUpdate } from "@/integrations/supabase/types";
+import { AddressFields } from "@/components/AddressFields";
+import { schoolContactSchema } from "@/lib/contact-schemas";
+import { saveSchoolContact } from "@/lib/contact.functions";
 import { AppHeader } from "@/components/AppHeader";
 import { useAuth, useIsAdmin } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
@@ -284,7 +287,11 @@ function AssignmentsTab() {
 
       <div className="grid gap-3">
         {assignments?.map((a) => {
-          const sub = a.profiles as { full_name: string; email: string; phone: string | null } | null;
+          const sub = a.profiles as {
+            full_name: string;
+            email: string;
+            phone: string | null;
+          } | null;
           return (
             <Card key={a.id}>
               <CardContent className="grid gap-2 pt-6">
@@ -410,12 +417,21 @@ function SubstitutesTab() {
             <p className="text-sm text-muted-foreground">
               {p.school_name ?? "—"} {p.graduation_year ? `· examen ${p.graduation_year}` : ""}
             </p>
+            {p.street_address && (
+              <p className="text-sm text-muted-foreground">
+                {p.street_address}, {p.postal_code} {p.city}
+              </p>
+            )}
             <p className="text-sm">Ämnen: {p.subjects.join(", ") || "inga valda"}</p>
             {p.availability && (
               <p className="text-sm text-muted-foreground">Tillgänglighet: {p.availability}</p>
             )}
             <div className="flex flex-wrap gap-2">
-              <Button size="sm" variant="outline" onClick={() => update(p.id, { approved: !p.approved })}>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => update(p.id, { approved: !p.approved })}
+              >
                 {p.approved ? "Ta bort godkännande" : "Godkänn vikarie"}
               </Button>
               <Select
@@ -452,6 +468,9 @@ function SubstitutesTab() {
 /* ---------------- Skolor ---------------- */
 
 function SchoolsTab() {
+  const saveContact = useServerFn(saveSchoolContact);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const qc = useQueryClient();
   const { data } = useQuery({
     queryKey: ["schools"],
@@ -462,20 +481,27 @@ function SchoolsTab() {
     },
   });
 
+  const editing = data?.find((school) => school.id === editingId);
   async function add(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    const { error } = await supabase.from("schools").insert({
-      name: String(fd.get("name") ?? "").trim().slice(0, 120),
-      contact_person: String(fd.get("contact_person") ?? "").trim().slice(0, 120) || null,
-      email: String(fd.get("email") ?? "").trim().slice(0, 255) || null,
-      phone: String(fd.get("phone") ?? "").trim().slice(0, 40) || null,
-    });
-    if (error) toast.error("Kunde inte lägga till skolan");
-    else {
-      toast.success("Skola tillagd");
-      (e.target as HTMLFormElement).reset();
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+    const parsed = schoolContactSchema.safeParse(Object.fromEntries(fd.entries()));
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0]?.message ?? "Kontrollera uppgifterna");
+      return;
+    }
+    setSaving(true);
+    try {
+      await saveContact({ data: { ...parsed.data, id: editingId ?? undefined } });
+      toast.success(editingId ? "Skoluppgifterna är uppdaterade" : "Skola tillagd");
+      form.reset();
+      setEditingId(null);
       qc.invalidateQueries({ queryKey: ["schools"] });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Kunde inte spara skolan");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -492,29 +518,63 @@ function SchoolsTab() {
     <div className="mt-4 grid gap-6">
       <Card className="shadow-soft">
         <CardHeader>
-          <CardTitle>Lägg till skola</CardTitle>
+          <CardTitle>{editingId ? "Ändra skoluppgifter" : "Lägg till skola"}</CardTitle>
         </CardHeader>
         <CardContent>
-          <form className="grid gap-4 sm:grid-cols-2" onSubmit={add}>
+          <form key={editingId ?? "new"} className="grid gap-4 sm:grid-cols-2" onSubmit={add}>
             <div className="grid gap-2">
               <Label htmlFor="name">Namn</Label>
-              <Input id="name" name="name" maxLength={120} required />
+              <Input
+                id="name"
+                name="name"
+                defaultValue={editing?.name ?? ""}
+                maxLength={120}
+                required
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="contact_person">Kontaktperson</Label>
-              <Input id="contact_person" name="contact_person" maxLength={120} />
+              <Input
+                id="contact_person"
+                name="contact_person"
+                defaultValue={editing?.contact_person ?? ""}
+                maxLength={120}
+                required
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="email">E-post</Label>
-              <Input id="email" name="email" type="email" maxLength={255} />
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                defaultValue={editing?.email ?? ""}
+                maxLength={255}
+                required
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="phone">Telefon</Label>
-              <Input id="phone" name="phone" maxLength={40} />
+              <Input
+                id="phone"
+                name="phone"
+                type="tel"
+                defaultValue={editing?.phone ?? ""}
+                minLength={5}
+                maxLength={40}
+                required
+                pattern="[+0-9 ()-]+"
+              />
             </div>
-            <Button type="submit" className="sm:col-span-2">
-              Spara skola
+            <AddressFields values={editing} prefix="school-address" />
+            <Button type="submit" className="sm:col-span-2" disabled={saving}>
+              {saving ? "Sparar…" : "Spara skola"}
             </Button>
+            {editingId && (
+              <Button type="button" variant="outline" onClick={() => setEditingId(null)}>
+                Avbryt
+              </Button>
+            )}
           </form>
         </CardContent>
       </Card>
@@ -535,6 +595,23 @@ function SchoolsTab() {
                   <Trash2 className="h-4 w-4" /> Radera
                 </Button>
               </div>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {s.street_address
+                  ? `${s.street_address}, ${s.postal_code ?? ""} ${s.city ?? ""}`
+                  : "Adress saknas"}
+              </p>
+              <Button
+                className="mt-3"
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setEditingId(s.id);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+              >
+                Ändra uppgifter
+              </Button>
               <SchoolLoginForm schoolId={s.id} defaultEmail={s.email ?? ""} />
               <SchoolCodeButton schoolId={s.id} />
             </CardContent>
@@ -613,9 +690,7 @@ function FeedbackTab() {
                       <Badge variant="secondary">
                         {FEEDBACK_CATEGORY_LABELS[f.category] ?? f.category}
                       </Badge>
-                      <Badge variant="outline">
-                        {f.role === "school" ? "Skola" : "Vikarie"}
-                      </Badge>
+                      <Badge variant="outline">{f.role === "school" ? "Skola" : "Vikarie"}</Badge>
                       {f.score != null && (
                         <span className="flex items-center gap-1 text-sm font-medium">
                           {f.score}
@@ -666,9 +741,26 @@ function SchoolLoginForm({ schoolId, defaultEmail }: { schoolId: string; default
     }
   }
   return (
-    <form onSubmit={submit} className="mt-4 grid gap-2 border-t border-border pt-4 sm:grid-cols-[1fr_1fr_auto]">
-      <Input name="email" type="email" placeholder="Skolans inlogg (e-post)" defaultValue={defaultEmail} required maxLength={255} />
-      <Input name="password" type="text" placeholder="Lösenord (minst 8 tecken)" required minLength={8} maxLength={72} />
+    <form
+      onSubmit={submit}
+      className="mt-4 grid gap-2 border-t border-border pt-4 sm:grid-cols-[1fr_1fr_auto]"
+    >
+      <Input
+        name="email"
+        type="email"
+        placeholder="Skolans inlogg (e-post)"
+        defaultValue={defaultEmail}
+        required
+        maxLength={255}
+      />
+      <Input
+        name="password"
+        type="text"
+        placeholder="Lösenord (minst 8 tecken)"
+        required
+        minLength={8}
+        maxLength={72}
+      />
       <Button type="submit" size="sm" disabled={busy}>
         {busy ? "Skapar…" : "Skapa skolinlogg"}
       </Button>
@@ -681,7 +773,12 @@ function SchoolCodeButton({ schoolId }: { schoolId: string }) {
   const [code, setCode] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   async function run() {
-    if (!window.confirm("Generera ny skolkod? Den gamla koden slutar fungera för nya lärare (redan registrerade lärare behåller åtkomst).")) return;
+    if (
+      !window.confirm(
+        "Generera ny skolkod? Den gamla koden slutar fungera för nya lärare (redan registrerade lärare behåller åtkomst).",
+      )
+    )
+      return;
     setBusy(true);
     try {
       const res = await gen({ data: { schoolId } });
@@ -699,11 +796,14 @@ function SchoolCodeButton({ schoolId }: { schoolId: string }) {
       </Button>
       {code ? (
         <span className="text-sm">
-          Skolkod: <code className="rounded bg-secondary px-2 py-1 font-mono font-semibold">{code}</code>{" "}
+          Skolkod:{" "}
+          <code className="rounded bg-secondary px-2 py-1 font-mono font-semibold">{code}</code>{" "}
           <span className="text-muted-foreground">— visas bara nu, ge den till skolan.</span>
         </span>
       ) : (
-        <span className="text-sm text-muted-foreground">Lärare använder skolkoden för att skapa konto.</span>
+        <span className="text-sm text-muted-foreground">
+          Lärare använder skolkoden för att skapa konto.
+        </span>
       )}
     </div>
   );
@@ -715,7 +815,8 @@ function TeachersTab() {
   const remove = useServerFn(removeTeacher);
   const { data } = useQuery({ queryKey: ["admin-teachers"], queryFn: () => fetchTeachers() });
   async function del(userId: string) {
-    if (!window.confirm("Ta bort läraren från skolan? Hen kan inte längre publicera vikariebehov.")) return;
+    if (!window.confirm("Ta bort läraren från skolan? Hen kan inte längre publicera vikariebehov."))
+      return;
     try {
       await remove({ data: { userId } });
       toast.success("Läraren är borttagen från skolan");
@@ -731,8 +832,13 @@ function TeachersTab() {
         <Card key={t.userId}>
           <CardContent className="flex flex-wrap items-center justify-between gap-2 pt-6">
             <div>
-              <p className="font-semibold">{t.name || "—"} · {t.schoolName}</p>
-              <p className="text-sm text-muted-foreground">{t.email}{t.phone ? ` · ${t.phone}` : ""}</p>
+              <p className="font-semibold">
+                {t.name || "—"} · {t.schoolName}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {t.email}
+                {t.phone ? ` · ${t.phone}` : ""}
+              </p>
             </div>
             <Button size="sm" variant="destructive" onClick={() => del(t.userId)}>
               <Trash2 className="h-4 w-4" /> Ta bort

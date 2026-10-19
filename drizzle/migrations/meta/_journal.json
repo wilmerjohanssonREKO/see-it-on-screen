@@ -22,6 +22,20 @@
       "when": 1791794422672,
       "tag": "0002_teacher_logins",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792405234981,
+      "tag": "0003_contact_addresses_validation",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792405327118,
+      "tag": "0004_enforce_substitute_address_on_contact_save",
+      "breakpoints": true
     }
   ]
 }

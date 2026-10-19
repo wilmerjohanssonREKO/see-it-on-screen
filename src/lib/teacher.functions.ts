@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
+import { teacherRegistrationSchema } from "./contact-schemas";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const MAX_ATTEMPTS = 5;
@@ -10,7 +11,13 @@ function toHex(buf: ArrayBuffer) {
   return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 async function hashCode(code: string, salt: string) {
-  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(code.trim().toUpperCase()), "PBKDF2", false, ["deriveBits"]);
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(code.trim().toUpperCase()),
+    "PBKDF2",
+    false,
+    ["deriveBits"],
+  );
   const bits = await crypto.subtle.deriveBits(
     { name: "PBKDF2", salt: new TextEncoder().encode(salt), iterations: 100_000, hash: "SHA-256" },
     key,
@@ -38,7 +45,10 @@ export const generateSchoolCode = createServerFn({ method: "POST" })
     const salt = toHex(crypto.getRandomValues(new Uint8Array(16)).buffer);
     const code_hash = await hashCode(code, salt);
     const { error } = await supabaseAdmin.from("school_codes").upsert({
-      school_id: data.schoolId, code_hash, salt, updated_at: new Date().toISOString(),
+      school_id: data.schoolId,
+      code_hash,
+      salt,
+      updated_at: new Date().toISOString(),
     });
     if (error) throw new Error("Kunde inte spara koden");
     return { code };
@@ -50,21 +60,17 @@ export const listSchoolsForSignup = createServerFn({ method: "GET" }).handler(as
   return data ?? [];
 });
 
-const registerInput = z.object({
-  fullName: z.string().trim().min(1).max(120),
-  email: z.string().trim().toLowerCase().email().max(255),
-  password: z.string().min(8).max(72),
-  phone: z.string().trim().min(5).max(30),
-  schoolId: z.string().uuid(),
-  code: z.string().trim().min(1).max(40),
-});
-
 export const registerTeacher = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => registerInput.parse(d))
+  .inputValidator((d: unknown) => teacherRegistrationSchema.parse(d))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const ip = (getRequestHeader("cf-connecting-ip") ?? getRequestHeader("x-forwarded-for") ?? "unknown")
-      .split(",")[0]!.trim();
+    const ip = (
+      getRequestHeader("cf-connecting-ip") ??
+      getRequestHeader("x-forwarded-for") ??
+      "unknown"
+    )
+      .split(",")[0]!
+      .trim();
     const since = new Date(Date.now() - WINDOW_MINUTES * 60_000).toISOString();
     const { count } = await supabaseAdmin
       .from("teacher_code_attempts")
@@ -72,18 +78,28 @@ export const registerTeacher = createServerFn({ method: "POST" })
       .gte("created_at", since)
       .or(`email.eq.${data.email},ip.eq.${ip}`);
     if ((count ?? 0) >= MAX_ATTEMPTS) {
-      return { ok: false as const, error: `För många felaktiga försök. Vänta ${WINDOW_MINUTES} minuter och försök igen.` };
+      return {
+        ok: false as const,
+        error: `För många felaktiga försök. Vänta ${WINDOW_MINUTES} minuter och försök igen.`,
+      };
     }
 
     const { data: row } = await supabaseAdmin
-      .from("school_codes").select("code_hash, salt").eq("school_id", data.schoolId).maybeSingle();
+      .from("school_codes")
+      .select("code_hash, salt")
+      .eq("school_id", data.schoolId)
+      .maybeSingle();
     const valid = !!row && (await hashCode(data.code, row.salt)) === row.code_hash;
     if (!valid) {
       await supabaseAdmin.from("teacher_code_attempts").insert({ email: data.email, ip });
       return { ok: false as const, error: "Fel skolkod. Kontrollera koden med din skola." };
     }
 
-    const { data: school } = await supabaseAdmin.from("schools").select("name").eq("id", data.schoolId).maybeSingle();
+    const { data: school } = await supabaseAdmin
+      .from("schools")
+      .select("name")
+      .eq("id", data.schoolId)
+      .maybeSingle();
     const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
       email: data.email,
       password: data.password,
@@ -93,15 +109,31 @@ export const registerTeacher = createServerFn({ method: "POST" })
     if (error || !created.user) {
       console.error("registerTeacher createUser failed:", error?.message, error);
       const exists = error?.message?.toLowerCase().includes("already");
-      return { ok: false as const, error: exists ? "Det finns redan ett konto med den e-postadressen." : "Kunde inte skapa kontot." };
+      return {
+        ok: false as const,
+        error: exists
+          ? "Det finns redan ett konto med den e-postadressen."
+          : "Kunde inte skapa kontot.",
+      };
     }
     const uid = created.user.id;
     await supabaseAdmin.from("user_roles").delete().eq("user_id", uid);
-    await supabaseAdmin.from("profiles")
-      .update({ full_name: data.fullName, phone: data.phone, school_name: school?.name ?? null })
+    const { error: profileError } = await supabaseAdmin
+      .from("profiles")
+      .update({
+        full_name: data.fullName,
+        email: data.email,
+        phone: data.phone,
+        school_name: school?.name ?? null,
+      })
       .eq("id", uid);
+    if (profileError) {
+      await supabaseAdmin.auth.admin.deleteUser(uid);
+      return { ok: false as const, error: "Kunde inte spara kontaktuppgifterna." };
+    }
     const { error: mErr } = await supabaseAdmin
-      .from("school_members").insert({ user_id: uid, school_id: data.schoolId, member_type: "teacher" });
+      .from("school_members")
+      .insert({ user_id: uid, school_id: data.schoolId, member_type: "teacher" });
     if (mErr) {
       await supabaseAdmin.auth.admin.deleteUser(uid);
       return { ok: false as const, error: "Kunde inte koppla kontot till skolan." };
@@ -115,7 +147,9 @@ export const listTeachers = createServerFn({ method: "GET" })
     await assertAdmin(context.supabase);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: members } = await supabaseAdmin
-      .from("school_members").select("user_id, school_id, created_at, schools(name)").eq("member_type", "teacher");
+      .from("school_members")
+      .select("user_id, school_id, created_at, schools(name)")
+      .eq("member_type", "teacher");
     const ids = (members ?? []).map((m) => m.user_id);
     const { data: profiles } = ids.length
       ? await supabaseAdmin.from("profiles").select("id, full_name, email, phone").in("id", ids)
@@ -139,7 +173,10 @@ export const removeTeacher = createServerFn({ method: "POST" })
     await assertAdmin(context.supabase);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
-      .from("school_members").delete().eq("user_id", data.userId).eq("member_type", "teacher");
+      .from("school_members")
+      .delete()
+      .eq("user_id", data.userId)
+      .eq("member_type", "teacher");
     if (error) throw new Error("Kunde inte ta bort läraren");
     return { ok: true };
   });

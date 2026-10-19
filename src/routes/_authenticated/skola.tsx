@@ -11,7 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { STATUS_LABELS, SUBJECTS, formatTime } from "@/lib/subjects";
 
@@ -43,7 +49,11 @@ function SchoolPage() {
   const { data: school } = useQuery({
     queryKey: ["my-school", schoolId],
     queryFn: async () => {
-      const { data } = await supabase.from("schools").select("name").eq("id", schoolId).maybeSingle();
+      const { data } = await supabase
+        .from("schools")
+        .select("name, street_address, postal_code, city")
+        .eq("id", schoolId)
+        .maybeSingle();
       return data;
     },
   });
@@ -61,7 +71,10 @@ function SchoolPage() {
     e.preventDefault();
     const form = e.currentTarget;
     const fd = new FormData(form);
-    if (!subject) { toast.error("Välj ämne"); return; }
+    if (!subject) {
+      toast.error("Välj ämne");
+      return;
+    }
     setBusy(true);
     const { data: a, error } = await supabase
       .from("assignments")
@@ -71,20 +84,30 @@ function SchoolPage() {
         assignment_date: String(fd.get("date")),
         start_time: String(fd.get("start")),
         end_time: String(fd.get("end")),
-        compensation: String(fd.get("compensation") ?? "").trim().slice(0, 120) || null,
-        description: String(fd.get("description") ?? "").trim().slice(0, 1000) || null,
+        compensation:
+          String(fd.get("compensation") ?? "")
+            .trim()
+            .slice(0, 120) || null,
+        description:
+          String(fd.get("description") ?? "")
+            .trim()
+            .slice(0, 1000) || null,
       })
       .select("id")
       .single();
     if (error || !a) {
       setBusy(false);
-      toast.error("Kunde inte spara behovet"); return;
+      toast.error("Kunde inte spara behovet");
+      return;
     }
     const { data: count, error: pErr } = await supabase.rpc("publish_assignment", {
       p_assignment_id: a.id,
     });
     setBusy(false);
-    if (pErr) { toast.error("Sparat men kunde inte publiceras"); return; }
+    if (pErr) {
+      toast.error("Sparat men kunde inte publiceras");
+      return;
+    }
     toast.success(`Publicerat! ${count ?? 0} vikarier har fått notis.`);
     form.reset();
     setSubject("");
@@ -92,9 +115,13 @@ function SchoolPage() {
   }
 
   async function decline(id: string) {
-    if (!window.confirm("Tacka nej till vikarien? Uppdraget blir öppet igen för andra vikarier.")) return;
+    if (!window.confirm("Tacka nej till vikarien? Uppdraget blir öppet igen för andra vikarier."))
+      return;
     const { error } = await supabase.rpc("decline_substitute", { p_assignment_id: id });
-    if (error) { toast.error("Kunde inte tacka nej"); return; }
+    if (error) {
+      toast.error("Kunde inte tacka nej");
+      return;
+    }
     toast.success("Vikarien är borttagen från uppdraget — det är öppet igen.");
     qc.invalidateQueries({ queryKey: ["school-assignments"] });
   }
@@ -105,7 +132,14 @@ function SchoolPage() {
       <main className="mx-auto grid max-w-4xl gap-6 px-4 py-8">
         <div>
           <h1 className="font-display text-3xl font-bold">{school?.name ?? "Er skola"}</h1>
-          <p className="text-muted-foreground">Lägg upp ett vikariebehov — matchade vikarier får besked direkt.</p>
+          {school?.street_address && (
+            <p className="mt-1 text-sm text-muted-foreground">
+              {school.street_address}, {school.postal_code} {school.city}
+            </p>
+          )}
+          <p className="text-muted-foreground">
+            Lägg upp ett vikariebehov — matchade vikarier får besked direkt.
+          </p>
         </div>
 
         <Card className="shadow-soft">
@@ -118,9 +152,15 @@ function SchoolPage() {
               <div className="grid gap-2">
                 <Label>Ämne</Label>
                 <Select value={subject} onValueChange={setSubject}>
-                  <SelectTrigger><SelectValue placeholder="Välj ämne" /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Välj ämne" />
+                  </SelectTrigger>
                   <SelectContent>
-                    {SUBJECTS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                    {SUBJECTS.map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {s}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -142,7 +182,12 @@ function SchoolPage() {
               </div>
               <div className="grid gap-2 sm:col-span-2">
                 <Label htmlFor="description">Beskrivning (valfritt)</Label>
-                <Textarea id="description" name="description" maxLength={1000} placeholder="Klass, lokal, vad som ska göras…" />
+                <Textarea
+                  id="description"
+                  name="description"
+                  maxLength={1000}
+                  placeholder="Klass, lokal, vad som ska göras…"
+                />
               </div>
               <Button type="submit" className="sm:col-span-2" disabled={busy}>
                 <Send className="h-4 w-4" /> {busy ? "Publicerar…" : "Publicera vikariebehov"}
@@ -158,10 +203,14 @@ function SchoolPage() {
             <Card key={a.id}>
               <CardContent className="flex flex-wrap items-center justify-between gap-2 pt-6">
                 <div>
-                  <p className="font-semibold">{a.subject} · {a.assignment_date}</p>
+                  <p className="font-semibold">
+                    {a.subject} · {a.assignment_date}
+                  </p>
                   <p className="text-sm text-muted-foreground">
                     {formatTime(a.start_time)}–{formatTime(a.end_time)}
-                    {a.substitute_name ? ` · Vikarie: ${a.substitute_name}${a.substitute_phone ? ` (${a.substitute_phone})` : ""}` : ""}
+                    {a.substitute_name
+                      ? ` · Vikarie: ${a.substitute_name}${a.substitute_phone ? ` (${a.substitute_phone})` : ""}`
+                      : ""}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">

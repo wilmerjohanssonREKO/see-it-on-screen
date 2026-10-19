@@ -14,3 +14,6 @@
 - Teacher accounts are school_members rows with member_type='teacher'; school codes are PBKDF2-hashed in school_codes and verified only in server functions (teacher.functions.ts), so the code check cannot be bypassed in the browser.
 
 - Keep retired MVP test tools, substitute ratings/statistics and admin promotion out of the UI; preserve historical data and use the shared `/auth` login for every account type.
+
+- Share contact validation in `contact-schemas.ts`, persist contact edits through authenticated `contact.functions.ts`, and mirror essential checks in database triggers; legacy auth-created profiles stay valid until contact completion.
+- Home addresses are private profile details and must not be included in school-facing assignment reads.
