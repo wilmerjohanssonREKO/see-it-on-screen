@@ -30,7 +30,7 @@ export const substituteContactSchema = z.object({
   ...contactShape,
   ...addressShape,
   subjects: z
-    .array(z.string().refine((s) => SUBJECTS.includes(s), "Välj ett giltigt ämne"))
+    .array(z.string().refine((s) => SUBJECTS.some((subject) => subject === s), "Välj ett giltigt ämne"))
     .min(1, "Välj minst ett ämne"),
   school_name: z.string().trim().max(120),
   graduation_year: z.number().int().min(1970).max(2100).nullable(),

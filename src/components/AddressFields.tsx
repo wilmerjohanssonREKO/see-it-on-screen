@@ -5,7 +5,7 @@ export function AddressFields({
   values,
   prefix = "address",
 }: {
-  values?: { street_address?: string | null; postal_code?: string | null; city?: string | null };
+  values?: { street_address?: string | null; postal_code?: string | null; city?: string | null } | undefined;
   prefix?: string;
 }) {
   return (
