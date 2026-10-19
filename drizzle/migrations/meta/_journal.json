@@ -50,6 +50,13 @@
       "when": 1792430325938,
       "tag": "0006_cv_feature",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792430871584,
+      "tag": "0007_distance_matching",
+      "breakpoints": true
     }
   ]
 }
