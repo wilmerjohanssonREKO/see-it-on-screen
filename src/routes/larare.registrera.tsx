@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 import { listSchoolsForSignup, registerTeacher } from "@/lib/teacher.functions";
+import { teacherRegistrationSchema } from "@/lib/contact-schemas";
 import { Brand } from "@/components/AppHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,18 +44,14 @@ function TeacherSignup() {
     const fd = new FormData(e.currentTarget);
     const email = String(fd.get("email") ?? "").trim();
     const password = String(fd.get("password") ?? "");
+    const parsed = teacherRegistrationSchema.safeParse({
+      fullName: String(fd.get("full_name") ?? ""), email, password,
+      phone: String(fd.get("phone") ?? ""), schoolId, code: String(fd.get("code") ?? ""),
+    });
+    if (!parsed.success) { setError(parsed.error.issues[0]?.message ?? "Kontrollera uppgifterna"); return; }
     setBusy(true);
     try {
-      const res = await register({
-        data: {
-          fullName: String(fd.get("full_name") ?? ""),
-          email,
-          password,
-          phone: String(fd.get("phone") ?? ""),
-          schoolId,
-          code: String(fd.get("code") ?? ""),
-        },
-      });
+      const res = await register({ data: parsed.data });
       if (!res.ok) { setError(res.error); return; }
       const { error: sErr } = await supabase.auth.signInWithPassword({ email, password });
       if (sErr) { toast.success("Konto skapat! Logga in."); navigate({ to: "/auth" }); return; }
@@ -80,7 +77,7 @@ function TeacherSignup() {
             <div className="grid gap-2"><Label htmlFor="full_name">Namn</Label><Input id="full_name" name="full_name" required maxLength={120} /></div>
             <div className="grid gap-2"><Label htmlFor="email">E-post</Label><Input id="email" name="email" type="email" required maxLength={255} /></div>
             <div className="grid gap-2"><Label htmlFor="password">Lösenord</Label><Input id="password" name="password" type="password" required minLength={8} maxLength={72} /></div>
-            <div className="grid gap-2"><Label htmlFor="phone">Telefon</Label><Input id="phone" name="phone" type="tel" required maxLength={30} /></div>
+            <div className="grid gap-2"><Label htmlFor="phone">Telefon</Label><Input id="phone" name="phone" type="tel" required minLength={5} maxLength={40} pattern="[+0-9 ()-]+" /></div>
             <div className="grid gap-2">
               <Label>Skola</Label>
               <Select value={schoolId} onValueChange={setSchoolId}>

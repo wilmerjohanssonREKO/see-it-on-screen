@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
+import { teacherRegistrationSchema } from "./contact-schemas";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const MAX_ATTEMPTS = 5;
@@ -50,17 +51,8 @@ export const listSchoolsForSignup = createServerFn({ method: "GET" }).handler(as
   return data ?? [];
 });
 
-const registerInput = z.object({
-  fullName: z.string().trim().min(1).max(120),
-  email: z.string().trim().toLowerCase().email().max(255),
-  password: z.string().min(8).max(72),
-  phone: z.string().trim().min(5).max(30),
-  schoolId: z.string().uuid(),
-  code: z.string().trim().min(1).max(40),
-});
-
 export const registerTeacher = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => registerInput.parse(d))
+  .inputValidator((d: unknown) => teacherRegistrationSchema.parse(d))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const ip = (getRequestHeader("cf-connecting-ip") ?? getRequestHeader("x-forwarded-for") ?? "unknown")
@@ -97,9 +89,13 @@ export const registerTeacher = createServerFn({ method: "POST" })
     }
     const uid = created.user.id;
     await supabaseAdmin.from("user_roles").delete().eq("user_id", uid);
-    await supabaseAdmin.from("profiles")
-      .update({ full_name: data.fullName, phone: data.phone, school_name: school?.name ?? null })
+    const { error: profileError } = await supabaseAdmin.from("profiles")
+      .update({ full_name: data.fullName, email: data.email, phone: data.phone, school_name: school?.name ?? null })
       .eq("id", uid);
+    if (profileError) {
+      await supabaseAdmin.auth.admin.deleteUser(uid);
+      return { ok: false as const, error: "Kunde inte spara kontaktuppgifterna." };
+    }
     const { error: mErr } = await supabaseAdmin
       .from("school_members").insert({ user_id: uid, school_id: data.schoolId, member_type: "teacher" });
     if (mErr) {

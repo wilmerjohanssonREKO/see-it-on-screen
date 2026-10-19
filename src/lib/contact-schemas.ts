@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { SUBJECTS } from "./subjects";
 
-export const nameField = z.string().trim().min(1, "Vyplňte jméno".replace("Vyplňte jméno", "Fyll i namn")).max(120);
+export const nameField = z.string().trim().min(1, "Fyll i namn").max(120);
 export const emailField = z.string().trim().email("Fyll i en giltig e-postadress").max(255);
 export const phoneField = z.string().trim().min(5, "Fyll i telefonnummer").max(40)
   .regex(/^[+0-9 ()-]+$/, "Fyll i ett giltigt telefonnummer")
