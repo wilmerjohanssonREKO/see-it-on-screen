@@ -159,7 +159,6 @@ function UppdragPage() {
                 mine: "[&_button]:bg-primary [&_button]:text-primary-foreground [&_button]:font-bold",
                 available: "[&_button]:bg-accent/40 [&_button]:font-bold",
               }}
-              classNames={{ today: "rounded-md ring-2 ring-foreground/30" }}
               className="[--cell-size:2.5rem]"
             />
             <div className="grid gap-2 text-sm">
@@ -168,7 +167,6 @@ function UppdragPage() {
               </p>
               <p className="flex items-center gap-2"><span className="h-4 w-4 rounded-md bg-primary" /> Mina jobb</p>
               <p className="flex items-center gap-2"><span className="h-4 w-4 rounded-md bg-accent/40" /> Tillgängliga jobb</p>
-              <p className="flex items-center gap-2"><span className="h-4 w-4 rounded-md ring-2 ring-foreground/30" /> Idag</p>
               <p className="mt-2 text-muted-foreground">
                 {selected ? `Visar ${format(selected, "d MMMM", { locale: sv })}` : "Klicka på en dag för att se dess jobb."}
               </p>
