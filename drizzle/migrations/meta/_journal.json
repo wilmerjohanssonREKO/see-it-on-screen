@@ -78,6 +78,13 @@
       "when": 1792432205847,
       "tag": "0010_profile_consent",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1792432966503,
+      "tag": "0011_stop_storing_background_checks",
+      "breakpoints": true
     }
   ]
 }

@@ -8,7 +8,7 @@ export function PolicyCheckbox() {
         className="mt-0.5 h-4 w-4 accent-primary"
       />
       <span>
-        Jag godkänner REKO UF:s{" "}
+        Jag har läst REKO UF:s{" "}
         <a
           href="/integritetspolicy"
           target="_blank"
