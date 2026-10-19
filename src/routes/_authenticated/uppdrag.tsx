@@ -22,12 +22,12 @@ export const Route = createFileRoute("/_authenticated/uppdrag")({
   },
   head: () => ({
     meta: [
-      { title: "Mina förfrågningar — REKO UF" },
+      { title: "Schema — REKO UF" },
       {
         name: "description",
         content: "Se vikariebehov du matchats mot och tacka ja till uppdrag hos REKO UF.",
       },
-      { property: "og:title", content: "Mina förfrågningar — REKO UF" },
+      { property: "og:title", content: "Schema — REKO UF" },
       { property: "og:description", content: "Vikariebehov du kan tacka ja till." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

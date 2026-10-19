@@ -47,7 +47,7 @@ export function AppHeader() {
                 className="rounded-md px-3 py-2 font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                 activeProps={{ className: "bg-secondary text-foreground" }}
               >
-                Uppdrag
+                Schema
               </Link>
               <Link
                 to="/profil"
