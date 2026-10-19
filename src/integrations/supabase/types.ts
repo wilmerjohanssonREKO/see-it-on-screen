@@ -249,6 +249,7 @@ export type Database = {
           background_file_path: string | null
           background_status: Database["public"]["Enums"]["background_status"]
           city: string | null
+          consent_at: string | null
           created_at: string
           cv_consent_at: string | null
           cv_file_path: string | null
@@ -270,6 +271,7 @@ export type Database = {
           background_file_path?: string | null
           background_status?: Database["public"]["Enums"]["background_status"]
           city?: string | null
+          consent_at?: string | null
           created_at?: string
           cv_consent_at?: string | null
           cv_file_path?: string | null
@@ -291,6 +293,7 @@ export type Database = {
           background_file_path?: string | null
           background_status?: Database["public"]["Enums"]["background_status"]
           city?: string | null
+          consent_at?: string | null
           created_at?: string
           cv_consent_at?: string | null
           cv_file_path?: string | null
@@ -664,6 +667,7 @@ export type Database = {
           substitute_phone: string
         }[]
       }
+      set_profile_consent: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "substitute"

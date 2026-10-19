@@ -15,3 +15,4 @@
 - [x] Avstånd i matchningen: lat/lng, Haversine, kort varsel (<24h) inom 15 km (minst 3), "ca X km"-visning — verifierat i webbläsaren
 - [x] Loggsystem: event_log (pseudonymiserad), assignment_metrics, Data-flik med CSV-export och gallring — verifierat i webbläsaren
 - [x] Ändra kort varsel till 2 timmar och avståndsradien till 10 km (i notify_matching)
+- [x] Samtyckesruta vid inloggning: profiles.consent_at + set_profile_consent RPC + ConsentBanner i _authenticated
