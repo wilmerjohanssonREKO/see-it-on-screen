@@ -84,8 +84,10 @@ function ProfilPage() {
     }
     setSaving(true);
     try {
-      await saveContact({ data: parsed.data });
+      const result = await saveContact({ data: parsed.data });
       toast.success("Profilen är sparad");
+      if (result?.geoWarning)
+        toast.warning("Kunde inte hitta positionen för postnumret — avståndsmatchning fungerar inte för din adress ännu");
       qc.invalidateQueries({ queryKey: ["profile"] });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Kunde inte spara profilen");

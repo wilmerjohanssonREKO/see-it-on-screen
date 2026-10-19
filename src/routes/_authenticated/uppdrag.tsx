@@ -42,6 +42,7 @@ type AssignmentRow = {
   compensation: string | null;
   status: string;
   assigned_substitute_id: string | null;
+  distance_km: number | null;
   schools: { name: string; contact_person: string | null } | null;
 };
 
@@ -58,13 +59,16 @@ function UppdragPage() {
       const { data, error } = await supabase
         .from("notifications")
         .select(
-          "id, assignment:assignments(id, subject, assignment_date, start_time, end_time, description, compensation, status, assigned_substitute_id, schools(name, contact_person))",
+          "id, distance_km, assignment:assignments(id, subject, assignment_date, start_time, end_time, description, compensation, status, assigned_substitute_id, schools(name, contact_person))",
         )
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? [])
-        .map((r) => r.assignment as unknown as AssignmentRow)
-        .filter(Boolean);
+        .map((r) => ({
+          ...(r.assignment as unknown as AssignmentRow),
+          distance_km: r.distance_km as number | null,
+        }))
+        .filter((a) => a?.id);
     },
   });
 
@@ -148,6 +152,11 @@ function UppdragPage() {
                     {a.compensation && (
                       <span className="flex items-center gap-1">
                         <Wallet className="h-4 w-4" /> {a.compensation}
+                      </span>
+                    )}
+                    {a.distance_km != null && (
+                      <span className="flex items-center gap-1">
+                        <MapPin className="h-4 w-4" /> ca {a.distance_km} km från skolan
                       </span>
                     )}
                   </div>

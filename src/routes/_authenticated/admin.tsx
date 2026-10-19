@@ -517,8 +517,10 @@ function SchoolsTab() {
     }
     setSaving(true);
     try {
-      await saveContact({ data: { ...parsed.data, id: editingId ?? undefined } });
+      const result = await saveContact({ data: { ...parsed.data, id: editingId ?? undefined } });
       toast.success(editingId ? "Skoluppgifterna är uppdaterade" : "Skola tillagd");
+      if (result?.geoWarning)
+        toast.warning("Kunde inte hitta positionen för postnumret — avståndsmatchning fungerar inte för den här adressen ännu");
       form.reset();
       setEditingId(null);
       qc.invalidateQueries({ queryKey: ["schools"] });
