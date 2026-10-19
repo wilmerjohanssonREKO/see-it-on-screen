@@ -127,9 +127,7 @@ function UppdragPage() {
       <AppHeader />
       <main className="mx-auto max-w-4xl px-4 py-8">
         <h1 className="text-3xl font-bold">Uppdrag</h1>
-        <p className="mt-1 text-muted-foreground">
-          Uppdrag du matchats mot.
-        </p>
+        <p className="mt-1 text-muted-foreground">{"\n"}</p>
 
         {!approved && (
           <Card className="mt-6 border-accent bg-accent/15">
