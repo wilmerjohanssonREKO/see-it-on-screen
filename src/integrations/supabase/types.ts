@@ -148,18 +148,21 @@ export type Database = {
         Row: {
           assignment_id: string
           created_at: string
+          distance_km: number | null
           id: string
           substitute_id: string
         }
         Insert: {
           assignment_id: string
           created_at?: string
+          distance_km?: number | null
           id?: string
           substitute_id: string
         }
         Update: {
           assignment_id?: string
           created_at?: string
+          distance_km?: number | null
           id?: string
           substitute_id?: string
         }
@@ -194,6 +197,8 @@ export type Database = {
           full_name: string
           graduation_year: number | null
           id: string
+          lat: number | null
+          lng: number | null
           phone: string | null
           postal_code: string | null
           school_name: string | null
@@ -213,6 +218,8 @@ export type Database = {
           full_name?: string
           graduation_year?: number | null
           id: string
+          lat?: number | null
+          lng?: number | null
           phone?: string | null
           postal_code?: string | null
           school_name?: string | null
@@ -232,6 +239,8 @@ export type Database = {
           full_name?: string
           graduation_year?: number | null
           id?: string
+          lat?: number | null
+          lng?: number | null
           phone?: string | null
           postal_code?: string | null
           school_name?: string | null
@@ -380,6 +389,8 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          lat: number | null
+          lng: number | null
           name: string
           phone: string | null
           postal_code: string | null
@@ -391,6 +402,8 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          lat?: number | null
+          lng?: number | null
           name: string
           phone?: string | null
           postal_code?: string | null
@@ -402,6 +415,8 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          lat?: number | null
+          lng?: number | null
           name?: string
           phone?: string | null
           postal_code?: string | null
@@ -494,6 +509,7 @@ export type Database = {
           start_time: string
           status: Database["public"]["Enums"]["assignment_status"]
           subject: string
+          substitute_distance_km: number
           substitute_name: string
           substitute_phone: string
         }[]
