@@ -11,3 +11,6 @@
 - [x] Security hardening + flow fixes from site review
 
 - [x] Logo: vit REKO UF-text på blå bakgrund i sidhuvudet
+- [x] CV-funktion: uppladdning med samtycke, behörighetsstyrd läsning via 60-sekunderslänkar
+- [ ] Avstånd i matchningen: postnummer/ort + lat/lng, Haversine, kort varsel (<24h) notifierar inom 15 km (minst 3), visa "ca X km" — från uppladdad spec
+- [ ] Loggsystem för statistik: event_log (pseudonymiserad), assignment_metrics-vy, admin-flik "Data" med CSV-export och gallring — från uppladdad spec
