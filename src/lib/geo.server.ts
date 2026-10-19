@@ -21,9 +21,10 @@ export async function geocodePostalCode(
     });
     if (!res.ok) return null;
     const arr = (await res.json()) as Array<{ lat: string; lon: string }>;
-    if (!arr?.length) return null;
-    const lat = Number.parseFloat(arr[0].lat);
-    const lng = Number.parseFloat(arr[0].lon);
+    const first = arr?.[0];
+    if (!first) return null;
+    const lat = Number.parseFloat(first.lat);
+    const lng = Number.parseFloat(first.lon);
     if (Number.isNaN(lat) || Number.isNaN(lng)) return null;
     return { lat, lng };
   } catch {
