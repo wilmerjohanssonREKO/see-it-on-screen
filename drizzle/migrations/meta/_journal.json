@@ -71,6 +71,13 @@
       "when": 1792431850029,
       "tag": "0009_fix_log_event_extensions_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792432205847,
+      "tag": "0010_profile_consent",
+      "breakpoints": true
     }
   ]
 }
