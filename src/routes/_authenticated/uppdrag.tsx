@@ -126,9 +126,9 @@ function UppdragPage() {
     <div className="min-h-screen bg-background">
       <AppHeader />
       <main className="mx-auto max-w-4xl px-4 py-8">
-        <h1 className="text-3xl font-bold">Mina förfrågningar</h1>
+        <h1 className="text-3xl font-bold">Uppdrag</h1>
         <p className="mt-1 text-muted-foreground">
-          Uppdrag du matchats mot. Först till kvarn gäller.
+          Uppdrag du matchats mot.
         </p>
 
         {!approved && (
