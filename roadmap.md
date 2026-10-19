@@ -5,3 +5,5 @@
 - [x] Admin can fully delete any substitute (incl. login)
 - [x] School can decline an assigned substitute (assignment reopens)
 - [ ] Email to school + substitute on match — blocked: needs a sender email domain owned by the user
+
+- [x] MVP cleanup: remove admin test tools, substitute ratings/statistics, profile admin promotion and duplicate homepage admin login; preserve existing data and core flows

@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Star, Upload } from "lucide-react";
+import { Upload } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { AppHeader } from "@/components/AppHeader";
-import { useAuth, useIsAdmin, useProfile } from "@/hooks/useAuth";
+import { useAuth, useProfile } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,7 +38,6 @@ function ProfilPage() {
   const { session } = useAuth();
   const userId = session?.user.id;
   const { data: profile, isLoading } = useProfile(userId);
-  const { data: isAdmin } = useIsAdmin(userId);
   const qc = useQueryClient();
 
   const [subjects, setSubjects] = useState<string[]>([]);
@@ -48,37 +47,6 @@ function ProfilPage() {
   useEffect(() => {
     if (profile?.subjects) setSubjects(profile.subjects);
   }, [profile?.subjects]);
-
-  const { data: stats } = useQuery({
-    queryKey: ["my-stats", userId],
-    enabled: !!userId,
-    queryFn: async () => {
-      const [assignments, ratings] = await Promise.all([
-        supabase
-          .from("assignments")
-          .select("id", { count: "exact", head: true })
-          .eq("assigned_substitute_id", userId!),
-        supabase.from("ratings").select("score").eq("substitute_id", userId!),
-      ]);
-      const scores = (ratings.data ?? []).map((r) => r.score);
-      return {
-        completed: assignments.count ?? 0,
-        average: scores.length
-          ? Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 10) / 10
-          : null,
-      };
-    },
-  });
-
-  async function claimAdmin() {
-    const { data, error } = await supabase.rpc("claim_first_admin");
-    if (error || !data) {
-      toast.error("Det finns redan en admin i systemet.");
-      return;
-    }
-    toast.success("Du är nu plattformsadmin.");
-    qc.invalidateQueries({ queryKey: ["is-admin"] });
-  }
 
   async function handleSave(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -145,24 +113,6 @@ function ProfilPage() {
               Belastningsregister: {BACKGROUND_LABELS[profile?.background_status ?? "pending"]}
             </Badge>
           </div>
-        </div>
-
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">Genomförda uppdrag</p>
-              <p className="text-3xl font-bold">{stats?.completed ?? 0}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">Snittbetyg</p>
-              <p className="flex items-center gap-2 text-3xl font-bold">
-                {stats?.average ?? "–"}
-                {stats?.average ? <Star className="h-6 w-6 fill-accent text-accent" /> : null}
-              </p>
-            </CardContent>
-          </Card>
         </div>
 
         <Card className="mt-6 shadow-soft">
@@ -289,18 +239,6 @@ function ProfilPage() {
           </CardContent>
         </Card>
 
-        {!isAdmin && (
-          <Card className="mt-6 border-dashed">
-            <CardContent className="flex flex-wrap items-center justify-between gap-3 pt-6">
-              <p className="text-sm text-muted-foreground">
-                Tillhör du REKO UF-teamet och är först i systemet? Gör dig till admin.
-              </p>
-              <Button variant="outline" size="sm" onClick={claimAdmin}>
-                Bli plattformsadmin
-              </Button>
-            </CardContent>
-          </Card>
-        )}
       </main>
     </div>
   );
