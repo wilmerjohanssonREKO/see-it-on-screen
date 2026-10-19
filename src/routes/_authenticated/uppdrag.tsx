@@ -118,14 +118,18 @@ function UppdragPage() {
   const selectedKey = selected ? format(selected, "yyyy-MM-dd") : null;
   const visible = (rows ?? [])
     .filter((a) => (selectedKey ? a.assignment_date === selectedKey : true))
-    .sort((a, b) => (a.assignment_date + a.start_time).localeCompare(b.assignment_date + b.start_time));
+    .sort(
+      (a, b) =>
+        (a.assignment_date + a.start_time).localeCompare(b.assignment_date + b.start_time) ||
+        (a.distance_km ?? Infinity) - (b.distance_km ?? Infinity),
+    );
 
   const approved = profile?.approved && profile?.background_status === "approved";
 
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
-      <main className="mx-auto max-w-4xl px-4 py-8">
+      <main className="mx-auto max-w-5xl px-4 py-8">
         <h1 className="text-3xl font-bold">Uppdrag</h1>
         <p className="mt-1 text-muted-foreground">{"\n"}</p>
 
@@ -144,8 +148,9 @@ function UppdragPage() {
           </Card>
         )}
 
-        <Card className="mt-6 shadow-soft">
-          <CardContent className="flex flex-col items-center gap-3 pt-6 sm:flex-row sm:items-start sm:gap-8">
+        <div className="mt-6 grid items-start gap-6 md:grid-cols-[auto_1fr]">
+        <Card className="shadow-soft">
+          <CardContent className="flex justify-center pt-6">
             <Calendar
               mode="single"
               locale={sv}
@@ -157,27 +162,19 @@ function UppdragPage() {
                 mine: "[&_button]:bg-primary [&_button]:text-primary-foreground [&_button]:font-bold",
                 available: "[&_button]:bg-accent/40 [&_button]:font-bold",
               }}
+              classNames={{ today: "[&_button]:ring-2 [&_button]:ring-inset [&_button]:ring-foreground/40" }}
               className="[--cell-size:2.5rem]"
             />
-            <div className="grid gap-2 text-sm">
-              <p className="text-base font-bold text-foreground first-letter:uppercase">
-                Idag: {format(new Date(), "EEEE d MMMM yyyy", { locale: sv })}
-              </p>
-              <p className="flex items-center gap-2"><span className="h-4 w-4 rounded-md bg-primary" /> Mina jobb</p>
-              <p className="flex items-center gap-2"><span className="h-4 w-4 rounded-md bg-accent/40" /> Tillgängliga jobb</p>
-              <p className="mt-2 text-muted-foreground">
-                {selected ? `Visar ${format(selected, "d MMMM", { locale: sv })}` : "Klicka på en dag för att se dess jobb."}
-              </p>
-              {selected && (
-                <Button size="sm" variant="outline" onClick={() => setSelected(undefined)}>
-                  Visa alla
-                </Button>
-              )}
-            </div>
           </CardContent>
         </Card>
 
-        <div className="mt-6 grid gap-4">
+        <div className="grid gap-4">
+          {selected && (
+            <div className="flex items-center justify-between gap-2 text-sm">
+              <span className="text-muted-foreground">Visar {format(selected, "d MMMM", { locale: sv })}</span>
+              <Button size="sm" variant="outline" onClick={() => setSelected(undefined)}>Visa alla</Button>
+            </div>
+          )}
           {selected && visible.length === 0 && (
             <p className="text-center text-muted-foreground">Inga jobb den här dagen.</p>
           )}
@@ -245,6 +242,7 @@ function UppdragPage() {
               </Card>
             );
           })}
+        </div>
         </div>
       </main>
     </div>
