@@ -1,5 +1,6 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { CalendarDays, Clock, MapPin, Wallet } from "lucide-react";
 
@@ -71,6 +72,17 @@ function UppdragPage() {
         .filter((a) => a?.id);
     },
   });
+
+  // Log once per assignment that the substitute has seen it (server-side write).
+  const loggedViews = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    for (const a of rows ?? []) {
+      if (!loggedViews.current.has(a.id)) {
+        loggedViews.current.add(a.id);
+        void supabase.rpc("log_assignment_view", { p_assignment_id: a.id });
+      }
+    }
+  }, [rows]);
 
   const claim = useMutation({
     mutationFn: async (assignmentId: string) => {

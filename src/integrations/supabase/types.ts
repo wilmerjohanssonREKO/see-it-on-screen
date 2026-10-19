@@ -35,6 +35,13 @@ export type Database = {
             foreignKeyName: "assignment_declines_assignment_id_fkey"
             columns: ["assignment_id"]
             isOneToOne: false
+            referencedRelation: "assignment_metrics"
+            referencedColumns: ["assignment_id"]
+          },
+          {
+            foreignKeyName: "assignment_declines_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
             referencedRelation: "assignments"
             referencedColumns: ["id"]
           },
@@ -106,6 +113,36 @@ export type Database = {
           },
         ]
       }
+      event_log: {
+        Row: {
+          assignment_id: string | null
+          event_type: string
+          id: string
+          metadata: Json
+          occurred_at: string
+          school_id: string | null
+          substitute_ref: string | null
+        }
+        Insert: {
+          assignment_id?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json
+          occurred_at?: string
+          school_id?: string | null
+          substitute_ref?: string | null
+        }
+        Update: {
+          assignment_id?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json
+          occurred_at?: string
+          school_id?: string | null
+          substitute_ref?: string | null
+        }
+        Relationships: []
+      }
       feedback: {
         Row: {
           category: string
@@ -144,6 +181,21 @@ export type Database = {
           },
         ]
       }
+      log_config: {
+        Row: {
+          id: boolean
+          secret: string
+        }
+        Insert: {
+          id?: boolean
+          secret: string
+        }
+        Update: {
+          id?: boolean
+          secret?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           assignment_id: string
@@ -167,6 +219,13 @@ export type Database = {
           substitute_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "notifications_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignment_metrics"
+            referencedColumns: ["assignment_id"]
+          },
           {
             foreignKeyName: "notifications_assignment_id_fkey"
             columns: ["assignment_id"]
@@ -275,6 +334,13 @@ export type Database = {
           substitute_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "ratings_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignment_metrics"
+            referencedColumns: ["assignment_id"]
+          },
           {
             foreignKeyName: "ratings_assignment_id_fkey"
             columns: ["assignment_id"]
@@ -465,9 +531,78 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      assignment_metrics: {
+        Row: {
+          accepted_count: number | null
+          assignment_id: string | null
+          avg_notified_distance_km: number | null
+          created_at: string | null
+          filled_distance_km: number | null
+          minutes_to_filled: number | null
+          minutes_to_first_response: number | null
+          notified_count: number | null
+          outcome: string | null
+          published_at: string | null
+          rating: number | null
+          school_id: string | null
+          school_name: string | null
+          short_notice: boolean | null
+          starts_at: string | null
+          subject: string | null
+          viewed_count: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignments_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      admin_assignment_metrics: {
+        Args: never
+        Returns: {
+          accepted_count: number | null
+          assignment_id: string | null
+          avg_notified_distance_km: number | null
+          created_at: string | null
+          filled_distance_km: number | null
+          minutes_to_filled: number | null
+          minutes_to_first_response: number | null
+          notified_count: number | null
+          outcome: string | null
+          published_at: string | null
+          rating: number | null
+          school_id: string | null
+          school_name: string | null
+          short_notice: boolean | null
+          starts_at: string | null
+          subject: string | null
+          viewed_count: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "assignment_metrics"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      admin_event_log: {
+        Args: never
+        Returns: {
+          assignment_id: string
+          event_type: string
+          id: string
+          metadata: Json
+          occurred_at: string
+          school_id: string
+          substitute_ref: string
+        }[]
+      }
       can_manage_school: { Args: { p_school: string }; Returns: boolean }
       claim_assignment: { Args: { p_assignment_id: string }; Returns: string }
       claim_first_admin: { Args: never; Returns: boolean }
@@ -494,9 +629,24 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      log_assignment_view: {
+        Args: { p_assignment_id: string }
+        Returns: undefined
+      }
+      log_event: {
+        Args: {
+          p_assignment_id?: string
+          p_event_type: string
+          p_metadata?: Json
+          p_school_id?: string
+          p_substitute_id?: string
+        }
+        Returns: undefined
+      }
       my_school_id: { Args: never; Returns: string }
       notify_matching: { Args: { p_assignment_id: string }; Returns: number }
       publish_assignment: { Args: { p_assignment_id: string }; Returns: number }
+      purge_old_event_log: { Args: never; Returns: number }
       school_assignments: {
         Args: never
         Returns: {

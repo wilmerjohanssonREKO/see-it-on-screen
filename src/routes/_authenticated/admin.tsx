@@ -12,6 +12,7 @@ import { Check, FileText, Plus, Send, Star, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { TablesUpdate } from "@/integrations/supabase/types";
 import { AddressFields } from "@/components/AddressFields";
+import { DataTab } from "@/components/admin/DataTab";
 import { schoolContactSchema } from "@/lib/contact-schemas";
 import { saveSchoolContact } from "@/lib/contact.functions";
 import { AppHeader } from "@/components/AppHeader";
@@ -88,6 +89,7 @@ function AdminPage() {
             <TabsTrigger value="skolor">Skolor</TabsTrigger>
             <TabsTrigger value="larare">Lärare</TabsTrigger>
             <TabsTrigger value="feedback">Feedback</TabsTrigger>
+            <TabsTrigger value="data">Data</TabsTrigger>
           </TabsList>
           <TabsContent value="behov">
             <AssignmentsTab />
@@ -103,6 +105,9 @@ function AdminPage() {
           </TabsContent>
           <TabsContent value="feedback">
             <FeedbackTab />
+          </TabsContent>
+          <TabsContent value="data">
+            <DataTab />
           </TabsContent>
         </Tabs>
       </main>
