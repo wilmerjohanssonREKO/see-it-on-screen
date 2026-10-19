@@ -59,6 +59,7 @@ type FeedbackRow = {
 function FeedbackPage() {
   const { session } = useAuth();
   const { data: profile } = useProfile(session?.user.id);
+  const { data: schoolId } = useMySchoolId(session?.user.id);
   const queryClient = useQueryClient();
   const [category, setCategory] = useState("upplevelse");
   const [score, setScore] = useState("");
@@ -88,7 +89,7 @@ function FeedbackPage() {
     setSaving(true);
     const { error } = await feedbackTable().insert({
       user_id: session.user.id,
-      role: profile?.school_name ? "school" : "substitute",
+      role: schoolId ? "school" : "substitute",
       category,
       message: message.trim(),
       score: score ? Number(score) : null,
