@@ -358,12 +358,13 @@ function SubstitutesTab() {
   const { data } = useQuery({
     queryKey: ["substitutes"],
     queryFn: async () => {
-      const { data: profiles, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .order("created_at", { ascending: false });
+      const [{ data: profiles, error }, { data: members }] = await Promise.all([
+        supabase.from("profiles").select("*").order("created_at", { ascending: false }),
+        supabase.from("school_members").select("user_id"),
+      ]);
       if (error) throw error;
-      return profiles ?? [];
+      const schoolUsers = new Set((members ?? []).map((m) => m.user_id));
+      return (profiles ?? []).filter((p) => !schoolUsers.has(p.id));
     },
   });
 
@@ -430,9 +431,15 @@ function SubstitutesTab() {
               <Button
                 size="sm"
                 variant="outline"
+                disabled={!p.approved && (!p.background_file_path || !p.phone || !p.full_name)}
+                title={!p.background_file_path ? "Vikarien har inte laddat upp något utdrag" : undefined}
                 onClick={() => update(p.id, { approved: !p.approved })}
               >
-                {p.approved ? "Ta bort godkännande" : "Godkänn vikarie"}
+                {p.approved
+                  ? "Ta bort godkännande"
+                  : p.background_file_path
+                    ? "Godkänn vikarie"
+                    : "Saknar utdrag"}
               </Button>
               <Select
                 value={p.background_status}
@@ -819,7 +826,7 @@ function TeachersTab() {
       return;
     try {
       await remove({ data: { userId } });
-      toast.success("Läraren är borttagen från skolan");
+      toast.success("Läraren är borttagen. Generera gärna en ny skolkod så att koden inte kan användas igen.");
       qc.invalidateQueries({ queryKey: ["admin-teachers"] });
     } catch {
       toast.error("Kunde inte ta bort läraren");

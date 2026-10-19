@@ -6,7 +6,7 @@ import { MessageSquareHeart, Star } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { AppHeader } from "@/components/AppHeader";
-import { useAuth, useProfile } from "@/hooks/useAuth";
+import { useAuth, useMySchoolId, useProfile } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -59,6 +59,7 @@ type FeedbackRow = {
 function FeedbackPage() {
   const { session } = useAuth();
   const { data: profile } = useProfile(session?.user.id);
+  const { data: schoolId } = useMySchoolId(session?.user.id);
   const queryClient = useQueryClient();
   const [category, setCategory] = useState("upplevelse");
   const [score, setScore] = useState("");
@@ -88,7 +89,7 @@ function FeedbackPage() {
     setSaving(true);
     const { error } = await feedbackTable().insert({
       user_id: session.user.id,
-      role: profile?.school_name ? "school" : "substitute",
+      role: schoolId ? "school" : "substitute",
       category,
       message: message.trim(),
       score: score ? Number(score) : null,

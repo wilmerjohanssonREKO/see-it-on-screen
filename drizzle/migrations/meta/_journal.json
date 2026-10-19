@@ -36,6 +36,13 @@
       "when": 1792405327118,
       "tag": "0004_enforce_substitute_address_on_contact_save",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792417278826,
+      "tag": "0005_security_hardening",
+      "breakpoints": true
     }
   ]
 }

@@ -97,8 +97,12 @@ function ProfilPage() {
     const path = `${userId}/${Date.now()}-${file.name.replace(/[^\w.-]/g, "_")}`;
     const { error } = await supabase.storage.from("background-checks").upload(path, file);
     if (!error) {
-      await supabase.from("profiles").update({ background_file_path: path }).eq("id", userId);
-      toast.success("Filen är uppladdad och väntar på granskning");
+      const { error: saveError } = await supabase
+        .from("profiles")
+        .update({ background_file_path: path })
+        .eq("id", userId);
+      if (saveError) toast.error("Filen laddades upp men kunde inte kopplas till profilen");
+      else toast.success("Filen är uppladdad och väntar på granskning");
       qc.invalidateQueries({ queryKey: ["profile"] });
     } else {
       toast.error("Uppladdningen misslyckades");
