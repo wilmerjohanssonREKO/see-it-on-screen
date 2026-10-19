@@ -6,7 +6,7 @@
 
 /*
  * REKO UF design system.
- * Primär: blå #3B5BDB. Accent: varm gul #FFB627.
+ * Primär: blå #475cb2. Accent: varm gul #FFB627.
  * Bakgrund: #F5F7FA. Text: #1F2933.
  */
 
@@ -60,8 +60,8 @@
   --shadow-lift: 0 2px 4px oklch(0.27 0.02 250 / 0.08), 0 16px 40px oklch(0.27 0.02 250 / 0.12);
   --background-image-gradient-brand: linear-gradient(
     135deg,
-    oklch(0.503 0.192 267.5) 0%,
-    oklch(0.44 0.17 273) 100%
+    #475cb2 0%,
+    #475cb2 100%
   );
 }
 
@@ -73,7 +73,7 @@
   --card-foreground: oklch(0.27 0.021 250);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.27 0.021 250);
-  --primary: oklch(0.503 0.192 267.5);
+  --primary: #475cb2;
   --primary-foreground: oklch(0.99 0.002 247);
   --secondary: oklch(0.945 0.012 254);
   --secondary-foreground: oklch(0.33 0.05 262);
@@ -89,20 +89,20 @@
   --warning-foreground: oklch(0.27 0.021 250);
   --border: oklch(0.905 0.01 252);
   --input: oklch(0.905 0.01 252);
-  --ring: oklch(0.503 0.192 267.5);
-  --chart-1: oklch(0.503 0.192 267.5);
+  --ring: #475cb2;
+  --chart-1: #475cb2;
   --chart-2: oklch(0.822 0.158 79);
   --chart-3: oklch(0.6 0.14 155);
   --chart-4: oklch(0.65 0.18 20);
-  --chart-5: oklch(0.55 0.1 220);
+  --chart-5: #475cb2;
   --sidebar: oklch(1 0 0);
   --sidebar-foreground: oklch(0.27 0.021 250);
-  --sidebar-primary: oklch(0.503 0.192 267.5);
+  --sidebar-primary: #475cb2;
   --sidebar-primary-foreground: oklch(0.99 0.002 247);
   --sidebar-accent: oklch(0.951 0.008 250);
   --sidebar-accent-foreground: oklch(0.27 0.021 250);
   --sidebar-border: oklch(0.905 0.01 252);
-  --sidebar-ring: oklch(0.503 0.192 267.5);
+  --sidebar-ring: #475cb2;
 }
 
 .dark {
@@ -112,7 +112,7 @@
   --card-foreground: oklch(0.96 0.004 247);
   --popover: oklch(0.27 0.025 256);
   --popover-foreground: oklch(0.96 0.004 247);
-  --primary: oklch(0.65 0.17 266);
+  --primary: #475cb2;
   --primary-foreground: oklch(0.15 0.02 254);
   --secondary: oklch(0.32 0.03 256);
   --secondary-foreground: oklch(0.96 0.004 247);
@@ -128,20 +128,20 @@
   --warning-foreground: oklch(0.22 0.02 254);
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 16%);
-  --ring: oklch(0.65 0.17 266);
-  --chart-1: oklch(0.65 0.17 266);
+  --ring: #475cb2;
+  --chart-1: #475cb2;
   --chart-2: oklch(0.822 0.158 79);
   --chart-3: oklch(0.68 0.14 155);
   --chart-4: oklch(0.7 0.18 20);
-  --chart-5: oklch(0.6 0.1 220);
+  --chart-5: #475cb2;
   --sidebar: oklch(0.27 0.025 256);
   --sidebar-foreground: oklch(0.96 0.004 247);
-  --sidebar-primary: oklch(0.65 0.17 266);
+  --sidebar-primary: #475cb2;
   --sidebar-primary-foreground: oklch(0.15 0.02 254);
   --sidebar-accent: oklch(0.32 0.03 256);
   --sidebar-accent-foreground: oklch(0.96 0.004 247);
   --sidebar-border: oklch(1 0 0 / 12%);
-  --sidebar-ring: oklch(0.65 0.17 266);
+  --sidebar-ring: #475cb2;
 }
 
 @layer base {
@@ -153,6 +153,7 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    font-weight: 500;
     -webkit-font-smoothing: antialiased;
   }
 
@@ -161,6 +162,7 @@
   h3,
   h4 {
     font-family: var(--font-display);
+    font-weight: 700;
     letter-spacing: -0.02em;
   }
 }
