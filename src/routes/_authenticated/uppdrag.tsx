@@ -22,12 +22,12 @@ export const Route = createFileRoute("/_authenticated/uppdrag")({
   },
   head: () => ({
     meta: [
-      { title: "Mina förfrågningar — REKO UF" },
+      { title: "Schema — REKO UF" },
       {
         name: "description",
         content: "Se vikariebehov du matchats mot och tacka ja till uppdrag hos REKO UF.",
       },
-      { property: "og:title", content: "Mina förfrågningar — REKO UF" },
+      { property: "og:title", content: "Schema — REKO UF" },
       { property: "og:description", content: "Vikariebehov du kan tacka ja till." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -125,13 +125,17 @@ function UppdragPage() {
     );
 
   const approved = profile?.approved && profile?.background_status === "approved";
+  const firstName = profile?.full_name?.trim().split(/\s+/)[0];
 
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
       <main className="mx-auto max-w-5xl px-4 py-8">
-        <h1 className="text-3xl font-bold">Uppdrag</h1>
-        <p className="mt-1 text-muted-foreground">{"\n"}</p>
+        <h1 className="text-3xl font-bold">Schema</h1>
+        <p className="mt-1 text-muted-foreground">
+          {firstName ? `God dag, ${firstName}` : "God dag"}
+        </p>
+
 
         {!approved && (
           <Card className="mt-6 border-accent bg-accent/15">
