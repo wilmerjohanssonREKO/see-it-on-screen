@@ -1,5 +1,6 @@
-/// <reference types="bun" />
-import { describe, expect, test } from "bun:test";
+import { describe, it as test } from "node:test";
+import assert from "node:assert/strict";
+const expect = (actual: boolean) => ({ toBe: (expected: boolean) => assert.equal(actual, expected) });
 import { schoolContactSchema, substituteContactSchema, teacherRegistrationSchema } from "./contact-schemas";
 
 const address = { street_address: "Skolgatan 10", postal_code: "123 45", city: "Stockholm" };
