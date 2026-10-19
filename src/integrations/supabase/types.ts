@@ -14,6 +14,32 @@ export type Database = {
   }
   public: {
     Tables: {
+      assignment_declines: {
+        Row: {
+          assignment_id: string
+          created_at: string
+          substitute_id: string
+        }
+        Insert: {
+          assignment_id: string
+          created_at?: string
+          substitute_id: string
+        }
+        Update: {
+          assignment_id?: string
+          created_at?: string
+          substitute_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignment_declines_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assignments: {
         Row: {
           assigned_at: string | null
@@ -421,8 +447,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_manage_school: { Args: { p_school: string }; Returns: boolean }
       claim_assignment: { Args: { p_assignment_id: string }; Returns: string }
       claim_first_admin: { Args: never; Returns: boolean }
+      create_and_publish_assignment: {
+        Args: {
+          p_compensation: string
+          p_date: string
+          p_description: string
+          p_end: string
+          p_start: string
+          p_subject: string
+        }
+        Returns: number
+      }
       decline_substitute: {
         Args: { p_assignment_id: string }
         Returns: boolean
@@ -436,6 +474,7 @@ export type Database = {
       }
       is_admin: { Args: never; Returns: boolean }
       my_school_id: { Args: never; Returns: string }
+      notify_matching: { Args: { p_assignment_id: string }; Returns: number }
       publish_assignment: { Args: { p_assignment_id: string }; Returns: number }
       school_assignments: {
         Args: never
