@@ -160,13 +160,16 @@ export type Database = {
           availability: string | null
           background_file_path: string | null
           background_status: Database["public"]["Enums"]["background_status"]
+          city: string | null
           created_at: string
           email: string
           full_name: string
           graduation_year: number | null
           id: string
           phone: string | null
+          postal_code: string | null
           school_name: string | null
+          street_address: string | null
           subjects: string[]
         }
         Insert: {
@@ -174,13 +177,16 @@ export type Database = {
           availability?: string | null
           background_file_path?: string | null
           background_status?: Database["public"]["Enums"]["background_status"]
+          city?: string | null
           created_at?: string
           email?: string
           full_name?: string
           graduation_year?: number | null
           id: string
           phone?: string | null
+          postal_code?: string | null
           school_name?: string | null
+          street_address?: string | null
           subjects?: string[]
         }
         Update: {
@@ -188,13 +194,16 @@ export type Database = {
           availability?: string | null
           background_file_path?: string | null
           background_status?: Database["public"]["Enums"]["background_status"]
+          city?: string | null
           created_at?: string
           email?: string
           full_name?: string
           graduation_year?: number | null
           id?: string
           phone?: string | null
+          postal_code?: string | null
           school_name?: string | null
+          street_address?: string | null
           subjects?: string[]
         }
         Relationships: []
@@ -334,28 +343,37 @@ export type Database = {
       }
       schools: {
         Row: {
+          city: string | null
           contact_person: string | null
           created_at: string
           email: string | null
           id: string
           name: string
           phone: string | null
+          postal_code: string | null
+          street_address: string | null
         }
         Insert: {
+          city?: string | null
           contact_person?: string | null
           created_at?: string
           email?: string | null
           id?: string
           name: string
           phone?: string | null
+          postal_code?: string | null
+          street_address?: string | null
         }
         Update: {
+          city?: string | null
           contact_person?: string | null
           created_at?: string
           email?: string | null
           id?: string
           name?: string
           phone?: string | null
+          postal_code?: string | null
+          street_address?: string | null
         }
         Relationships: []
       }
