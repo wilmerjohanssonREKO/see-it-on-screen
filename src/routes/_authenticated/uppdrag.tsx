@@ -1,6 +1,9 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { sv } from "date-fns/locale";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
 import { CalendarDays, Clock, MapPin, Wallet } from "lucide-react";
 
@@ -101,6 +104,22 @@ function UppdragPage() {
     onError: () => toast.error("Något gick fel, försök igen"),
   });
 
+  const [selected, setSelected] = useState<Date | undefined>();
+  const toDate = (d: string) => new Date(`${d}T00:00:00`);
+  const { mineDays, openDays } = useMemo(() => {
+    const mine: Date[] = [];
+    const open: Date[] = [];
+    for (const a of rows ?? []) {
+      if (a.assigned_substitute_id === userId) mine.push(toDate(a.assignment_date));
+      else if (a.status === "open") open.push(toDate(a.assignment_date));
+    }
+    return { mineDays: mine, openDays: open };
+  }, [rows, userId]);
+  const selectedKey = selected ? format(selected, "yyyy-MM-dd") : null;
+  const visible = (rows ?? [])
+    .filter((a) => (selectedKey ? a.assignment_date === selectedKey : true))
+    .sort((a, b) => (a.assignment_date + a.start_time).localeCompare(b.assignment_date + b.start_time));
+
   const approved = profile?.approved && profile?.background_status === "approved";
 
   return (
@@ -117,7 +136,7 @@ function UppdragPage() {
             <CardContent className="pt-6 text-sm">
               <p className="font-semibold">Din profil är inte godkänd ännu</p>
               <p className="mt-1 text-muted-foreground">
-                Fyll i din profil och ladda upp utdrag ur belastningsregistret. Vi granskar den
+                Fyll i din profil och visa upp ditt utdrag ur belastningsregistret för oss. Vi granskar
                 och hör av oss. Först därefter matchas du mot uppdrag.
               </p>
               <Button asChild size="sm" className="mt-3">
@@ -127,7 +146,45 @@ function UppdragPage() {
           </Card>
         )}
 
+        <Card className="mt-6 shadow-soft">
+          <CardContent className="flex flex-col items-center gap-3 pt-6 sm:flex-row sm:items-start sm:gap-8">
+            <Calendar
+              mode="single"
+              locale={sv}
+              weekStartsOn={1}
+              selected={selected}
+              onSelect={setSelected}
+              modifiers={{ mine: mineDays, available: openDays }}
+              modifiersClassNames={{
+                mine: "[&_button]:bg-primary [&_button]:text-primary-foreground [&_button]:font-bold",
+                available: "[&_button]:bg-accent/40 [&_button]:font-bold",
+              }}
+              classNames={{ today: "rounded-md ring-2 ring-foreground/30" }}
+              className="[--cell-size:2.5rem]"
+            />
+            <div className="grid gap-2 text-sm">
+              <p className="text-base font-bold text-foreground first-letter:uppercase">
+                Idag: {format(new Date(), "EEEE d MMMM yyyy", { locale: sv })}
+              </p>
+              <p className="flex items-center gap-2"><span className="h-4 w-4 rounded-md bg-primary" /> Mina jobb</p>
+              <p className="flex items-center gap-2"><span className="h-4 w-4 rounded-md bg-accent/40" /> Tillgängliga jobb</p>
+              <p className="flex items-center gap-2"><span className="h-4 w-4 rounded-md ring-2 ring-foreground/30" /> Idag</p>
+              <p className="mt-2 text-muted-foreground">
+                {selected ? `Visar ${format(selected, "d MMMM", { locale: sv })}` : "Klicka på en dag för att se dess jobb."}
+              </p>
+              {selected && (
+                <Button size="sm" variant="outline" onClick={() => setSelected(undefined)}>
+                  Visa alla
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
         <div className="mt-6 grid gap-4">
+          {selected && visible.length === 0 && (
+            <p className="text-center text-muted-foreground">Inga jobb den här dagen.</p>
+          )}
           {isLoading && <p className="text-muted-foreground">Laddar…</p>}
           {!isLoading && (rows?.length ?? 0) === 0 && (
             <Card>
@@ -137,7 +194,7 @@ function UppdragPage() {
               </CardContent>
             </Card>
           )}
-          {rows?.map((a) => {
+          {visible.map((a) => {
             const mine = a.assigned_substitute_id === userId;
             return (
               <Card key={a.id} className="shadow-soft">
