@@ -163,6 +163,9 @@ function UppdragPage() {
               className="[--cell-size:2.5rem]"
             />
             <div className="grid gap-2 text-sm">
+              <p className="text-base font-bold capitalize text-foreground">
+                Idag: {format(new Date(), "EEEE d MMMM yyyy", { locale: sv })}
+              </p>
               <p className="flex items-center gap-2"><span className="h-4 w-4 rounded-md bg-primary" /> Mina jobb</p>
               <p className="flex items-center gap-2"><span className="h-4 w-4 rounded-md bg-accent/40" /> Tillgängliga jobb</p>
               <p className="flex items-center gap-2"><span className="h-4 w-4 rounded-md ring-2 ring-foreground/30" /> Idag</p>
