@@ -50,7 +50,6 @@ function ProfilPage() {
 
   const [subjects, setSubjects] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [cvConsent, setCvConsent] = useState(false);
   const [cvBusy, setCvBusy] = useState(false);
   const getCvUrl = useServerFn(getCvSignedUrl);
@@ -94,26 +93,6 @@ function ProfilPage() {
     } finally {
       setSaving(false);
     }
-  }
-
-  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file || !userId) return;
-    setUploading(true);
-    const path = `${userId}/${Date.now()}-${file.name.replace(/[^\w.-]/g, "_")}`;
-    const { error } = await supabase.storage.from("background-checks").upload(path, file);
-    if (!error) {
-      const { error: saveError } = await supabase
-        .from("profiles")
-        .update({ background_file_path: path })
-        .eq("id", userId);
-      if (saveError) toast.error("Filen laddades upp men kunde inte kopplas till profilen");
-      else toast.success("Filen är uppladdad och väntar på granskning");
-      qc.invalidateQueries({ queryKey: ["profile"] });
-    } else {
-      toast.error("Uppladdningen misslyckades");
-    }
-    setUploading(false);
   }
 
   async function handleCvUpload(e: React.ChangeEvent<HTMLInputElement>) {

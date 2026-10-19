@@ -17,37 +17,54 @@ export const Route = createFileRoute("/integritetspolicy")({
 
 const sections: { title: string; body: string[] }[] = [
   {
+    title: "Vem ansvarar för dina uppgifter",
+    body: [
+      "REKO UF är personuppgiftsansvarig. REKO UF är en förmedlingstjänst: vi kopplar ihop gymnasieskolor med vikarier. Vi är inte arbetsgivare och hyr inte ut personal — anställningen sker mellan skolan och vikarien. Vi tar aldrig betalt av vikarier.",
+      "Kontakt: [ERT NAMN], [ER E-POST], [ERT TELEFONNUMMER].",
+    ],
+  },
+  {
     title: "Vilka uppgifter vi sparar",
     body: [
-      "När du skapar ett konto sparar vi ditt namn, din mejladress och ditt telefonnummer. Som vikarie sparar vi även din adress (gatuadress, postnummer och ort), dina ämnen, ditt CV och utdrag ur belastningsregister, om du laddar upp dem.",
-      "Skolor sparar skolans namn, kontaktperson, kontaktuppgifter och adress.",
+      "Namn, mejladress och telefonnummer. Som vikarie även adress (för att räkna ut avstånd till skolor), ämnen, tillgänglighet och ditt CV om du laddar upp det.",
+      "Vi sparar inte ditt utdrag ur belastningsregistret. Du visar upp originalet och vi noterar bara att det är kontrollerat och när.",
+      "Skolor och lärare: skolans namn, kontaktperson, kontaktuppgifter och adress.",
+      "Du måste vara 18 år eller äldre för att bli vikarie.",
     ],
   },
   {
-    title: "Varför vi sparar uppgifterna",
+    title: "Varför vi får spara dem",
     body: [
-      "Uppgifterna används för att matcha vikariebehov med vikarier: skolan publicerar ett behov, och godkända vikarier med rätt ämne får en notis. Din adress används bara för att räkna ut avståndet till skolan — aldrig för att visa var du bor för någon annan.",
-      "Ditt CV och ditt belastningsregisterutdrag delas bara med skolor du har anmält dig till eller blivit tilldelad ett uppdrag hos, och bara om du gett ditt samtycke.",
+      "Uppgifterna behövs för att tjänsten ska fungera — att matcha vikariebehov med vikarier (avtal, artikel 6.1 b i dataskyddsförordningen).",
+      "Användningsloggen sparas för att förbättra tjänsten (berättigat intresse, artikel 6.1 f). Den är pseudonymiserad och innehåller aldrig namn, mejl, telefonnummer eller postnummer.",
+      "Ditt CV delas bara med skolor du anmält dig till eller fått uppdrag hos, och bara om du har samtyckt. Samtycket kan du ta tillbaka genom att ta bort ditt CV.",
     ],
   },
   {
-    title: "Användningsloggen",
+    title: "Vem som får del av uppgifterna",
     body: [
-      "Vi loggar hur tjänsten används — till exempel när ett vikariebehov publiceras, öppnas och tillsätts — för att kunna förbättra matchningen och förstå vad skolor och vikarier behöver.",
-      "Loggen är pseudonymiserad: vikarier lagras som en kod som inte kan länkas tillbaka till dig av någon annan än systemet. Loggen innehåller aldrig namn, mejladresser, telefonnummer eller postnummer.",
+      "Skolor ser namn, kontaktuppgifter och ungefärligt avstånd för vikarier som anmält sig till deras uppdrag — aldrig din hemadress.",
+      "Uppgifterna lagras hos vår molnleverantör inom EU/EES. Postnummer och ort skickas till kartjänsten OpenStreetMap (Nominatim) för att räkna fram en ungefärlig position.",
+    ],
+  },
+  {
+    title: "Hur länge vi sparar dem",
+    body: [
+      "Kontouppgifter sparas så länge du har ett konto. Tar du bort kontot raderas profil, CV och kopplingar. Konton som inte använts på 24 månader raderas.",
+      "Användningsloggen raderas efter 12 månader.",
     ],
   },
   {
     title: "Dina rättigheter",
     body: [
-      "Du kan när som helst se och ändra dina uppgifter på din profilsida. Du kan ta bort ditt CV när du vill.",
-      "Vill du ta bort hela ditt konto och alla uppgifter vi har om dig, kontakta oss så raderar vi allt.",
+      "Du har rätt att få veta vilka uppgifter vi har om dig, få dem rättade eller raderade, invända mot behandlingen och få ut dem i ett läsbart format. Du ändrar det mesta själv på din profilsida — kontakta oss för resten.",
+      "Är du missnöjd med hur vi hanterar dina uppgifter kan du klaga hos Integritetsskyddsmyndigheten (IMY), imy.se.",
     ],
   },
   {
-    title: "Kontakt",
+    title: "Kakor",
     body: [
-      "Har du frågor om hur vi hanterar dina uppgifter? Kontakta [ERT NAMN] på [ER E-POST] eller [ERT TELEFONNUMMER].",
+      "Vi använder bara det som krävs för att du ska kunna vara inloggad. Inga spårnings- eller reklamkakor.",
     ],
   },
 ];
