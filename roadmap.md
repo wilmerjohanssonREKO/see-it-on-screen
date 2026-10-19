@@ -14,3 +14,4 @@
 - [x] CV-funktion: uppladdning med samtycke, behörighetsstyrd läsning via 60-sekunderslänkar
 - [x] Avstånd i matchningen: lat/lng, Haversine, kort varsel (<24h) inom 15 km (minst 3), "ca X km"-visning — verifierat i webbläsaren
 - [ ] Loggsystem för statistik: event_log (pseudonymiserad), assignment_metrics-vy, admin-flik "Data" med CSV-export och gallring — från uppladdad spec
+- [x] Ändra kort varsel till 2 timmar och avståndsradien till 10 km (i notify_matching)
