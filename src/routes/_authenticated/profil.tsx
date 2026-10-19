@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { saveProfileContact } from "@/lib/contact.functions";
+import { getCvSignedUrl } from "@/lib/cv.functions";
 import { contactShape, substituteContactSchema } from "@/lib/contact-schemas";
 import { z } from "zod";
 import { AddressFields } from "@/components/AddressFields";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Upload } from "lucide-react";
+import { FileText, Trash2, Upload } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { AppHeader } from "@/components/AppHeader";
@@ -50,6 +51,9 @@ function ProfilPage() {
   const [subjects, setSubjects] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [cvConsent, setCvConsent] = useState(false);
+  const [cvBusy, setCvBusy] = useState(false);
+  const getCvUrl = useServerFn(getCvSignedUrl);
 
   useEffect(() => {
     if (profile?.subjects) setSubjects(profile.subjects);
@@ -108,6 +112,72 @@ function ProfilPage() {
       toast.error("Uppladdningen misslyckades");
     }
     setUploading(false);
+  }
+
+  async function handleCvUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !userId) return;
+    if (file.type !== "application/pdf") {
+      toast.error("Endast PDF-filer är tillåtna");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Filen får vara max 5 MB");
+      return;
+    }
+    if (!profile?.cv_consent_at && !cvConsent) {
+      toast.error("Du måste samtycka innan du laddar upp ditt CV");
+      return;
+    }
+    setCvBusy(true);
+    const path = `${userId}/${Date.now()}-cv.pdf`;
+    const { error } = await supabase.storage.from("cvs").upload(path, file);
+    if (error) {
+      toast.error("Uppladdningen misslyckades");
+      setCvBusy(false);
+      return;
+    }
+    if (profile?.cv_file_path) {
+      await supabase.storage.from("cvs").remove([profile.cv_file_path]);
+    }
+    const { error: saveError } = await supabase
+      .from("profiles")
+      .update({
+        cv_file_path: path,
+        ...(profile?.cv_consent_at ? {} : { cv_consent_at: new Date().toISOString() }),
+      })
+      .eq("id", userId);
+    if (saveError) toast.error("CV:t laddades upp men kunde inte kopplas till profilen");
+    else toast.success("Ditt CV är uppladdat");
+    qc.invalidateQueries({ queryKey: ["profile"] });
+    setCvBusy(false);
+  }
+
+  async function handleCvRemove() {
+    if (!userId || !profile?.cv_file_path) return;
+    if (!window.confirm("Ta bort ditt CV?")) return;
+    setCvBusy(true);
+    await supabase.storage.from("cvs").remove([profile.cv_file_path]);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ cv_file_path: null, cv_consent_at: null })
+      .eq("id", userId);
+    if (error) toast.error("Kunde inte ta bort CV:t");
+    else toast.success("CV:t är borttaget");
+    setCvConsent(false);
+    qc.invalidateQueries({ queryKey: ["profile"] });
+    setCvBusy(false);
+  }
+
+  async function handleCvView() {
+    if (!userId) return;
+    try {
+      const { url } = await getCvUrl({ data: { substituteId: userId } });
+      window.open(url, "_blank", "noopener");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Kunde inte öppna CV:t");
+    }
   }
 
   if (isLoading || schoolLoading) {
@@ -270,6 +340,70 @@ function ProfilPage() {
                   {uploading ? "Laddar upp…" : "Ladda upp fil"}
                 </label>
               </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="mt-6 shadow-soft">
+          <CardHeader>
+            <CardTitle>Mitt CV</CardTitle>
+            <CardDescription>
+              Ladda upp ditt CV som PDF (max 5 MB). Endast du, REKO UF-teamet och skolor du
+              anmält dig till kan läsa det.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-3">
+            <p className="text-sm">
+              {profile?.cv_file_path ? (
+                <>
+                  <strong>CV uppladdat</strong>
+                  {profile.cv_consent_at ? " · samtycke givet" : ""}
+                </>
+              ) : (
+                "Inget CV uppladdat"
+              )}
+            </p>
+            {!profile?.cv_consent_at && (
+              <label className="flex items-start gap-2 text-sm">
+                <Checkbox
+                  checked={cvConsent}
+                  onCheckedChange={(v) => setCvConsent(v === true)}
+                />
+                Jag samtycker till att skolor jag anmäler mig till kan läsa mitt CV.
+              </label>
+            )}
+            <div className="flex flex-wrap gap-2">
+              <input
+                id="cvfile"
+                type="file"
+                accept="application/pdf"
+                className="hidden"
+                onChange={handleCvUpload}
+              />
+              <Button
+                asChild
+                variant="outline"
+                disabled={cvBusy || (!profile?.cv_consent_at && !cvConsent)}
+              >
+                <label htmlFor="cvfile" className="cursor-pointer">
+                  <Upload className="h-4 w-4" />
+                  {cvBusy
+                    ? "Laddar upp…"
+                    : profile?.cv_file_path
+                      ? "Ersätt CV"
+                      : "Ladda upp CV"}
+                </label>
+              </Button>
+              {profile?.cv_file_path && (
+                <>
+                  <Button size="default" variant="ghost" onClick={handleCvView}>
+                    <FileText className="h-4 w-4" /> Visa mitt CV
+                  </Button>
+                  <Button variant="ghost" onClick={handleCvRemove} disabled={cvBusy}>
+                    <Trash2 className="h-4 w-4" /> Ta bort
+                  </Button>
+                </>
+              )}
             </div>
           </CardContent>
         </Card>

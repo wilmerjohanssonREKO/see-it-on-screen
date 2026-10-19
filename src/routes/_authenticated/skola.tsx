@@ -1,8 +1,11 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Send } from "lucide-react";
+import { FileText, Send } from "lucide-react";
+
+import { getCvForAssignment } from "@/lib/cv-school.functions";
 
 import { supabase } from "@/integrations/supabase/client";
 import { AppHeader } from "@/components/AppHeader";
@@ -39,6 +42,26 @@ export const Route = createFileRoute("/_authenticated/skola")({
   }),
   component: SchoolPage,
 });
+
+function CvButton({ assignmentId }: { assignmentId: string }) {
+  const getCv = useServerFn(getCvForAssignment);
+  const { data } = useQuery({
+    queryKey: ["cv-for-assignment", assignmentId],
+    queryFn: async () => {
+      const { url } = await getCv({ data: { assignmentId } });
+      return url;
+    },
+    staleTime: 30_000,
+  });
+  if (!data) return null;
+  return (
+    <Button size="sm" variant="outline" asChild>
+      <a href={data} target="_blank" rel="noopener noreferrer">
+        <FileText className="h-4 w-4" /> Läs CV
+      </a>
+    </Button>
+  );
+}
 
 function SchoolPage() {
   const { schoolId } = Route.useRouteContext();
@@ -197,6 +220,9 @@ function SchoolPage() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
+                  {a.status === "filled" && a.substitute_name && (
+                    <CvButton assignmentId={a.id} />
+                  )}
                   {a.status === "filled" && a.substitute_name && (
                     <Button size="sm" variant="outline" onClick={() => decline(a.id)}>
                       Tacka nej

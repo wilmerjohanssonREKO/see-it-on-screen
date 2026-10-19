@@ -188,6 +188,8 @@ export type Database = {
           background_status: Database["public"]["Enums"]["background_status"]
           city: string | null
           created_at: string
+          cv_consent_at: string | null
+          cv_file_path: string | null
           email: string
           full_name: string
           graduation_year: number | null
@@ -205,6 +207,8 @@ export type Database = {
           background_status?: Database["public"]["Enums"]["background_status"]
           city?: string | null
           created_at?: string
+          cv_consent_at?: string | null
+          cv_file_path?: string | null
           email?: string
           full_name?: string
           graduation_year?: number | null
@@ -222,6 +226,8 @@ export type Database = {
           background_status?: Database["public"]["Enums"]["background_status"]
           city?: string | null
           created_at?: string
+          cv_consent_at?: string | null
+          cv_file_path?: string | null
           email?: string
           full_name?: string
           graduation_year?: number | null

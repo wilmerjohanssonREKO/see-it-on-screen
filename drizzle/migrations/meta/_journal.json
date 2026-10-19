@@ -43,6 +43,13 @@
       "when": 1792417278826,
       "tag": "0005_security_hardening",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792430325938,
+      "tag": "0006_cv_feature",
+      "breakpoints": true
     }
   ]
 }

@@ -3,10 +3,11 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { createSchoolLogin } from "@/lib/school-admin.functions";
 import { deleteUserCompletely } from "@/lib/user-admin.functions";
+import { getCvSignedUrl } from "@/lib/cv.functions";
 import { generateSchoolCode, listTeachers, removeTeacher } from "@/lib/teacher.functions";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Check, Plus, Send, Star, Trash2 } from "lucide-react";
+import { Check, FileText, Plus, Send, Star, Trash2 } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import type { TablesUpdate } from "@/integrations/supabase/types";
@@ -354,6 +355,7 @@ function AssignmentsTab() {
 
 function SubstitutesTab() {
   const deleteUser = useServerFn(deleteUserCompletely);
+  const getCvUrl = useServerFn(getCvSignedUrl);
   const qc = useQueryClient();
   const { data } = useQuery({
     queryKey: ["substitutes"],
@@ -396,6 +398,15 @@ function SubstitutesTab() {
     else window.open(data.signedUrl, "_blank", "noopener");
   }
 
+  async function openCv(substituteId: string) {
+    try {
+      const { url } = await getCvUrl({ data: { substituteId } });
+      window.open(url, "_blank", "noopener");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Kunde inte öppna CV:t");
+    }
+  }
+
   return (
     <div className="mt-4 grid gap-3">
       {data?.map((p) => (
@@ -413,6 +424,7 @@ function SubstitutesTab() {
                   {p.approved ? "Godkänd" : "Ej godkänd"}
                 </Badge>
                 <Badge variant="outline">{BACKGROUND_LABELS[p.background_status]}</Badge>
+                <Badge variant="outline">{p.cv_file_path ? "CV uppladdat" : "Inget CV"}</Badge>
               </div>
             </div>
             <p className="text-sm text-muted-foreground">
@@ -459,6 +471,11 @@ function SubstitutesTab() {
               {p.background_file_path && (
                 <Button size="sm" variant="ghost" onClick={() => openFile(p.background_file_path!)}>
                   Visa utdrag
+                </Button>
+              )}
+              {p.cv_file_path && (
+                <Button size="sm" variant="ghost" onClick={() => openCv(p.id)}>
+                  <FileText className="h-4 w-4" /> Visa CV
                 </Button>
               )}
               <Button size="sm" variant="destructive" onClick={() => deleteSubstitute(p.id)}>
