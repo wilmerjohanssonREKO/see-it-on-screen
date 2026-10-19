@@ -17,3 +17,4 @@
 
 - Share contact validation in `contact-schemas.ts`, persist contact edits through authenticated `contact.functions.ts`, and mirror essential checks in database triggers; legacy auth-created profiles stay valid until contact completion.
 - Home addresses are private profile details and must not be included in school-facing assignment reads.
+- Schools/teachers create, publish and decline assignments only via SECURITY DEFINER RPCs (create_and_publish_assignment, decline_substitute) guarded by can_manage_school(); they have no direct write policies on assignments, so they cannot reassign or alter claims.
