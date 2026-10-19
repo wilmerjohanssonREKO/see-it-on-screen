@@ -6,7 +6,7 @@ import { deleteUserCompletely } from "@/lib/user-admin.functions";
 import { generateSchoolCode, listTeachers, removeTeacher } from "@/lib/teacher.functions";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Check, Plus, Send, Star, Trash2, Beaker, Copy, Download } from "lucide-react";
+import { Check, Plus, Send, Star, Trash2 } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import type { TablesUpdate } from "@/integrations/supabase/types";
@@ -35,7 +35,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
       {
         name: "description",
         content:
-          "Lägg upp vikariebehov, godkänn vikarier, hantera skolkonton och sätt betyg i REKO UF:s adminpanel.",
+          "Lägg upp vikariebehov, godkänn vikarier, hantera skolkonton och lärare i REKO UF:s adminpanel.",
       },
       { property: "og:title", content: "Adminpanel — REKO UF" },
       { property: "og:description", content: "Intern översikt för REKO UF-teamet." },
@@ -76,14 +76,13 @@ function AdminPage() {
       <AppHeader />
       <main className="mx-auto max-w-5xl px-4 py-8">
         <h1 className="text-3xl font-bold">Adminpanel</h1>
-        <p className="mt-1 text-muted-foreground">Hantera behov, vikarier, skolor och betyg.</p>
+        <p className="mt-1 text-muted-foreground">Hantera behov, vikarier, skolor och lärare.</p>
         <Tabs defaultValue="behov" className="mt-6">
           <TabsList className="flex-wrap">
             <TabsTrigger value="behov">Vikariebehov</TabsTrigger>
             <TabsTrigger value="vikarier">Vikarier</TabsTrigger>
             <TabsTrigger value="skolor">Skolor</TabsTrigger>
             <TabsTrigger value="larare">Lärare</TabsTrigger>
-            <TabsTrigger value="testdata">Testdata</TabsTrigger>
             <TabsTrigger value="feedback">Feedback</TabsTrigger>
           </TabsList>
           <TabsContent value="behov">
@@ -97,9 +96,6 @@ function AdminPage() {
           </TabsContent>
           <TabsContent value="larare">
             <TeachersTab />
-          </TabsContent>
-          <TabsContent value="testdata">
-            <TestDataTab />
           </TabsContent>
           <TabsContent value="feedback">
             <FeedbackTab />
@@ -334,12 +330,6 @@ function AssignmentsTab() {
                       Öppna igen
                     </Button>
                   )}
-                  {a.assigned_substitute_id && (
-                    <RatingForm
-                      substituteId={a.assigned_substitute_id}
-                      assignmentId={a.id}
-                    />
-                  )}
                   <Button size="sm" variant="destructive" onClick={() => deleteAssignment(a.id)}>
                     <Trash2 className="h-4 w-4" /> Radera
                   </Button>
@@ -353,69 +343,6 @@ function AssignmentsTab() {
   );
 }
 
-function RatingForm({ substituteId, assignmentId }: { substituteId: string; assignmentId: string }) {
-  const [open, setOpen] = useState(false);
-  const [score, setScore] = useState("5");
-  const qc = useQueryClient();
-
-  async function save(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    const { error } = await supabase.from("ratings").insert({
-      substitute_id: substituteId,
-      assignment_id: assignmentId,
-      score: Number(score),
-      comment: String(fd.get("comment") ?? "").slice(0, 500) || null,
-    });
-    if (error) toast.error("Kunde inte spara betyget");
-    else {
-      toast.success("Betyg sparat");
-      setOpen(false);
-      qc.invalidateQueries({ queryKey: ["substitutes"] });
-    }
-  }
-
-  if (!open) {
-    return (
-      <Button size="sm" variant="accent" onClick={() => setOpen(true)}>
-        <Star className="h-4 w-4" /> Sätt betyg
-      </Button>
-    );
-  }
-
-  return (
-    <form className="flex w-full flex-wrap items-end gap-2" onSubmit={save}>
-      <div className="grid gap-1">
-        <Label className="text-xs">Betyg</Label>
-        <Select value={score} onValueChange={setScore}>
-          <SelectTrigger className="w-20">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {[1, 2, 3, 4, 5].map((n) => (
-              <SelectItem key={n} value={String(n)}>
-                {n}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="grid flex-1 gap-1">
-        <Label className="text-xs">Kommentar</Label>
-        <Input name="comment" maxLength={500} />
-      </div>
-      <Button size="sm" type="submit">
-        Spara
-      </Button>
-      <Button size="sm" type="button" variant="ghost" onClick={() => setOpen(false)}>
-        Avbryt
-      </Button>
-    </form>
-  );
-}
-
-/* ---------------- Skolförfrågningar ---------------- */
-
 /* ---------------- Vikarier ---------------- */
 
 function SubstitutesTab() {
@@ -424,25 +351,12 @@ function SubstitutesTab() {
   const { data } = useQuery({
     queryKey: ["substitutes"],
     queryFn: async () => {
-      const [profiles, ratings, assignments] = await Promise.all([
-        supabase.from("profiles").select("*").order("created_at", { ascending: false }),
-        supabase.from("ratings").select("substitute_id, score"),
-        supabase.from("assignments").select("assigned_substitute_id"),
-      ]);
-      if (profiles.error) throw profiles.error;
-      return (profiles.data ?? []).map((p) => {
-        const scores = (ratings.data ?? [])
-          .filter((r) => r.substitute_id === p.id)
-          .map((r) => r.score);
-        return {
-          ...p,
-          completed: (assignments.data ?? []).filter((a) => a.assigned_substitute_id === p.id)
-            .length,
-          average: scores.length
-            ? Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 10) / 10
-            : null,
-        };
-      });
+      const { data: profiles, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return profiles ?? [];
     },
   });
 
@@ -494,8 +408,7 @@ function SubstitutesTab() {
               </div>
             </div>
             <p className="text-sm text-muted-foreground">
-              {p.school_name ?? "—"} {p.graduation_year ? `· examen ${p.graduation_year}` : ""} ·{" "}
-              {p.completed} uppdrag · snittbetyg {p.average ?? "–"}
+              {p.school_name ?? "—"} {p.graduation_year ? `· examen ${p.graduation_year}` : ""}
             </p>
             <p className="text-sm">Ämnen: {p.subjects.join(", ") || "inga valda"}</p>
             {p.availability && (
@@ -628,220 +541,6 @@ function SchoolsTab() {
           </Card>
         ))}
       </div>
-    </div>
-  );
-}
-
-/* ---------------- Testdata & Utveckling ---------------- */
-
-function TestDataTab() {
-  const qc = useQueryClient();
-  const [loading, setLoading] = useState(false);
-  const [createdEmails, setCreatedEmails] = useState<string[]>([]);
-  const [showEmails, setShowEmails] = useState(false);
-
-  const testSchools = [
-    { name: "Donner Gymnasium", contact_person: "Anna Svensson", email: "anna@donner.se", phone: "070-123 45 67" },
-    { name: "Praktiska Gymnasiet", contact_person: "Bo Lundberg", email: "bo@praktiska.se", phone: "070-234 56 78" },
-    { name: "NTI Gymnasiet", contact_person: "Cecilia Bergman", email: "cecilia@nti.se", phone: "070-345 67 89" },
-  ];
-
-  const testSubstitutes = [
-    { name: "Erik Andersson", email: "erik.andersson@test.se", phone: "070-111 22 33", school: "Donner Gymnasium", year: 2020, subjects: ["Matematik", "Fysik"] },
-    { name: "Frida Bergström", email: "frida.bergstrom@test.se", phone: "070-222 33 44", school: "NTI Gymnasiet", year: 2021, subjects: ["Svenska", "Engelska"] },
-    { name: "Gustav Carlsson", email: "gustav.carlsson@test.se", phone: "070-333 44 55", school: "Praktiska Gymnasiet", year: 2019, subjects: ["Matematik", "Kemi"] },
-    { name: "Hanna Dahlberg", email: "hanna.dahlberg@test.se", phone: "070-444 55 66", school: "Donner Gymnasium", year: 2022, subjects: ["Historia", "Samhällskunskap"] },
-    { name: "Igor Eklund", email: "igor.eklund@test.se", phone: "070-555 66 77", school: "NTI Gymnasiet", year: 2020, subjects: ["Biologi", "Kemi"] },
-  ];
-
-  const testSchoolRequests = [
-    { school_name: "Sankt Erik Gymnasium", contact_person: "Lars Malmberg", contact_email: "lars@saintrik.se", contact_phone: "070-999 88 77", description: "Behöver 2 matematiklärare för ht24" },
-    { school_name: "Södermalms Gymnasium", contact_person: "Maja Nilsson", contact_email: "maja@sodermalmsgym.se", contact_phone: "070-888 77 66", description: "Kemlärare under försöksperiod" },
-  ];
-
-  async function createTestSchools() {
-    setLoading(true);
-    try {
-      for (const school of testSchools) {
-        const { error } = await supabase.from("schools").insert(school);
-        if (error) throw error;
-      }
-      toast.success(`${testSchools.length} testskolor tillagda`);
-      qc.invalidateQueries({ queryKey: ["schools"] });
-    } catch (err) {
-      toast.error("Kunde inte skapa testskolor");
-    }
-    setLoading(false);
-  }
-
-  async function createTestSubstitutes() {
-    setLoading(true);
-    const emails: string[] = [];
-    try {
-      for (const sub of testSubstitutes) {
-        // Skapa auth-konto
-        const { data: authData, error: authError } = await supabase.auth.signUp({
-          email: sub.email,
-          password: "TestPassword123!", // Test-lösenord (ändra vid produktion)
-        });
-        if (authError) throw authError;
-        if (authData.user) {
-          emails.push(sub.email);
-          // Uppdatera profil
-          const { error: profileError } = await supabase
-            .from("profiles")
-            .update({
-              full_name: sub.name,
-              phone: sub.phone,
-              school_name: sub.school,
-              graduation_year: sub.year,
-              subjects: sub.subjects,
-              approved: true,
-              background_status: "approved",
-              availability: "Flexibel",
-            })
-            .eq("id", authData.user.id);
-          if (profileError) throw profileError;
-        }
-      }
-      setCreatedEmails(emails);
-      toast.success(`${emails.length} testvikarier skapade`);
-      qc.invalidateQueries({ queryKey: ["substitutes"] });
-    } catch (err) {
-      toast.error("Kunde inte skapa testvikarier");
-    }
-    setLoading(false);
-  }
-
-  async function createTestRequests() {
-    setLoading(true);
-    try {
-      for (const req of testSchoolRequests) {
-        const { error } = await supabase.from("school_requests").insert({
-          ...req,
-          handled: false,
-        });
-        if (error) throw error;
-      }
-      toast.success(`${testSchoolRequests.length} testförfrågningar tillagda`);
-      qc.invalidateQueries({ queryKey: ["school-requests"] });
-    } catch (err) {
-      toast.error("Kunde inte skapa testförfrågningar");
-    }
-    setLoading(false);
-  }
-
-  async function clearAllData() {
-    if (!confirm("Radera ALLT (skolor, vikarier, behov, förfrågningar, betyg, notifikationer)? Denna åtgärd kan inte ångras.")) {
-      return;
-    }
-    setLoading(true);
-    try {
-      await supabase.from("notifications").delete().neq("id", "");
-      await supabase.from("ratings").delete().neq("id", "");
-      await supabase.from("assignments").delete().neq("id", "");
-      await supabase.from("school_requests").delete().neq("id", "");
-      await supabase.from("profiles").delete().neq("id", "");
-      await supabase.from("schools").delete().neq("id", "");
-      toast.success("All data raderad");
-      qc.invalidateQueries();
-      setCreatedEmails([]);
-    } catch (err) {
-      toast.error("Kunde inte radera data");
-    }
-    setLoading(false);
-  }
-
-  const downloadLoginCsv = () => {
-    const csvContent = [
-      ["Email", "Lösenord"],
-      ...testSubstitutes.map(sub => [sub.email, "TestPassword123!"])
-    ]
-      .map(row => row.map(cell => `"${cell}"`).join(","))
-      .join("\n");
-    
-    const element = document.createElement("a");
-    element.setAttribute("href", "data:text/csv;charset=utf-8," + encodeURIComponent(csvContent));
-    element.setAttribute("download", "test-accounts.csv");
-    element.style.display = "none";
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-  };
-
-  return (
-    <div className="mt-4 grid gap-6">
-      <Card className="border-blue-200 bg-blue-50 shadow-soft">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-blue-900">
-            <Beaker className="h-5 w-5" /> Testdata för utveckling
-          </CardTitle>
-          <CardDescription>Skapa testskolor, vikarier och förfrågningar för att utveckla och testa systemet.</CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Button onClick={createTestSchools} disabled={loading} variant="outline">
-              <Plus className="h-4 w-4" /> Skapa testskolor ({testSchools.length})
-            </Button>
-            <Button onClick={createTestSubstitutes} disabled={loading} variant="outline">
-              <Plus className="h-4 w-4" /> Skapa testvikarier ({testSubstitutes.length})
-            </Button>
-            <Button onClick={createTestRequests} disabled={loading} variant="outline">
-              <Plus className="h-4 w-4" /> Skapa testförfrågningar ({testSchoolRequests.length})
-            </Button>
-            <Button onClick={downloadLoginCsv} disabled={loading || testSubstitutes.length === 0} variant="outline">
-              <Download className="h-4 w-4" /> Ladda ned testinloggningar
-            </Button>
-          </div>
-
-          {createdEmails.length > 0 && (
-            <div className="rounded-lg border border-green-200 bg-green-50 p-4">
-              <div className="flex items-center justify-between gap-2">
-                <div>
-                  <p className="font-semibold text-green-900">{createdEmails.length} testvikarier skapade</p>
-                  <p className="text-sm text-green-700">Lösenord: <code className="bg-white px-2 py-1 rounded">TestPassword123!</code></p>
-                </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setShowEmails(!showEmails)}
-                  className="gap-2"
-                >
-                  <Copy className="h-4 w-4" />
-                  {showEmails ? "Dölj" : "Visa"} e-poster
-                </Button>
-              </div>
-              {showEmails && (
-                <div className="mt-3 space-y-1 bg-white p-3 rounded text-sm font-mono text-gray-700">
-                  {createdEmails.map(email => (
-                    <div key={email}>{email}</div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          <Button
-            onClick={clearAllData}
-            disabled={loading}
-            variant="destructive"
-            className="w-full"
-          >
-            <Trash2 className="h-4 w-4" /> Radera all testdata
-          </Button>
-
-          <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-            <p className="font-semibold mb-2">Testdata information:</p>
-            <ul className="space-y-1 text-xs">
-              <li>• <strong>Skolor:</strong> {testSchools.length} testskolor med kontaktuppgifter</li>
-              <li>• <strong>Vikarier:</strong> {testSubstitutes.length} testpersoner med olika ämnen</li>
-              <li>• <strong>Förfrågningar:</strong> {testSchoolRequests.length} testförfrågningar från skolor</li>
-              <li>• <strong>Lösenord:</strong> TestPassword123! för alla testvikarier</li>
-              <li>• <strong>Status:</strong> Testvikarier skapas redan godkända och med godkänd bakgrundskontroll</li>
-            </ul>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
