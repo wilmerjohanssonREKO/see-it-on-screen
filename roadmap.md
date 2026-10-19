@@ -10,4 +10,4 @@
 - [x] Add school/substitute addresses and require essential contact details; preserve existing accounts
 - [x] Security hardening + flow fixes from site review
 
-- [ ] Logo: vit REKO UF-text på blå bakgrund i sidhuvudet
+- [x] Logo: vit REKO UF-text på blå bakgrund i sidhuvudet
