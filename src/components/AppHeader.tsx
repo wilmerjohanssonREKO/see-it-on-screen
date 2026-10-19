@@ -6,8 +6,10 @@ import { useAuth, useIsAdmin, useMySchoolId } from "@/hooks/useAuth";
 
 export function Brand({ className = "" }: { className?: string }) {
   return (
-    <Link to="/" className={`flex items-center gap-2 font-display ${className}`}>
-      <span className="text-2xl font-bold tracking-tight text-primary">REKO UF</span>
+    <Link to="/" className={`inline-flex items-center ${className}`}>
+      <span className="rounded-xl bg-primary px-3.5 py-1.5 font-display text-lg font-extrabold tracking-tight text-primary-foreground shadow-soft">
+        REKO UF
+      </span>
     </Link>
   );
 }
