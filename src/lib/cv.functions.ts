@@ -38,26 +38,26 @@ export const getCvSignedUrl = createServerFn({ method: "POST" })
     if (!allowed) {
       const { data: mySchool } = await supabase.rpc("my_school_id");
       if (mySchool) {
-        const { data: related } = await supabase
+        // Permission check needs to see notifications of OTHER users, which
+        // RLS hides from school accounts — use the privileged client for
+        // this read-only existence check only.
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { data: match } = await supabaseAdmin
           .from("assignments")
-          .select("id")
+          .select("id, notifications!inner(id)")
           .eq("school_id", mySchool)
-          .or(`assigned_substitute_id.eq.${targetId}`);
-        // RLS already scopes what the caller can see; also check notifications
-        const { data: notified } = await supabase
-          .from("notifications")
-          .select("id")
-          .eq("substitute_id", targetId);
-        if ((related?.length ?? 0) > 0) allowed = true;
-        if (!allowed && (notified?.length ?? 0) > 0) {
-          // verify at least one notified assignment belongs to my school
-          const { data: mine } = await supabase
+          .eq("notifications.substitute_id", targetId)
+          .limit(1);
+        if ((match?.length ?? 0) > 0) {
+          allowed = true;
+        } else {
+          const { data: assigned } = await supabaseAdmin
             .from("assignments")
-            .select("id, notifications!inner(id)")
+            .select("id")
             .eq("school_id", mySchool)
-            .eq("notifications.substitute_id", targetId)
+            .eq("assigned_substitute_id", targetId)
             .limit(1);
-          allowed = (mine?.length ?? 0) > 0;
+          allowed = (assigned?.length ?? 0) > 0;
         }
       }
     }
