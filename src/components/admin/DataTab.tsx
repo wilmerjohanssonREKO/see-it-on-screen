@@ -18,7 +18,10 @@ function median(values: number[]): number | null {
   if (!values.length) return null;
   const sorted = [...values].sort((a, b) => a - b);
   const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+  const a = sorted[mid];
+  const b = sorted[mid - 1];
+  if (a === undefined) return null;
+  return sorted.length % 2 || b === undefined ? a : (b + a) / 2;
 }
 
 function fmtMinutes(min: number | null): string {
