@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { GraduationCap, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useAuth, useIsAdmin, useMySchoolId } from "@/hooks/useAuth";
@@ -7,10 +7,7 @@ import { useAuth, useIsAdmin, useMySchoolId } from "@/hooks/useAuth";
 export function Brand({ className = "" }: { className?: string }) {
   return (
     <Link to="/" className={`flex items-center gap-2 font-display ${className}`}>
-      <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground">
-        <GraduationCap className="h-5 w-5" />
-      </span>
-      <span className="text-lg font-bold tracking-tight">REKO UF</span>
+      <span className="text-2xl font-bold tracking-tight text-primary">REKO UF</span>
     </Link>
   );
 }
