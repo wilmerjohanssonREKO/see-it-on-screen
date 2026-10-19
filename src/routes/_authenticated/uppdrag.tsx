@@ -76,9 +76,11 @@ function UppdragPage() {
   // Log once per assignment that the substitute has seen it (server-side write).
   const loggedViews = useRef<Set<string>>(new Set());
   useEffect(() => {
+    console.log("[view-log] effect, rows:", rows?.length);
     for (const a of rows ?? []) {
       if (!loggedViews.current.has(a.id)) {
         loggedViews.current.add(a.id);
+        console.log("[view-log] logging view for", a.id);
         void supabase.rpc("log_assignment_view", { p_assignment_id: a.id });
       }
     }
