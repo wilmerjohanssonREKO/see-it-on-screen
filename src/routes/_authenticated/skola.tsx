@@ -76,36 +76,19 @@ function SchoolPage() {
       return;
     }
     setBusy(true);
-    const { data: a, error } = await supabase
-      .from("assignments")
-      .insert({
-        school_id: schoolId,
-        subject,
-        assignment_date: String(fd.get("date")),
-        start_time: String(fd.get("start")),
-        end_time: String(fd.get("end")),
-        compensation:
-          String(fd.get("compensation") ?? "")
-            .trim()
-            .slice(0, 120) || null,
-        description:
-          String(fd.get("description") ?? "")
-            .trim()
-            .slice(0, 1000) || null,
-      })
-      .select("id")
-      .single();
-    if (error || !a) {
-      setBusy(false);
-      toast.error("Kunde inte spara behovet");
-      return;
-    }
-    const { data: count, error: pErr } = await supabase.rpc("publish_assignment", {
-      p_assignment_id: a.id,
+    const { data: count, error } = await supabase.rpc("create_and_publish_assignment", {
+      p_subject: subject,
+      p_date: String(fd.get("date")),
+      p_start: String(fd.get("start")),
+      p_end: String(fd.get("end")),
+      p_compensation: String(fd.get("compensation") ?? ""),
+      p_description: String(fd.get("description") ?? ""),
     });
     setBusy(false);
-    if (pErr) {
-      toast.error("Sparat men kunde inte publiceras");
+    if (error) {
+      toast.error(
+        error.message.includes("Sluttiden") ? error.message : "Kunde inte publicera behovet. Försök igen.",
+      );
       return;
     }
     toast.success(`Publicerat! ${count ?? 0} vikarier har fått notis.`);
