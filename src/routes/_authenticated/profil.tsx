@@ -60,14 +60,24 @@ function ProfilPage() {
     const fd = new FormData(e.currentTarget);
     const year = String(fd.get("graduation_year") ?? "").trim();
     const raw = {
-      full_name: String(fd.get("full_name") ?? ""), email: String(fd.get("email") ?? ""),
-      phone: String(fd.get("phone") ?? ""), street_address: String(fd.get("street_address") ?? ""),
-      postal_code: String(fd.get("postal_code") ?? ""), city: String(fd.get("city") ?? ""),
-      school_name: String(fd.get("school_name") ?? ""), graduation_year: year ? Number(year) : null,
-      availability: String(fd.get("availability") ?? ""), subjects,
+      full_name: String(fd.get("full_name") ?? ""),
+      email: String(fd.get("email") ?? ""),
+      phone: String(fd.get("phone") ?? ""),
+      street_address: String(fd.get("street_address") ?? ""),
+      postal_code: String(fd.get("postal_code") ?? ""),
+      city: String(fd.get("city") ?? ""),
+      school_name: String(fd.get("school_name") ?? ""),
+      graduation_year: year ? Number(year) : null,
+      availability: String(fd.get("availability") ?? ""),
+      subjects,
     };
-    const parsed = schoolId ? z.object(contactShape).safeParse(raw) : substituteContactSchema.safeParse(raw);
-    if (!parsed.success) { toast.error(parsed.error.issues[0]?.message ?? "Kontrollera uppgifterna"); return; }
+    const parsed = schoolId
+      ? z.object(contactShape).safeParse(raw)
+      : substituteContactSchema.safeParse(raw);
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0]?.message ?? "Kontrollera uppgifterna");
+      return;
+    }
     setSaving(true);
     try {
       await saveContact({ data: parsed.data });
@@ -75,7 +85,9 @@ function ProfilPage() {
       qc.invalidateQueries({ queryKey: ["profile"] });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Kunde inte spara profilen");
-    } finally { setSaving(false); }
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -150,61 +162,76 @@ function ProfilPage() {
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="phone">Telefon</Label>
-                  <Input id="phone" name="phone" type="tel" defaultValue={profile?.phone ?? ""} required minLength={5} maxLength={40} pattern="[+0-9 ()-]+" />
+                  <Input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    defaultValue={profile?.phone ?? ""}
+                    required
+                    minLength={5}
+                    maxLength={40}
+                    pattern="[+0-9 ()-]+"
+                  />
                 </div>
                 {!schoolId && <AddressFields values={profile ?? undefined} />}
-                {!schoolId && <div className="grid gap-2">
-                  <Label htmlFor="school_name">Skola du gick på</Label>
-                  <Input
-                    id="school_name"
-                    name="school_name"
-                    defaultValue={profile?.school_name ?? ""}
-                    maxLength={120}
-                  />
-                </div>}
-                {!schoolId && <div className="grid gap-2">
-                  <Label htmlFor="graduation_year">Examensår</Label>
-                  <Input
-                    id="graduation_year"
-                    name="graduation_year"
-                    type="number"
-                    min={1970}
-                    max={2100}
-                    defaultValue={profile?.graduation_year ?? ""}
-                  />
-                </div>}
+                {!schoolId && (
+                  <div className="grid gap-2">
+                    <Label htmlFor="school_name">Skola du gick på</Label>
+                    <Input
+                      id="school_name"
+                      name="school_name"
+                      defaultValue={profile?.school_name ?? ""}
+                      maxLength={120}
+                    />
+                  </div>
+                )}
+                {!schoolId && (
+                  <div className="grid gap-2">
+                    <Label htmlFor="graduation_year">Examensår</Label>
+                    <Input
+                      id="graduation_year"
+                      name="graduation_year"
+                      type="number"
+                      min={1970}
+                      max={2100}
+                      defaultValue={profile?.graduation_year ?? ""}
+                    />
+                  </div>
+                )}
               </div>
 
-              {!schoolId && <div className="grid gap-2">
-                <Label>Ämnen du kan vikariera i</Label>
-                <div className="grid gap-2 rounded-lg border border-border p-4 sm:grid-cols-2">
-                  {SUBJECTS.map((s) => (
-                    <label key={s} className="flex items-center gap-2 text-sm">
-                      <Checkbox
-                        checked={subjects.includes(s)}
-                        onCheckedChange={(v) =>
-                          setSubjects((prev) =>
-                            v ? [...prev, s] : prev.filter((x) => x !== s),
-                          )
-                        }
-                      />
-                      {s}
-                    </label>
-                  ))}
+              {!schoolId && (
+                <div className="grid gap-2">
+                  <Label>Ämnen du kan vikariera i</Label>
+                  <div className="grid gap-2 rounded-lg border border-border p-4 sm:grid-cols-2">
+                    {SUBJECTS.map((s) => (
+                      <label key={s} className="flex items-center gap-2 text-sm">
+                        <Checkbox
+                          checked={subjects.includes(s)}
+                          onCheckedChange={(v) =>
+                            setSubjects((prev) => (v ? [...prev, s] : prev.filter((x) => x !== s)))
+                          }
+                        />
+                        {s}
+                      </label>
+                    ))}
+                  </div>
                 </div>
-              </div>}
+              )}
 
-              {!schoolId && <div className="grid gap-2">
-                <Label htmlFor="availability">Tillgänglighet</Label>
-                <Textarea
-                  id="availability"
-                  name="availability"
-                  rows={3}
-                  maxLength={1000}
-                  defaultValue={profile?.availability ?? ""}
-                  placeholder="T.ex. Mån–ons hela dagar, tors efter kl 13"
-                />
-              </div>}
+              {!schoolId && (
+                <div className="grid gap-2">
+                  <Label htmlFor="availability">Tillgänglighet</Label>
+                  <Textarea
+                    id="availability"
+                    name="availability"
+                    rows={3}
+                    maxLength={1000}
+                    defaultValue={profile?.availability ?? ""}
+                    placeholder="T.ex. Mån–ons hela dagar, tors efter kl 13"
+                  />
+                </div>
+              )}
 
               <Button type="submit" disabled={saving}>
                 {saving ? "Sparar…" : "Spara profil"}
@@ -222,8 +249,7 @@ function ProfilPage() {
           </CardHeader>
           <CardContent className="grid gap-3">
             <p className="text-sm">
-              Status:{" "}
-              <strong>{BACKGROUND_LABELS[profile?.background_status ?? "pending"]}</strong>
+              Status: <strong>{BACKGROUND_LABELS[profile?.background_status ?? "pending"]}</strong>
               {profile?.background_file_path ? " · fil uppladdad" : " · ingen fil uppladdad"}
             </p>
             <div>
@@ -243,7 +269,6 @@ function ProfilPage() {
             </div>
           </CardContent>
         </Card>
-
       </main>
     </div>
   );

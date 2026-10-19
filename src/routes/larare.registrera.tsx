@@ -12,13 +12,22 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const Route = createFileRoute("/larare/registrera")({
   head: () => ({
     meta: [
       { title: "Registrera lärarkonto — REKO UF" },
-      { name: "description", content: "Lärare skapar konto med sin skolas skolkod och publicerar vikariebehov direkt." },
+      {
+        name: "description",
+        content: "Lärare skapar konto med sin skolas skolkod och publicerar vikariebehov direkt.",
+      },
       { property: "og:title", content: "Registrera lärarkonto — REKO UF" },
       { property: "og:description", content: "Gå med i din skola på REKO UF med skolkoden." },
       { property: "og:type", content: "website" },
@@ -32,7 +41,10 @@ function TeacherSignup() {
   const navigate = useNavigate();
   const register = useServerFn(registerTeacher);
   const fetchSchools = useServerFn(listSchoolsForSignup);
-  const { data: schools } = useQuery({ queryKey: ["signup-schools"], queryFn: () => fetchSchools() });
+  const { data: schools } = useQuery({
+    queryKey: ["signup-schools"],
+    queryFn: () => fetchSchools(),
+  });
   const [schoolId, setSchoolId] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,21 +52,38 @@ function TeacherSignup() {
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
-    if (!schoolId) { setError("Välj skola"); return; }
+    if (!schoolId) {
+      setError("Välj skola");
+      return;
+    }
     const fd = new FormData(e.currentTarget);
     const email = String(fd.get("email") ?? "").trim();
     const password = String(fd.get("password") ?? "");
     const parsed = teacherRegistrationSchema.safeParse({
-      fullName: String(fd.get("full_name") ?? ""), email, password,
-      phone: String(fd.get("phone") ?? ""), schoolId, code: String(fd.get("code") ?? ""),
+      fullName: String(fd.get("full_name") ?? ""),
+      email,
+      password,
+      phone: String(fd.get("phone") ?? ""),
+      schoolId,
+      code: String(fd.get("code") ?? ""),
     });
-    if (!parsed.success) { setError(parsed.error.issues[0]?.message ?? "Kontrollera uppgifterna"); return; }
+    if (!parsed.success) {
+      setError(parsed.error.issues[0]?.message ?? "Kontrollera uppgifterna");
+      return;
+    }
     setBusy(true);
     try {
       const res = await register({ data: parsed.data });
-      if (!res.ok) { setError(res.error); return; }
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
       const { error: sErr } = await supabase.auth.signInWithPassword({ email, password });
-      if (sErr) { toast.success("Konto skapat! Logga in."); navigate({ to: "/auth" }); return; }
+      if (sErr) {
+        toast.success("Konto skapat! Logga in.");
+        navigate({ to: "/auth" });
+        return;
+      }
       toast.success("Välkommen! Du kan nu publicera vikariebehov.");
       navigate({ to: "/skola" });
     } catch {
@@ -74,24 +103,67 @@ function TeacherSignup() {
         </CardHeader>
         <CardContent>
           <form className="grid gap-4" onSubmit={submit}>
-            <div className="grid gap-2"><Label htmlFor="full_name">Namn</Label><Input id="full_name" name="full_name" required maxLength={120} /></div>
-            <div className="grid gap-2"><Label htmlFor="email">E-post</Label><Input id="email" name="email" type="email" required maxLength={255} /></div>
-            <div className="grid gap-2"><Label htmlFor="password">Lösenord</Label><Input id="password" name="password" type="password" required minLength={8} maxLength={72} /></div>
-            <div className="grid gap-2"><Label htmlFor="phone">Telefon</Label><Input id="phone" name="phone" type="tel" required minLength={5} maxLength={40} pattern="[+0-9 ()-]+" /></div>
+            <div className="grid gap-2">
+              <Label htmlFor="full_name">Namn</Label>
+              <Input id="full_name" name="full_name" required maxLength={120} />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="email">E-post</Label>
+              <Input id="email" name="email" type="email" required maxLength={255} />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="password">Lösenord</Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                required
+                minLength={8}
+                maxLength={72}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="phone">Telefon</Label>
+              <Input
+                id="phone"
+                name="phone"
+                type="tel"
+                required
+                minLength={5}
+                maxLength={40}
+                pattern="[+0-9 ()-]+"
+              />
+            </div>
             <div className="grid gap-2">
               <Label>Skola</Label>
               <Select value={schoolId} onValueChange={setSchoolId}>
-                <SelectTrigger><SelectValue placeholder="Välj skola" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Välj skola" />
+                </SelectTrigger>
                 <SelectContent>
-                  {schools?.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                  {schools?.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid gap-2"><Label htmlFor="code">Skolkod</Label><Input id="code" name="code" required maxLength={40} autoComplete="off" /></div>
-            {error && <p className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
-            <Button type="submit" disabled={busy}>{busy ? "Skapar…" : "Skapa lärarkonto"}</Button>
+            <div className="grid gap-2">
+              <Label htmlFor="code">Skolkod</Label>
+              <Input id="code" name="code" required maxLength={40} autoComplete="off" />
+            </div>
+            {error && (
+              <p className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</p>
+            )}
+            <Button type="submit" disabled={busy}>
+              {busy ? "Skapar…" : "Skapa lärarkonto"}
+            </Button>
           </form>
-          <Link to="/auth" className="mt-4 block text-center text-sm text-muted-foreground hover:text-foreground">
+          <Link
+            to="/auth"
+            className="mt-4 block text-center text-sm text-muted-foreground hover:text-foreground"
+          >
             Har du redan ett konto? Logga in
           </Link>
         </CardContent>
