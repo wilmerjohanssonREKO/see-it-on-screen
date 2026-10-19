@@ -28,6 +28,10 @@ export const deleteUserCompletely = createServerFn({ method: "POST" })
     if (files?.length) {
       await db.storage.from("background-checks").remove(files.map((f) => `${id}/${f.name}`));
     }
+    const { data: cvFiles } = await db.storage.from("cvs").list(id);
+    if (cvFiles?.length) {
+      await db.storage.from("cvs").remove(cvFiles.map((f) => `${id}/${f.name}`));
+    }
 
     const { error: pErr } = await db.from("profiles").delete().eq("id", id);
     if (pErr) throw new Error(pErr.message);
