@@ -41,30 +41,20 @@ export function ConsentBanner({ userId }: { userId: string }) {
         <h2 className="text-lg font-bold text-foreground">
           Så hanterar vi dina uppgifter
         </h2>
-        <p className="mt-3 text-sm font-medium text-muted-foreground">
-          Vi sparar namn, kontaktuppgifter, adress (för avstånd till skolor),
-          ditt CV om du laddar upp det, samt en pseudonymiserad logg
-          över hur tjänsten används. Uppgifterna delas bara med skolor du
-          anmält dig till.
-        </p>
-        <p className="mt-2 text-sm font-medium text-muted-foreground">
-          Läs mer i{" "}
-          <a
-            href="/integritetspolicy"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-semibold text-primary underline underline-offset-2"
-          >
-            REKO UF:s integritetspolicy
-          </a>
-          .
-        </p>
+        <a
+          href="/integritetspolicy"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-3 text-sm font-semibold text-primary underline underline-offset-2"
+        >
+          Läs REKO UF:s integritetspolicy
+        </a>
         <Button
           className="mt-5 w-full"
           onClick={approve}
           disabled={saving}
         >
-          {saving ? "Sparar…" : "Jag har läst integritetspolicyn"}
+          {saving ? "Sparar…" : "Jag har läst och accepterar integritetspolicyn"}
         </Button>
       </div>
     </div>
