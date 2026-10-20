@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 /**
  * Visar en samtyckesruta för inloggade användare tills de godkänt att
@@ -32,20 +33,29 @@ export function ConsentBanner({ userId }: { userId: string }) {
     setSaving(true);
     const { error } = await supabase.rpc("set_profile_consent");
     setSaving(false);
-    if (!error) setNeedsConsent(false);
+    if (error) {
+      toast.error("Kunde inte spara. Försök igen.");
+      return;
+    }
+    setNeedsConsent(false);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="consent-title"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4"
+    >
       <div className="w-full max-w-md rounded-lg border bg-card p-6 shadow-lg">
-        <h2 className="text-lg font-bold text-foreground">
+        <h2 id="consent-title" className="text-lg font-bold text-foreground">
           Så hanterar vi dina uppgifter
         </h2>
         <a
           href="/integritetspolicy"
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-3 text-sm font-semibold text-primary underline underline-offset-2"
+          className="mt-3 inline-block text-sm font-semibold text-primary underline underline-offset-2"
         >
           Läs REKO UF:s integritetspolicy
         </a>
