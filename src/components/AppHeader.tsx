@@ -2,7 +2,8 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { useAuth, useIsAdmin, useMySchoolId } from "@/hooks/useAuth";
+import { useAuth, useIsAdmin, useMySchoolId, useProfile } from "@/hooks/useAuth";
+import { SubstituteAvatar } from "@/components/SubstituteAvatar";
 
 export function Brand({ className = "" }: { className?: string }) {
   return (
@@ -18,6 +19,7 @@ export function AppHeader() {
   const { session } = useAuth();
   const { data: isAdmin } = useIsAdmin(session?.user.id);
   const { data: schoolId } = useMySchoolId(session?.user.id);
+  const { data: profile } = useProfile(session?.user.id);
   const navigate = useNavigate();
 
   return (
@@ -72,6 +74,11 @@ export function AppHeader() {
                   activeProps={{ className: "bg-secondary text-foreground" }}
                 >
                   Admin
+                </Link>
+              )}
+              {!schoolId && !isAdmin && (
+                <Link to="/profil" aria-label="Min profil" className="ml-1">
+                  <SubstituteAvatar id={session.user.id} name={profile?.full_name} className="h-8 w-8 text-xs" />
                 </Link>
               )}
               <Button

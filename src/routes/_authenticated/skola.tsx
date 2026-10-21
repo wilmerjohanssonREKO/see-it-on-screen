@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { FileText, Send } from "lucide-react";
 
 import { getCvForAssignment } from "@/lib/cv-school.functions";
+import { SubstituteAvatar } from "@/components/SubstituteAvatar";
+import { RatingSummary, StarRatingForm } from "@/components/StarRating";
 
 import { supabase } from "@/integrations/supabase/client";
 import { AppHeader } from "@/components/AppHeader";
@@ -120,6 +122,20 @@ function SchoolPage() {
     qc.invalidateQueries({ queryKey: ["school-assignments"] });
   }
 
+  async function rate(id: string, score: number, comment: string) {
+    const { error } = await supabase.rpc("rate_substitute", {
+      p_assignment_id: id,
+      p_score: score,
+      p_comment: comment,
+    });
+    if (error) {
+      toast.error(error.message || "Kunde inte spara betyget");
+      return;
+    }
+    toast.success("Tack för ditt betyg!");
+    qc.invalidateQueries({ queryKey: ["school-assignments"] });
+  }
+
   async function decline(id: string) {
     if (!window.confirm("Tacka nej till vikarien? Uppdraget blir öppet igen för andra vikarier."))
       return;
@@ -207,7 +223,10 @@ function SchoolPage() {
           {list?.length === 0 && <p className="text-muted-foreground">Inga behov än.</p>}
           {list?.map((a) => (
             <Card key={a.id}>
-              <CardContent className="flex flex-wrap items-center justify-between gap-2 pt-6">
+              <CardContent className="grid gap-3 pt-6">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-3">
+                  {a.substitute_id && <SubstituteAvatar id={a.substitute_id} name={a.substitute_name} />}
                 <div>
                   <p className="font-semibold">
                     {a.subject} · {a.assignment_date}
@@ -215,15 +234,19 @@ function SchoolPage() {
                   <p className="text-sm text-muted-foreground">
                     {formatTime(a.start_time)}–{formatTime(a.end_time)}
                     {a.substitute_name
-                      ? ` · Vikarie: ${a.substitute_name}${a.substitute_phone ? ` (${a.substitute_phone})` : ""}${a.substitute_distance_km != null ? ` · ca ${Number(a.substitute_distance_km).toLocaleString("sv-SE")} km` : ""}`
+                      ? ` · Vikarie: ${a.substitute_name}${a.substitute_phone ? ` (${a.substitute_phone})` : ""}`
                       : ""}
                   </p>
+                  {a.substitute_id && (
+                    <RatingSummary avg={a.substitute_rating_avg} count={a.substitute_rating_count} />
+                  )}
+                </div>
                 </div>
                 <div className="flex items-center gap-2">
                   {a.status === "filled" && a.substitute_name && (
                     <CvButton assignmentId={a.id} />
                   )}
-                  {a.status === "filled" && a.substitute_name && (
+                  {a.status === "filled" && a.substitute_name && !a.completed && (
                     <Button size="sm" variant="outline" onClick={() => decline(a.id)}>
                       Tacka nej
                     </Button>
@@ -232,6 +255,11 @@ function SchoolPage() {
                     {STATUS_LABELS[a.status as keyof typeof STATUS_LABELS] ?? a.status}
                   </Badge>
                 </div>
+              </div>
+                {a.completed && !a.rated && (
+                  <StarRatingForm label="Betygsätt vikarien" onSubmit={(score, comment) => rate(a.id, score, comment)} />
+                )}
+                {a.completed && a.rated && <p className="text-sm text-muted-foreground">Ni har betygsatt vikarien.</p>}
               </CardContent>
             </Card>
           ))}

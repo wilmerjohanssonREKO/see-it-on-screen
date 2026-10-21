@@ -9,14 +9,11 @@ export type AssignmentMetric = {
   created_at: string;
   published_at: string;
   starts_at: string;
-  short_notice: boolean;
   notified_count: number;
   viewed_count: number;
   accepted_count: number;
   minutes_to_first_response: number | null;
   minutes_to_filled: number | null;
-  filled_distance_km: number | null;
-  avg_notified_distance_km: number | null;
   outcome: string;
   rating: number | null;
 };
@@ -63,23 +60,20 @@ export const exportMetricsCsv = createServerFn({ method: "GET" })
       m.created_at,
       m.published_at,
       m.starts_at,
-      m.short_notice ? "ja" : "nej",
       m.notified_count,
       m.viewed_count,
       m.accepted_count,
       m.minutes_to_first_response,
       m.minutes_to_filled,
-      m.filled_distance_km,
-      m.avg_notified_distance_km,
       m.outcome,
       m.rating,
     ]);
     return toCsv(
       [
         "uppdrag_id", "amne", "skola", "skapad", "publicerad", "startar",
-        "kort_varsel", "notifierade", "oppnat", "tackat_ja",
+        "notifierade", "oppnat", "tackat_ja",
         "minuter_till_forsta_svar", "minuter_till_tillsatt",
-        "avstand_tillsatt_km", "snittavstand_notifierade_km", "utfall", "betyg",
+        "utfall", "betyg",
       ],
       rows,
     );

@@ -19,3 +19,8 @@
 - [x] Ändra kort varsel till 2 timmar och avståndsradien till 10 km (i notify_matching)
 - [x] Samtyckesruta vid inloggning: profiles.consent_at + set_profile_consent RPC + ConsentBanner i _authenticated
 - [x] Uppdragssidan: kalender med mina/tillgängliga jobb + dagens datum
+
+- [ ] Förenkla matchning: alla godkända vikarier ser alla öppna annonser, ta bort avstånd/postnummer
+- [ ] Profilbild för vikarier (avatars-bucket, samtycke, signerade länkar)
+- [ ] Betyg åt båda håll (skola->vikarie i ratings, vikarie->skola i school_ratings)
+- [ ] Integritetspolicy /integritet + privacy_accepted_at/privacy_version (väntar på policytext och resten av meddelandet)

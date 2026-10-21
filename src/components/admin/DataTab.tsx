@@ -30,9 +30,6 @@ function fmtMinutes(min: number | null): string {
   return `${(min / 60).toLocaleString("sv-SE", { maximumFractionDigits: 1 })} h`;
 }
 
-function fmtKm(km: number | null): string {
-  return km === null ? "–" : `${Number(km).toLocaleString("sv-SE")} km`;
-}
 
 const OUTCOME_LABELS: Record<string, string> = {
   open: "Öppet",
@@ -75,26 +72,6 @@ export function DataTab() {
   const medFilled = median(
     filled.map((m) => m.minutes_to_filled).filter((v): v is number => v !== null),
   );
-  const avgFilledDistance =
-    filled.length && filled.some((m) => m.filled_distance_km !== null)
-      ? filled.reduce((sum, m) => sum + (m.filled_distance_km ?? 0), 0) /
-        filled.filter((m) => m.filled_distance_km !== null).length
-      : null;
-
-  const compare = (short: boolean) => {
-    const group = rows.filter((m) => m.short_notice === short);
-    const groupFilled = group.filter((m) => m.outcome === "filled");
-    return {
-      total: group.length,
-      fillRate: group.length ? Math.round((groupFilled.length / group.length) * 100) : null,
-      medFilled: median(
-        groupFilled.map((m) => m.minutes_to_filled).filter((v): v is number => v !== null),
-      ),
-    };
-  };
-  const shortStats = compare(true);
-  const normalStats = compare(false);
-
   const sorted = [...rows].sort((a, b) => {
     const va = a[sortKey];
     const vb = b[sortKey];
@@ -154,7 +131,7 @@ export function DataTab() {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Uppdrag totalt</CardDescription>
@@ -179,52 +156,7 @@ export function DataTab() {
             <CardTitle className="text-3xl">{fmtMinutes(medFilled)}</CardTitle>
           </CardHeader>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Snittavstånd (tillsatta)</CardDescription>
-            <CardTitle className="text-3xl">{fmtKm(avgFilledDistance)}</CardTitle>
-          </CardHeader>
-        </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Kort varsel mot vanligt varsel</CardTitle>
-          <CardDescription>
-            Kort varsel = uppdrag som publiceras mindre än 2 timmar före start.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b text-muted-foreground">
-                <th className="px-3 py-2 text-left font-semibold">Varsel</th>
-                <th className="px-3 py-2 text-left font-semibold">Uppdrag</th>
-                <th className="px-3 py-2 text-left font-semibold">Andel tillsatta</th>
-                <th className="px-3 py-2 text-left font-semibold">Mediantid till tillsatt</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="border-b">
-                <td className="px-3 py-2">Kort varsel (under 2 h)</td>
-                <td className="px-3 py-2">{shortStats.total}</td>
-                <td className="px-3 py-2">
-                  {shortStats.fillRate === null ? "–" : `${shortStats.fillRate} %`}
-                </td>
-                <td className="px-3 py-2">{fmtMinutes(shortStats.medFilled)}</td>
-              </tr>
-              <tr>
-                <td className="px-3 py-2">Vanligt varsel</td>
-                <td className="px-3 py-2">{normalStats.total}</td>
-                <td className="px-3 py-2">
-                  {normalStats.fillRate === null ? "–" : `${normalStats.fillRate} %`}
-                </td>
-                <td className="px-3 py-2">{fmtMinutes(normalStats.medFilled)}</td>
-              </tr>
-            </tbody>
-          </table>
-        </CardContent>
-      </Card>
 
       <Card>
         <CardHeader>
@@ -242,7 +174,6 @@ export function DataTab() {
                 <th className="px-3 py-2 text-left font-semibold">Öppnat</th>
                 <th className="px-3 py-2 text-left font-semibold">Tackat ja</th>
                 <SortTh label="Tid till tillsatt" k="minutes_to_filled" />
-                <th className="px-3 py-2 text-left font-semibold">Avstånd</th>
                 <SortTh label="Utfall" k="outcome" />
               </tr>
             </thead>
@@ -251,7 +182,6 @@ export function DataTab() {
                 <tr key={m.assignment_id} className="border-b last:border-0">
                   <td className="px-3 py-2">
                     {new Date(m.published_at).toLocaleDateString("sv-SE")}
-                    {m.short_notice ? " · kort" : ""}
                   </td>
                   <td className="px-3 py-2">{m.subject}</td>
                   <td className="px-3 py-2">{m.school_name}</td>
@@ -259,13 +189,12 @@ export function DataTab() {
                   <td className="px-3 py-2">{m.viewed_count}</td>
                   <td className="px-3 py-2">{m.accepted_count}</td>
                   <td className="px-3 py-2">{fmtMinutes(m.minutes_to_filled)}</td>
-                  <td className="px-3 py-2">{fmtKm(m.filled_distance_km)}</td>
                   <td className="px-3 py-2">{OUTCOME_LABELS[m.outcome] ?? m.outcome}</td>
                 </tr>
               ))}
               {!sorted.length && (
                 <tr>
-                  <td className="px-3 py-6 text-center text-muted-foreground" colSpan={9}>
+                  <td className="px-3 py-6 text-center text-muted-foreground" colSpan={8}>
                     Inga uppdrag ännu — statistiken fylls på allt eftersom.
                   </td>
                 </tr>

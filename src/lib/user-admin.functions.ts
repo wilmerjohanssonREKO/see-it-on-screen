@@ -20,6 +20,7 @@ export const deleteUserCompletely = createServerFn({ method: "POST" })
     await db.from("assignments").update({ assigned_substitute_id: null }).eq("assigned_substitute_id", id);
     await db.from("notifications").delete().eq("substitute_id", id);
     await db.from("ratings").delete().eq("substitute_id", id);
+    await db.from("school_ratings").delete().eq("substitute_id", id);
     await db.from("feedback").delete().eq("user_id", id);
     await db.from("school_members").delete().eq("user_id", id);
     await db.from("user_roles").delete().eq("user_id", id);
@@ -31,6 +32,11 @@ export const deleteUserCompletely = createServerFn({ method: "POST" })
     const { data: cvFiles } = await db.storage.from("cvs").list(id);
     if (cvFiles?.length) {
       await db.storage.from("cvs").remove(cvFiles.map((f) => `${id}/${f.name}`));
+    }
+
+    const { data: avatarFiles } = await db.storage.from("avatars").list(id);
+    if (avatarFiles?.length) {
+      await db.storage.from("avatars").remove(avatarFiles.map((f) => `${id}/${f.name}`));
     }
 
     const { error: pErr } = await db.from("profiles").delete().eq("id", id);
