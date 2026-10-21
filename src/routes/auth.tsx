@@ -55,6 +55,7 @@ function AuthPage() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!e.currentTarget.reportValidity()) return;
     const fd = new FormData(e.currentTarget);
     const fullName = String(fd.get("full_name") ?? "").trim();
     const parsed = schema.safeParse({

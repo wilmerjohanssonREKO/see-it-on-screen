@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { isOwnedPrivatePath } from "./private-files";
 
 /**
  * For the school page: returns a 60-second signed URL for the CV of the
@@ -33,6 +34,7 @@ export const getCvForAssignment = createServerFn({ method: "POST" })
       .eq("id", assignment.assigned_substitute_id)
       .maybeSingle();
     if (!profile?.cv_file_path || !profile.cv_consent_at) return { url: null };
+    if (!isOwnedPrivatePath(profile.cv_file_path, assignment.assigned_substitute_id)) return { url: null };
 
     const { data: signed, error } = await supabaseAdmin.storage
       .from("cvs")

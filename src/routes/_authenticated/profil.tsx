@@ -90,7 +90,6 @@ function ProfilPage() {
       setAvatarBusy(false);
       return;
     }
-    if (profile?.avatar_path) await supabase.storage.from("avatars").remove([profile.avatar_path]);
     const { error: saveError } = await supabase
       .from("profiles")
       .update({
@@ -98,8 +97,13 @@ function ProfilPage() {
         ...(profile?.avatar_consent_at ? {} : { avatar_consent_at: new Date().toISOString() }),
       })
       .eq("id", userId);
-    if (saveError) toast.error("Bilden laddades upp men kunde inte kopplas till profilen");
-    else toast.success("Profilbilden är sparad");
+    if (saveError) {
+      await supabase.storage.from("avatars").remove([path]);
+      toast.error("Bilden laddades upp men kunde inte kopplas till profilen");
+    } else {
+      if (profile?.avatar_path) await supabase.storage.from("avatars").remove([profile.avatar_path]);
+      toast.success("Profilbilden är sparad");
+    }
     qc.invalidateQueries({ queryKey: ["profile"] });
     qc.invalidateQueries({ queryKey: ["avatar", userId] });
     setAvatarBusy(false);
@@ -109,7 +113,12 @@ function ProfilPage() {
     if (!userId || !profile?.avatar_path) return;
     if (!window.confirm("Ta bort din profilbild?")) return;
     setAvatarBusy(true);
-    await supabase.storage.from("avatars").remove([profile.avatar_path]);
+    const { error: removeError } = await supabase.storage.from("avatars").remove([profile.avatar_path]);
+    if (removeError) {
+      toast.error("Kunde inte ta bort bilden");
+      setAvatarBusy(false);
+      return;
+    }
     const { error } = await supabase
       .from("profiles")
       .update({ avatar_path: null, avatar_consent_at: null })
@@ -182,9 +191,6 @@ function ProfilPage() {
       setCvBusy(false);
       return;
     }
-    if (profile?.cv_file_path) {
-      await supabase.storage.from("cvs").remove([profile.cv_file_path]);
-    }
     const { error: saveError } = await supabase
       .from("profiles")
       .update({
@@ -192,8 +198,13 @@ function ProfilPage() {
         ...(profile?.cv_consent_at ? {} : { cv_consent_at: new Date().toISOString() }),
       })
       .eq("id", userId);
-    if (saveError) toast.error("CV:t laddades upp men kunde inte kopplas till profilen");
-    else toast.success("Ditt CV är uppladdat");
+    if (saveError) {
+      await supabase.storage.from("cvs").remove([path]);
+      toast.error("CV:t laddades upp men kunde inte kopplas till profilen");
+    } else {
+      if (profile?.cv_file_path) await supabase.storage.from("cvs").remove([profile.cv_file_path]);
+      toast.success("Ditt CV är uppladdat");
+    }
     qc.invalidateQueries({ queryKey: ["profile"] });
     setCvBusy(false);
   }
@@ -202,7 +213,12 @@ function ProfilPage() {
     if (!userId || !profile?.cv_file_path) return;
     if (!window.confirm("Ta bort ditt CV?")) return;
     setCvBusy(true);
-    await supabase.storage.from("cvs").remove([profile.cv_file_path]);
+    const { error: removeError } = await supabase.storage.from("cvs").remove([profile.cv_file_path]);
+    if (removeError) {
+      toast.error("Kunde inte ta bort CV:t");
+      setCvBusy(false);
+      return;
+    }
     const { error } = await supabase
       .from("profiles")
       .update({ cv_file_path: null, cv_consent_at: null })

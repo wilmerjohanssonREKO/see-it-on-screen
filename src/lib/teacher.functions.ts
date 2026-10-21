@@ -64,20 +64,21 @@ export const registerTeacher = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => teacherRegistrationSchema.parse(d))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const ip = (
+    const ipValue = (
       getRequestHeader("cf-connecting-ip") ??
       getRequestHeader("x-forwarded-for") ??
       "unknown"
     )
-      .split(",")[0]!
-      .trim();
+      .split(",")[0]
+      ?.trim();
+    const ip = ipValue && /^[0-9a-fA-F:.]+$/.test(ipValue) ? ipValue : "unknown";
     const since = new Date(Date.now() - WINDOW_MINUTES * 60_000).toISOString();
-    const { count } = await supabaseAdmin
-      .from("teacher_code_attempts")
-      .select("id", { count: "exact", head: true })
-      .gte("created_at", since)
-      .or(`email.eq.${data.email},ip.eq.${ip}`);
-    if ((count ?? 0) >= MAX_ATTEMPTS) {
+    const [emailAttempts, ipAttempts] = await Promise.all([
+      supabaseAdmin.from("teacher_code_attempts").select("id", { count: "exact", head: true }).gte("created_at", since).eq("email", data.email),
+      supabaseAdmin.from("teacher_code_attempts").select("id", { count: "exact", head: true }).gte("created_at", since).eq("ip", ip),
+    ]);
+    if (emailAttempts.error || ipAttempts.error) return { ok: false as const, error: "Kunde inte kontrollera försöken. Försök igen senare." };
+    if ((emailAttempts.count ?? 0) >= MAX_ATTEMPTS || (ipAttempts.count ?? 0) >= MAX_ATTEMPTS) {
       return {
         ok: false as const,
         error: `För många felaktiga försök. Vänta ${WINDOW_MINUTES} minuter och försök igen.`,
@@ -91,15 +92,17 @@ export const registerTeacher = createServerFn({ method: "POST" })
       .maybeSingle();
     const valid = !!row && (await hashCode(data.code, row.salt)) === row.code_hash;
     if (!valid) {
-      await supabaseAdmin.from("teacher_code_attempts").insert({ email: data.email, ip });
+      const { error } = await supabaseAdmin.from("teacher_code_attempts").insert({ email: data.email, ip });
+      if (error) return { ok: false as const, error: "Kunde inte kontrollera försöken. Försök igen senare." };
       return { ok: false as const, error: "Fel skolkod. Kontrollera koden med din skola." };
     }
 
-    const { data: school } = await supabaseAdmin
+    const { data: school, error: schoolError } = await supabaseAdmin
       .from("schools")
       .select("name")
       .eq("id", data.schoolId)
       .maybeSingle();
+    if (schoolError || !school) return { ok: false as const, error: "Kunde inte hitta skolan." };
     const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
       email: data.email,
       password: data.password,

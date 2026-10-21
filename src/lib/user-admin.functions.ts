@@ -12,31 +12,30 @@ export const deleteUserCompletely = createServerFn({ method: "POST" })
 
     const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
     const id = data.userId;
+    async function checked(operation: PromiseLike<{ error: unknown }>) {
+      const { error } = await operation;
+      if (error) throw new Error("Kunde inte ta bort alla kontouppgifter. Försök igen.");
+    }
 
     // Free up assignments this person held, then remove everything linked to them
-    await db.from("assignments")
+    await checked(db.from("assignments")
       .update({ status: "open", assigned_substitute_id: null, assigned_at: null })
-      .eq("assigned_substitute_id", id).eq("status", "filled");
-    await db.from("assignments").update({ assigned_substitute_id: null }).eq("assigned_substitute_id", id);
-    await db.from("notifications").delete().eq("substitute_id", id);
-    await db.from("ratings").delete().eq("substitute_id", id);
-    await db.from("school_ratings").delete().eq("substitute_id", id);
-    await db.from("feedback").delete().eq("user_id", id);
-    await db.from("school_members").delete().eq("user_id", id);
-    await db.from("user_roles").delete().eq("user_id", id);
+      .eq("assigned_substitute_id", id).eq("status", "filled"));
+    await checked(db.from("assignments").update({ assigned_substitute_id: null }).eq("assigned_substitute_id", id));
+    await checked(db.from("notifications").delete().eq("substitute_id", id));
+    await checked(db.from("ratings").delete().eq("substitute_id", id));
+    await checked(db.from("school_ratings").delete().eq("substitute_id", id));
+    await checked(db.from("feedback").delete().eq("user_id", id));
+    await checked(db.from("school_members").delete().eq("user_id", id));
+    await checked(db.from("user_roles").delete().eq("user_id", id));
 
-    const { data: files } = await db.storage.from("background-checks").list(id);
-    if (files?.length) {
-      await db.storage.from("background-checks").remove(files.map((f) => `${id}/${f.name}`));
-    }
-    const { data: cvFiles } = await db.storage.from("cvs").list(id);
-    if (cvFiles?.length) {
-      await db.storage.from("cvs").remove(cvFiles.map((f) => `${id}/${f.name}`));
-    }
-
-    const { data: avatarFiles } = await db.storage.from("avatars").list(id);
-    if (avatarFiles?.length) {
-      await db.storage.from("avatars").remove(avatarFiles.map((f) => `${id}/${f.name}`));
+    for (const bucket of ["background-checks", "cvs", "avatars"]) {
+      while (true) {
+        const { data: files, error } = await db.storage.from(bucket).list(id, { limit: 100 });
+        if (error) throw new Error("Kunde inte läsa kontots filer. Försök igen.");
+        if (!files?.length) break;
+        await checked(db.storage.from(bucket).remove(files.map((f) => `${id}/${f.name}`)));
+      }
     }
 
     const { error: pErr } = await db.from("profiles").delete().eq("id", id);

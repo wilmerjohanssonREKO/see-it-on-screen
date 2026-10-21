@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { csvCell } from "./csv";
 
 export type AssignmentMetric = {
   assignment_id: string;
@@ -27,12 +28,6 @@ type EventLogRow = {
   substitute_ref: string | null;
   metadata: Record<string, unknown>;
 };
-
-function csvCell(value: unknown): string {
-  if (value === null || value === undefined) return "";
-  const s = typeof value === "object" ? JSON.stringify(value) : String(value);
-  return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-}
 
 function toCsv(headers: string[], rows: unknown[][]): string {
   const lines = [headers.join(";")];
