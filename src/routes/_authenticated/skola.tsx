@@ -57,10 +57,20 @@ function CvButton({ assignmentId }: { assignmentId: string }) {
   });
   if (!data) return null;
   return (
-    <Button size="sm" variant="outline" asChild>
-      <a href={data} target="_blank" rel="noopener noreferrer">
-        <FileText className="h-4 w-4" /> Läs CV
-      </a>
+    <Button size="sm" variant="outline" onClick={async () => {
+      const tab = window.open("about:blank", "_blank");
+      if (tab) tab.opener = null;
+      try {
+        const { url } = await getCv({ data: { assignmentId } });
+        if (!url) throw new Error("CV saknas");
+        if (tab) tab.location.href = url;
+        else window.open(url, "_blank", "noopener,noreferrer");
+      } catch {
+        tab?.close();
+        toast.error("Kunde inte öppna CV:t");
+      }
+    }}>
+      <FileText className="h-4 w-4" /> Läs CV
     </Button>
   );
 }

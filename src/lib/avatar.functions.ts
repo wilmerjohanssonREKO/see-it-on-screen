@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { isOwnedPrivatePath } from "./private-files";
 
 /**
  * Returns 5-minute signed URLs for substitute profile pictures.
@@ -29,7 +30,7 @@ export const getAvatarUrls = createServerFn({ method: "POST" })
       .in("id", allowed);
     for (const p of profiles ?? []) {
       const consentOk = p.id === context.userId || !!p.avatar_consent_at;
-      if (!p.avatar_path || !consentOk) {
+      if (!p.avatar_path || !consentOk || !isOwnedPrivatePath(p.avatar_path, p.id)) {
         result[p.id] = null;
         continue;
       }

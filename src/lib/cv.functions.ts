@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { isOwnedPrivatePath } from "./private-files";
 
 /**
  * Returns a 60-second signed URL for a substitute's CV.
@@ -18,16 +19,6 @@ export const getCvSignedUrl = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const targetId = data.substituteId;
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("cv_file_path, cv_consent_at")
-      .eq("id", targetId)
-      .maybeSingle();
-
-    if (!profile?.cv_file_path || !profile.cv_consent_at) {
-      throw new Error("Vikarien har inte laddat upp något CV");
-    }
-
     let allowed = targetId === userId;
 
     if (!allowed) {
@@ -36,35 +27,17 @@ export const getCvSignedUrl = createServerFn({ method: "POST" })
     }
 
     if (!allowed) {
-      const { data: mySchool } = await supabase.rpc("my_school_id");
-      if (mySchool) {
-        // Permission check needs to see notifications of OTHER users, which
-        // RLS hides from school accounts — use the privileged client for
-        // this read-only existence check only.
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { data: match } = await supabaseAdmin
-          .from("assignments")
-          .select("id, notifications!inner(id)")
-          .eq("school_id", mySchool)
-          .eq("notifications.substitute_id", targetId)
-          .limit(1);
-        if ((match?.length ?? 0) > 0) {
-          allowed = true;
-        } else {
-          const { data: assigned } = await supabaseAdmin
-            .from("assignments")
-            .select("id")
-            .eq("school_id", mySchool)
-            .eq("assigned_substitute_id", targetId)
-            .limit(1);
-          allowed = (assigned?.length ?? 0) > 0;
-        }
-      }
+      const { data: canView, error } = await supabase.rpc("can_view_substitute", { p_substitute: targetId });
+      allowed = !error && canView === true;
     }
 
     if (!allowed) throw new Error("Du har inte behörighet att läsa detta CV");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: profile } = await supabaseAdmin.from("profiles")
+      .select("cv_file_path, cv_consent_at").eq("id", targetId).maybeSingle();
+    if (!profile?.cv_file_path || !profile.cv_consent_at) throw new Error("Vikarien har inte laddat upp något CV");
+    if (!isOwnedPrivatePath(profile.cv_file_path, targetId)) throw new Error("Kunde inte öppna CV:t");
     const { data: signed, error } = await supabaseAdmin.storage
       .from("cvs")
       .createSignedUrl(profile.cv_file_path, 60);
