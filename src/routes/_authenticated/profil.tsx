@@ -4,11 +4,12 @@ import { saveProfileContact } from "@/lib/contact.functions";
 import { getCvSignedUrl } from "@/lib/cv.functions";
 import { contactShape, substituteContactSchema } from "@/lib/contact-schemas";
 import { z } from "zod";
-import { AddressFields } from "@/components/AddressFields";
 import { useEffect, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { FileText, Trash2, Upload } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { SubstituteAvatar } from "@/components/SubstituteAvatar";
+import { RatingSummary } from "@/components/StarRating";
 
 import { supabase } from "@/integrations/supabase/client";
 import { AppHeader } from "@/components/AppHeader";
@@ -53,6 +54,73 @@ function ProfilPage() {
   const [cvConsent, setCvConsent] = useState(false);
   const [cvBusy, setCvBusy] = useState(false);
   const getCvUrl = useServerFn(getCvSignedUrl);
+  const [avatarConsent, setAvatarConsent] = useState(false);
+  const [avatarBusy, setAvatarBusy] = useState(false);
+  const { data: ratingSummary } = useQuery({
+    queryKey: ["my-rating-summary", userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data } = await supabase.rpc("my_rating_summary");
+      return data?.[0] ?? null;
+    },
+  });
+
+  async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !userId) return;
+    const ext = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" }[file.type];
+    if (!ext) {
+      toast.error("Endast JPG, PNG eller WebP är tillåtna");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Bilden får vara max 2 MB");
+      return;
+    }
+    if (!profile?.avatar_consent_at && !avatarConsent) {
+      toast.error("Du måste samtycka innan du laddar upp en bild");
+      return;
+    }
+    setAvatarBusy(true);
+    const path = `${userId}/${Date.now()}-avatar.${ext}`;
+    const { error } = await supabase.storage.from("avatars").upload(path, file, { contentType: file.type });
+    if (error) {
+      toast.error("Uppladdningen misslyckades");
+      setAvatarBusy(false);
+      return;
+    }
+    if (profile?.avatar_path) await supabase.storage.from("avatars").remove([profile.avatar_path]);
+    const { error: saveError } = await supabase
+      .from("profiles")
+      .update({
+        avatar_path: path,
+        ...(profile?.avatar_consent_at ? {} : { avatar_consent_at: new Date().toISOString() }),
+      })
+      .eq("id", userId);
+    if (saveError) toast.error("Bilden laddades upp men kunde inte kopplas till profilen");
+    else toast.success("Profilbilden är sparad");
+    qc.invalidateQueries({ queryKey: ["profile"] });
+    qc.invalidateQueries({ queryKey: ["avatar", userId] });
+    setAvatarBusy(false);
+  }
+
+  async function handleAvatarRemove() {
+    if (!userId || !profile?.avatar_path) return;
+    if (!window.confirm("Ta bort din profilbild?")) return;
+    setAvatarBusy(true);
+    await supabase.storage.from("avatars").remove([profile.avatar_path]);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ avatar_path: null, avatar_consent_at: null })
+      .eq("id", userId);
+    if (error) toast.error("Kunde inte ta bort bilden");
+    else toast.success("Profilbilden är borttagen");
+    setAvatarConsent(false);
+    qc.invalidateQueries({ queryKey: ["profile"] });
+    qc.invalidateQueries({ queryKey: ["avatar", userId] });
+    setAvatarBusy(false);
+  }
 
   useEffect(() => {
     if (profile?.subjects) setSubjects(profile.subjects);
@@ -66,9 +134,6 @@ function ProfilPage() {
       full_name: String(fd.get("full_name") ?? ""),
       email: String(fd.get("email") ?? ""),
       phone: String(fd.get("phone") ?? ""),
-      street_address: String(fd.get("street_address") ?? ""),
-      postal_code: String(fd.get("postal_code") ?? ""),
-      city: String(fd.get("city") ?? ""),
       school_name: String(fd.get("school_name") ?? ""),
       graduation_year: year ? Number(year) : null,
       availability: String(fd.get("availability") ?? ""),
@@ -83,10 +148,8 @@ function ProfilPage() {
     }
     setSaving(true);
     try {
-      const result = await saveContact({ data: parsed.data });
+      await saveContact({ data: parsed.data });
       toast.success("Profilen är sparad");
-      if (result?.geoWarning)
-        toast.warning("Kunde inte hitta positionen för postnumret — avståndsmatchning fungerar inte för din adress ännu");
       qc.invalidateQueries({ queryKey: ["profile"] });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Kunde inte spara profilen");
@@ -175,7 +238,10 @@ function ProfilPage() {
       <AppHeader />
       <main className="mx-auto max-w-3xl px-4 py-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-3xl font-bold">Min profil</h1>
+          <div>
+            <h1 className="text-3xl font-bold">Min profil</h1>
+            {!schoolId && <RatingSummary avg={ratingSummary?.avg_score} count={ratingSummary?.rating_count} />}
+          </div>
           <div className="flex items-center gap-2">
             <Badge variant={profile?.approved ? "default" : "secondary"}>
               {profile?.approved ? "Godkänd vikarie" : "Väntar godkännande"}
@@ -189,7 +255,7 @@ function ProfilPage() {
         <Card className="mt-6 shadow-soft">
           <CardHeader>
             <CardTitle>Uppgifter</CardTitle>
-            <CardDescription>Vi använder dessa för att matcha dig mot uppdrag.</CardDescription>
+            <CardDescription>Ämnen och tillgänglighet är valfria och visas för skolor.</CardDescription>
           </CardHeader>
           <CardContent>
             <form className="grid gap-4" onSubmit={handleSave}>
@@ -228,7 +294,6 @@ function ProfilPage() {
                     pattern="[+0-9 ()-]+"
                   />
                 </div>
-                {!schoolId && <AddressFields values={profile ?? undefined} />}
                 {!schoolId && (
                   <div className="grid gap-2">
                     <Label htmlFor="school_name">Skola du gick på</Label>
@@ -310,6 +375,53 @@ function ProfilPage() {
             </p>
           </CardContent>
         </Card>
+
+        {!schoolId && (
+          <Card className="mt-6 shadow-soft">
+            <CardHeader>
+              <CardTitle>Profilbild</CardTitle>
+              <CardDescription>
+                JPG, PNG eller WebP, max 2 MB. Bilden visas rund. Endast du, REKO UF-teamet och skolor
+                du anmält dig till kan se den.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-3">
+              <div className="flex items-center gap-4">
+                <SubstituteAvatar id={userId} name={profile?.full_name} className="h-20 w-20 text-xl" />
+                <p className="text-sm">{profile?.avatar_path ? <strong>Bild uppladdad</strong> : "Ingen bild uppladdad"}</p>
+              </div>
+              {!profile?.avatar_consent_at && (
+                <label className="flex items-start gap-2 text-sm">
+                  <Checkbox checked={avatarConsent} onCheckedChange={(v) => setAvatarConsent(v === true)} />
+                  Jag samtycker till att skolor jag anmäler mig till kan se min bild.
+                </label>
+              )}
+              <div className="flex flex-wrap gap-2">
+                <input
+                  id="avatarfile"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={handleAvatarUpload}
+                />
+                <Button asChild variant="outline" disabled={avatarBusy || (!profile?.avatar_consent_at && !avatarConsent)}>
+                  <label
+                    htmlFor="avatarfile"
+                    className={`cursor-pointer ${avatarBusy || (!profile?.avatar_consent_at && !avatarConsent) ? "pointer-events-none opacity-50" : ""}`}
+                  >
+                    <Upload className="h-4 w-4" />
+                    {avatarBusy ? "Laddar upp…" : profile?.avatar_path ? "Byt bild" : "Ladda upp bild"}
+                  </label>
+                </Button>
+                {profile?.avatar_path && (
+                  <Button variant="ghost" onClick={handleAvatarRemove} disabled={avatarBusy}>
+                    <Trash2 className="h-4 w-4" /> Ta bort
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <Card className="mt-6 shadow-soft">
           <CardHeader>

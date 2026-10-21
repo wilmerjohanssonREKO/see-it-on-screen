@@ -246,6 +246,8 @@ export type Database = {
         Row: {
           approved: boolean
           availability: string | null
+          avatar_consent_at: string | null
+          avatar_path: string | null
           background_file_path: string | null
           background_status: Database["public"]["Enums"]["background_status"]
           city: string | null
@@ -268,6 +270,8 @@ export type Database = {
         Insert: {
           approved?: boolean
           availability?: string | null
+          avatar_consent_at?: string | null
+          avatar_path?: string | null
           background_file_path?: string | null
           background_status?: Database["public"]["Enums"]["background_status"]
           city?: string | null
@@ -290,6 +294,8 @@ export type Database = {
         Update: {
           approved?: boolean
           availability?: string | null
+          avatar_consent_at?: string | null
+          avatar_path?: string | null
           background_file_path?: string | null
           background_status?: Database["public"]["Enums"]["background_status"]
           city?: string | null
@@ -418,6 +424,58 @@ export type Database = {
           },
         ]
       }
+      school_ratings: {
+        Row: {
+          assignment_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          school_id: string
+          score: number
+          substitute_id: string
+        }
+        Insert: {
+          assignment_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          school_id: string
+          score: number
+          substitute_id: string
+        }
+        Update: {
+          assignment_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          school_id?: string
+          score?: number
+          substitute_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_ratings_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: true
+            referencedRelation: "assignment_metrics"
+            referencedColumns: ["assignment_id"]
+          },
+          {
+            foreignKeyName: "school_ratings_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: true
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_ratings_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       school_requests: {
         Row: {
           contact_email: string | null
@@ -538,9 +596,7 @@ export type Database = {
         Row: {
           accepted_count: number | null
           assignment_id: string | null
-          avg_notified_distance_km: number | null
           created_at: string | null
-          filled_distance_km: number | null
           minutes_to_filled: number | null
           minutes_to_first_response: number | null
           notified_count: number | null
@@ -549,7 +605,6 @@ export type Database = {
           rating: number | null
           school_id: string | null
           school_name: string | null
-          short_notice: boolean | null
           starts_at: string | null
           subject: string | null
           viewed_count: number | null
@@ -571,9 +626,7 @@ export type Database = {
         Returns: {
           accepted_count: number | null
           assignment_id: string | null
-          avg_notified_distance_km: number | null
           created_at: string | null
-          filled_distance_km: number | null
           minutes_to_filled: number | null
           minutes_to_first_response: number | null
           notified_count: number | null
@@ -582,7 +635,6 @@ export type Database = {
           rating: number | null
           school_id: string | null
           school_name: string | null
-          short_notice: boolean | null
           starts_at: string | null
           subject: string | null
           viewed_count: number | null
@@ -606,7 +658,12 @@ export type Database = {
           substitute_ref: string
         }[]
       }
+      assignment_completed: {
+        Args: { p_assignment_id: string }
+        Returns: boolean
+      }
       can_manage_school: { Args: { p_school: string }; Returns: boolean }
+      can_view_substitute: { Args: { p_substitute: string }; Returns: boolean }
       claim_assignment: { Args: { p_assignment_id: string }; Returns: string }
       claim_first_admin: { Args: never; Returns: boolean }
       create_and_publish_assignment: {
@@ -646,28 +703,69 @@ export type Database = {
         }
         Returns: undefined
       }
+      my_rating_summary: {
+        Args: never
+        Returns: {
+          avg_score: number
+          rating_count: number
+        }[]
+      }
       my_school_id: { Args: never; Returns: string }
       notify_matching: { Args: { p_assignment_id: string }; Returns: number }
       publish_assignment: { Args: { p_assignment_id: string }; Returns: number }
       purge_old_event_log: { Args: never; Returns: number }
+      rate_school: {
+        Args: { p_assignment_id: string; p_comment: string; p_score: number }
+        Returns: undefined
+      }
+      rate_substitute: {
+        Args: { p_assignment_id: string; p_comment: string; p_score: number }
+        Returns: undefined
+      }
       school_assignments: {
         Args: never
         Returns: {
           assignment_date: string
           compensation: string
+          completed: boolean
           created_at: string
           description: string
           end_time: string
           id: string
+          rated: boolean
           start_time: string
           status: Database["public"]["Enums"]["assignment_status"]
           subject: string
-          substitute_distance_km: number
+          substitute_id: string
           substitute_name: string
           substitute_phone: string
+          substitute_rating_avg: number
+          substitute_rating_count: number
         }[]
       }
       set_profile_consent: { Args: never; Returns: undefined }
+      substitute_assignments: {
+        Args: never
+        Returns: {
+          assigned_to_me: boolean
+          assignment_date: string
+          compensation: string
+          completed: boolean
+          description: string
+          end_time: string
+          id: string
+          rated: boolean
+          school_contact_person: string
+          school_email: string
+          school_name: string
+          school_phone: string
+          school_rating_avg: number
+          school_rating_count: number
+          start_time: string
+          status: Database["public"]["Enums"]["assignment_status"]
+          subject: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "substitute"

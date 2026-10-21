@@ -28,10 +28,9 @@ export const schoolContactSchema = z.object({
 });
 export const substituteContactSchema = z.object({
   ...contactShape,
-  ...addressShape,
   subjects: z
     .array(z.string().refine((s) => SUBJECTS.some((subject) => subject === s), "Välj ett giltigt ämne"))
-    .min(1, "Välj minst ett ämne"),
+    .default([]),
   school_name: z.string().trim().max(120),
   graduation_year: z.number().int().min(1970).max(2100).nullable(),
   availability: z.string().trim().max(1000),

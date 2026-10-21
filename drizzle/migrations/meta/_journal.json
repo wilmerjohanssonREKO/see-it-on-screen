@@ -85,6 +85,20 @@
       "when": 1792432966503,
       "tag": "0011_stop_storing_background_checks",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792569182040,
+      "tag": "0012_simplify_matching",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1792569348085,
+      "tag": "0013_ratings_both_ways_and_avatars",
+      "breakpoints": true
     }
   ]
 }

@@ -11,11 +11,11 @@ describe("Obligatoriska kontaktuppgifter", () => {
     expect(schoolContactSchema.safeParse(school).success).toBe(true);
     for (const field of Object.keys(school)) expect(schoolContactSchema.safeParse({ ...school, [field]: "" }).success).toBe(false);
   });
-  test("vikarier kräver adress, telefon och minst ett ämne", () => {
-    const profile = { ...contact, ...address, subjects: ["Svenska"], school_name: "", graduation_year: null, availability: "" };
+  test("vikarier kräver telefon men inte adress eller ämnen", () => {
+    const profile = { ...contact, subjects: ["Svenska"], school_name: "", graduation_year: null, availability: "" };
     expect(substituteContactSchema.safeParse(profile).success).toBe(true);
-    for (const field of [...Object.keys(contact), ...Object.keys(address)]) expect(substituteContactSchema.safeParse({ ...profile, [field]: "" }).success).toBe(false);
-    expect(substituteContactSchema.safeParse({ ...profile, subjects: [] }).success).toBe(false);
+    for (const field of Object.keys(contact)) expect(substituteContactSchema.safeParse({ ...profile, [field]: "" }).success).toBe(false);
+    expect(substituteContactSchema.safeParse({ ...profile, subjects: [] }).success).toBe(true);
   });
   test("lärare kräver giltig e-post och telefon utan hemadress", () => {
     const teacher = { fullName: contact.full_name, email: contact.email, phone: contact.phone, password: "testpassword123", schoolId: "11111111-1111-4111-8111-111111111111", code: "ABCDE12345" };

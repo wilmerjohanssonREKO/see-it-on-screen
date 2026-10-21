@@ -29,6 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SubstituteAvatar } from "@/components/SubstituteAvatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { BACKGROUND_LABELS, STATUS_LABELS, SUBJECTS, formatTime } from "@/lib/subjects";
@@ -88,6 +89,7 @@ function AdminPage() {
             <TabsTrigger value="vikarier">Vikarier</TabsTrigger>
             <TabsTrigger value="skolor">Skolor</TabsTrigger>
             <TabsTrigger value="larare">Lärare</TabsTrigger>
+            <TabsTrigger value="betyg">Betyg</TabsTrigger>
             <TabsTrigger value="feedback">Feedback</TabsTrigger>
             <TabsTrigger value="data">Data</TabsTrigger>
           </TabsList>
@@ -102,6 +104,9 @@ function AdminPage() {
           </TabsContent>
           <TabsContent value="larare">
             <TeachersTab />
+          </TabsContent>
+          <TabsContent value="betyg">
+            <RatingsTab />
           </TabsContent>
           <TabsContent value="feedback">
             <FeedbackTab />
@@ -410,11 +415,14 @@ function SubstitutesTab() {
         <Card key={p.id}>
           <CardContent className="grid gap-2 pt-6">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <div>
+              <div className="flex items-center gap-3">
+                <SubstituteAvatar id={p.id} name={p.full_name} />
+                <div>
                 <p className="font-semibold">{p.full_name || p.email}</p>
                 <p className="text-sm text-muted-foreground">
                   {p.email} {p.phone ? `· ${p.phone}` : ""}
                 </p>
+                </div>
               </div>
               <div className="flex flex-wrap gap-2">
                 <Badge variant={p.approved ? "default" : "secondary"}>
@@ -427,11 +435,6 @@ function SubstitutesTab() {
             <p className="text-sm text-muted-foreground">
               {p.school_name ?? "—"} {p.graduation_year ? `· examen ${p.graduation_year}` : ""}
             </p>
-            {p.street_address && (
-              <p className="text-sm text-muted-foreground">
-                {p.street_address}, {p.postal_code} {p.city}
-              </p>
-            )}
             <p className="text-sm">Ämnen: {p.subjects.join(", ") || "inga valda"}</p>
             {p.availability && (
               <p className="text-sm text-muted-foreground">Tillgänglighet: {p.availability}</p>
@@ -481,6 +484,91 @@ function SubstitutesTab() {
   );
 }
 
+/* ---------------- Betyg ---------------- */
+
+function RatingsTab() {
+  const qc = useQueryClient();
+  const { data } = useQuery({
+    queryKey: ["admin-ratings"],
+    queryFn: async () => {
+      const [subs, schools] = await Promise.all([
+        supabase
+          .from("ratings")
+          .select("id, score, comment, created_at, profiles(full_name), assignments(subject, assignment_date, schools(name))")
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("school_ratings")
+          .select("id, score, comment, created_at, schools(name), assignments(subject, assignment_date)")
+          .order("created_at", { ascending: false }),
+      ]);
+      return { subs: subs.data ?? [], schools: schools.data ?? [] };
+    },
+  });
+
+  async function remove(table: "ratings" | "school_ratings", id: string) {
+    if (!window.confirm("Ta bort omdömet?")) return;
+    const { error } = await supabase.from(table).delete().eq("id", id);
+    if (error) toast.error("Kunde inte ta bort omdömet");
+    else {
+      toast.success("Omdömet är borttaget");
+      qc.invalidateQueries({ queryKey: ["admin-ratings"] });
+    }
+  }
+
+  const Row = ({ title, sub, score, comment, onDelete }: { title: string; sub: string; score: number; comment: string | null; onDelete: () => void }) => (
+    <Card>
+      <CardContent className="flex flex-wrap items-start justify-between gap-2 pt-6">
+        <div>
+          <p className="font-semibold">{title}</p>
+          <p className="text-sm text-muted-foreground">{sub}</p>
+          <p className="mt-1 flex gap-0.5">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <Star key={n} className={`h-4 w-4 ${n <= score ? "fill-accent text-accent" : "text-muted-foreground"}`} />
+            ))}
+          </p>
+          {comment && <p className="mt-1 text-sm">{comment}</p>}
+        </div>
+        <Button size="sm" variant="ghost" onClick={onDelete}>
+          <Trash2 className="h-4 w-4" /> Ta bort
+        </Button>
+      </CardContent>
+    </Card>
+  );
+
+  return (
+    <div className="mt-4 grid gap-6">
+      <section className="grid gap-3">
+        <h2 className="text-xl font-semibold">Betyg på vikarier</h2>
+        {!data?.subs.length && <p className="text-muted-foreground">Inga betyg än.</p>}
+        {data?.subs.map((r) => (
+          <Row
+            key={r.id}
+            title={r.profiles?.full_name || "Vikarie"}
+            sub={`${r.assignments?.schools?.name ?? "—"} · ${r.assignments?.subject ?? ""} ${r.assignments?.assignment_date ?? ""}`}
+            score={r.score}
+            comment={r.comment}
+            onDelete={() => remove("ratings", r.id)}
+          />
+        ))}
+      </section>
+      <section className="grid gap-3">
+        <h2 className="text-xl font-semibold">Betyg på skolor</h2>
+        {!data?.schools.length && <p className="text-muted-foreground">Inga betyg än.</p>}
+        {data?.schools.map((r) => (
+          <Row
+            key={r.id}
+            title={r.schools?.name ?? "Skola"}
+            sub={`${r.assignments?.subject ?? ""} ${r.assignments?.assignment_date ?? ""}`}
+            score={r.score}
+            comment={r.comment}
+            onDelete={() => remove("school_ratings", r.id)}
+          />
+        ))}
+      </section>
+    </div>
+  );
+}
+
 /* ---------------- Skolor ---------------- */
 
 function SchoolsTab() {
@@ -509,10 +597,8 @@ function SchoolsTab() {
     }
     setSaving(true);
     try {
-      const result = await saveContact({ data: { ...parsed.data, id: editingId ?? undefined } });
+      await saveContact({ data: { ...parsed.data, id: editingId ?? undefined } });
       toast.success(editingId ? "Skoluppgifterna är uppdaterade" : "Skola tillagd");
-      if (result?.geoWarning)
-        toast.warning("Kunde inte hitta positionen för postnumret — avståndsmatchning fungerar inte för den här adressen ännu");
       form.reset();
       setEditingId(null);
       qc.invalidateQueries({ queryKey: ["schools"] });

@@ -14,6 +14,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { STATUS_LABELS, formatTime } from "@/lib/subjects";
+import { RatingSummary, StarRatingForm } from "@/components/StarRating";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/uppdrag")({
   beforeLoad: async () => {
@@ -25,7 +27,7 @@ export const Route = createFileRoute("/_authenticated/uppdrag")({
       { title: "Schema — REKO UF" },
       {
         name: "description",
-        content: "Se vikariebehov du matchats mot och tacka ja till uppdrag hos REKO UF.",
+        content: "Se alla öppna vikariebehov och tacka ja till uppdrag hos REKO UF.",
       },
       { property: "og:title", content: "Schema — REKO UF" },
       { property: "og:description", content: "Vikariebehov du kan tacka ja till." },
@@ -45,9 +47,15 @@ type AssignmentRow = {
   description: string | null;
   compensation: string | null;
   status: string;
-  assigned_substitute_id: string | null;
-  distance_km: number | null;
-  schools: { name: string; contact_person: string | null } | null;
+  assigned_to_me: boolean;
+  school_name: string;
+  school_contact_person: string | null;
+  school_phone: string | null;
+  school_email: string | null;
+  school_rating_avg: number | null;
+  school_rating_count: number;
+  completed: boolean;
+  rated: boolean;
 };
 
 function UppdragPage() {
@@ -60,19 +68,9 @@ function UppdragPage() {
     queryKey: ["my-assignments", userId],
     enabled: !!userId,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("notifications")
-        .select(
-          "id, distance_km, assignment:assignments(id, subject, assignment_date, start_time, end_time, description, compensation, status, assigned_substitute_id, schools(name, contact_person))",
-        )
-        .order("created_at", { ascending: false });
+      const { data, error } = await supabase.rpc("substitute_assignments");
       if (error) throw error;
-      return (data ?? [])
-        .map((r) => ({
-          ...(r.assignment as unknown as AssignmentRow),
-          distance_km: r.distance_km as number | null,
-        }))
-        .filter((a) => a?.id);
+      return (data ?? []) as AssignmentRow[];
     },
   });
 
@@ -104,25 +102,37 @@ function UppdragPage() {
     onError: () => toast.error("Något gick fel, försök igen"),
   });
 
+  async function rateSchool(id: string, score: number, comment: string) {
+    const { error } = await supabase.rpc("rate_school", { p_assignment_id: id, p_score: score, p_comment: comment });
+    if (error) {
+      toast.error(error.message || "Kunde inte spara betyget");
+      return;
+    }
+    toast.success("Tack för ditt betyg!");
+    qc.invalidateQueries({ queryKey: ["my-assignments"] });
+  }
+
   const [selected, setSelected] = useState<Date | undefined>();
   const toDate = (d: string) => new Date(`${d}T00:00:00`);
   const { mineDays, openDays } = useMemo(() => {
     const mine: Date[] = [];
     const open: Date[] = [];
     for (const a of rows ?? []) {
-      if (a.assigned_substitute_id === userId) mine.push(toDate(a.assignment_date));
+      if (a.assigned_to_me) mine.push(toDate(a.assignment_date));
       else if (a.status === "open") open.push(toDate(a.assignment_date));
     }
     return { mineDays: mine, openDays: open };
-  }, [rows, userId]);
+  }, [rows]);
+  const [subjectFilter, setSubjectFilter] = useState<string>("all");
+  const subjectsInList = useMemo(
+    () => Array.from(new Set((rows ?? []).map((a) => a.subject))).sort((x, y) => x.localeCompare(y, "sv")),
+    [rows],
+  );
   const selectedKey = selected ? format(selected, "yyyy-MM-dd") : null;
   const visible = (rows ?? [])
     .filter((a) => (selectedKey ? a.assignment_date === selectedKey : true))
-    .sort(
-      (a, b) =>
-        (a.assignment_date + a.start_time).localeCompare(b.assignment_date + b.start_time) ||
-        (a.distance_km ?? Infinity) - (b.distance_km ?? Infinity),
-    );
+    .filter((a) => subjectFilter === "all" || a.subject === subjectFilter)
+    .sort((a, b) => (a.assignment_date + a.start_time).localeCompare(b.assignment_date + b.start_time));
 
   const approved = profile?.approved && profile?.background_status === "approved";
   const firstName = profile?.full_name?.trim().split(/\s+/)[0];
@@ -173,6 +183,19 @@ function UppdragPage() {
         </Card>
 
         <div className="grid gap-4">
+          {subjectsInList.length > 1 && (
+            <Select value={subjectFilter} onValueChange={setSubjectFilter}>
+              <SelectTrigger className="w-full sm:w-64" aria-label="Filtrera på ämne">
+                <SelectValue placeholder="Alla ämnen" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Alla ämnen</SelectItem>
+                {subjectsInList.map((sub) => (
+                  <SelectItem key={sub} value={sub}>{sub}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
           {selected && (
             <div className="flex items-center justify-between gap-2 text-sm">
               <span className="text-muted-foreground">Visar {format(selected, "d MMMM", { locale: sv })}</span>
@@ -186,21 +209,21 @@ function UppdragPage() {
           {!isLoading && (rows?.length ?? 0) === 0 && (
             <Card>
               <CardContent className="py-10 text-center text-muted-foreground">
-                Inga förfrågningar än. Du får ett meddelande här när ett uppdrag matchar dina
-                ämnen.
+                Inga öppna uppdrag just nu.
               </CardContent>
             </Card>
           )}
           {visible.map((a) => {
-            const mine = a.assigned_substitute_id === userId;
+            const mine = a.assigned_to_me;
             return (
               <Card key={a.id} className="shadow-soft">
                 <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
                   <div>
                     <CardTitle className="text-lg">{a.subject}</CardTitle>
                     <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                      <MapPin className="h-4 w-4" /> {a.schools?.name ?? "Skola"}
+                      <MapPin className="h-4 w-4" /> {a.school_name}
                     </p>
+                    <RatingSummary avg={a.school_rating_avg} count={a.school_rating_count} />
                   </div>
                   <Badge variant={a.status === "open" ? "default" : "secondary"}>
                     {mine ? "Ditt uppdrag" : STATUS_LABELS[a.status]}
@@ -220,14 +243,19 @@ function UppdragPage() {
                         <Wallet className="h-4 w-4" /> {a.compensation}
                       </span>
                     )}
-                    {a.distance_km != null && (
-                      <span className="flex items-center gap-1">
-                        <MapPin className="h-4 w-4" /> ca{" "}
-                        {a.distance_km.toLocaleString("sv-SE")} km från skolan
-                      </span>
-                    )}
                   </div>
                   {a.description && <p className="text-sm">{a.description}</p>}
+                  {mine && (a.school_contact_person || a.school_phone || a.school_email) && (
+                    <p className="text-sm">
+                      Kontakt: {[a.school_contact_person, a.school_phone, a.school_email].filter(Boolean).join(" · ")}
+                    </p>
+                  )}
+                  {mine && a.completed && !a.rated && (
+                    <StarRatingForm label="Betygsätt skolan" onSubmit={(score, comment) => rateSchool(a.id, score, comment)} />
+                  )}
+                  {mine && a.completed && a.rated && (
+                    <p className="text-sm text-muted-foreground">Du har betygsatt skolan.</p>
+                  )}
                   {a.status === "open" ? (
                     <Button
                       className="w-full sm:w-auto"
