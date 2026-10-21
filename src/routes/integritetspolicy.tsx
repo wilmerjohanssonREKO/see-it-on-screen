@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppHeader } from "@/components/AppHeader";
+import { PublicFooter } from "@/components/PublicFooter";
 
 export const Route = createFileRoute("/integritetspolicy")({
   head: () => ({
@@ -71,9 +72,9 @@ const sections: { title: string; body: string[] }[] = [
 
 function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex min-h-screen flex-col bg-background">
       <AppHeader />
-      <main className="mx-auto max-w-3xl px-4 py-14 md:py-20">
+      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-14 md:py-20">
         <h1 className="text-4xl font-bold text-foreground">Integritetspolicy</h1>
         <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
           Här förklarar vi vilka uppgifter REKO UF sparar, varför vi sparar dem och vilka rättigheter du har.
@@ -93,6 +94,7 @@ function PrivacyPage() {
           ))}
         </div>
       </main>
+      <PublicFooter />
     </div>
   );
 }

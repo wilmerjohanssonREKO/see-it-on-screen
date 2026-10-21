@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Mail, Phone, UserRound } from "lucide-react";
 import { AppHeader } from "@/components/AppHeader";
+import { PublicFooter } from "@/components/PublicFooter";
 
 export const Route = createFileRoute("/kontakt")({
   head: () => ({
@@ -18,9 +19,9 @@ export const Route = createFileRoute("/kontakt")({
 
 function KontaktPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex min-h-screen flex-col bg-background">
       <AppHeader />
-      <main className="mx-auto max-w-3xl px-4 py-14 md:py-20">
+      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-14 md:py-20">
         <span className="inline-block rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground">För gymnasieskolor</span>
         <h1 className="mt-4 text-4xl font-bold text-foreground">Bli skolpartner</h1>
         <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground">Vill din skola använda REKO? Kontakta oss så bokar vi in ett möte</p>
@@ -40,6 +41,7 @@ function KontaktPage() {
           ))}
         </dl>
       </main>
+      <PublicFooter />
     </div>
   );
 }
