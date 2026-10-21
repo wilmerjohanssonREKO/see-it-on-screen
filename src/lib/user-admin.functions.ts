@@ -2,24 +2,6 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-export const provisionRequestedTestSubstitute = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { data: isAdmin, error: roleError } = await context.supabase.rpc("is_admin");
-    if (roleError || !isAdmin) throw new Error("Endast admin kan skapa testkontot");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const password = `Reko-${crypto.randomUUID()}!`;
-    const email = "vikarie.test.20261021@example.com";
-    const { data, error } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: { full_name: "Testvikarie REKO" },
-    });
-    if (error || !data.user) throw new Error("Kunde inte skapa testkontot");
-    return { email, password, userId: data.user.id };
-  });
-
 export const deleteUserCompletely = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ userId: z.string().uuid() }).parse(d))
