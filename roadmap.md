@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Samlad kvalitetsgenomgång: inventera befintliga funktioner, testa flöden och behörigheter, rätta tydliga buggar utan design- eller dataändringar, rapportera körda respektive lästa kontroller
+- [x] Samlad kvalitetsgenomgång: inventerat funktioner, kört skol-/vikarie-/betygs-/fil-/behörighetstester, rättat åtkomst/samtidighet/CSV/felhantering; kvarstående beslut och ej implementerat dokumenterat i kvalitetsrapport
 
 - [x] Skapa ett separat testvikariekonto och lämna verifierade inloggningsuppgifter till Wilmer
 - [x] Skapa REKO Testgymnasium med separata skol- och lärarinloggningar; båda verifierade i webbläsaren

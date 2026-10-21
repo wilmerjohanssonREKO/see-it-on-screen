@@ -52,6 +52,7 @@ function TeacherSignup() {
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!e.currentTarget.reportValidity()) return;
     setError(null);
     if (!schoolId) {
       setError("Välj skola");
