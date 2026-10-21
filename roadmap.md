@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Skapa ett separat testvikariekonto och lämna verifierade inloggningsuppgifter till Wilmer
+- [x] Skapa ett separat testvikariekonto och lämna verifierade inloggningsuppgifter till Wilmer
 
 - [x] Replace public school request form with a contact page and remove the admin request tab; preserve historical data and school accounts
 
