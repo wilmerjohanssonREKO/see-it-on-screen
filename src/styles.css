@@ -6,7 +6,7 @@
 
 /*
  * REKO UF design system.
- * Primär: terrakotta #A94D3A, text grafit #302D2B, bakgrund krämvit #F8F1E8. Accent: aprikos #F2B99A.
+ * Primär: terrakotta #A94D3A, text grafit #302D2B, bakgrund krämvit #F8F1E8. Accent: salviagrön #A8B99A, sparsam accent: korallorange #F06449.
  */
 
 @theme inline {
@@ -33,6 +33,7 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-coral: var(--coral);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-success: var(--success);
@@ -80,8 +81,9 @@
   --secondary-foreground: #302D2B;
   --muted: oklch(0.96 0.012 55);
   --muted-foreground: oklch(0.47 0.015 50);
-  --accent: #F2B99A;
+  --accent: #A8B99A;
   --accent-foreground: #302D2B;
+  --coral: #F06449;
   --destructive: oklch(0.58 0.22 25);
   --destructive-foreground: oklch(0.99 0.002 247);
   --success: oklch(0.6 0.14 155);
@@ -92,9 +94,9 @@
   --input: oklch(0.91 0.02 55);
   --ring: #A94D3A;
   --chart-1: #A94D3A;
-  --chart-2: oklch(0.822 0.158 79);
+  --chart-2: #A8B99A;
   --chart-3: oklch(0.6 0.14 155);
-  --chart-4: oklch(0.65 0.18 20);
+  --chart-4: #F06449;
   --chart-5: #A94D3A;
   --sidebar: oklch(1 0 0);
   --sidebar-foreground: #302D2B;
@@ -120,8 +122,9 @@
   --secondary-foreground: oklch(0.96 0.004 247);
   --muted: oklch(0.32 0.03 256);
   --muted-foreground: oklch(0.72 0.02 252);
-  --accent: oklch(0.822 0.158 79);
-  --accent-foreground: oklch(0.22 0.02 254);
+  --accent: #A8B99A;
+  --accent-foreground: #302D2B;
+  --coral: #F06449;
   --destructive: oklch(0.65 0.2 25);
   --destructive-foreground: oklch(0.98 0.002 247);
   --success: oklch(0.68 0.14 155);
@@ -132,9 +135,9 @@
   --input: oklch(1 0 0 / 16%);
   --ring: #A94D3A;
   --chart-1: #A94D3A;
-  --chart-2: oklch(0.822 0.158 79);
+  --chart-2: #A8B99A;
   --chart-3: oklch(0.68 0.14 155);
-  --chart-4: oklch(0.7 0.18 20);
+  --chart-4: #F06449;
   --chart-5: #A94D3A;
   --sidebar: oklch(0.27 0.025 256);
   --sidebar-foreground: oklch(0.96 0.004 247);
