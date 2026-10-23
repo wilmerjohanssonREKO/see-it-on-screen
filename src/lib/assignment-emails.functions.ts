@@ -12,7 +12,7 @@ import { sendTemplateEmail } from "@/lib/email-templates/send-email";
  */
 export const notifyAssignmentClaimed = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ assignmentId: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ assignmentId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 

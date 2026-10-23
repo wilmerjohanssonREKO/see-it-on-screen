@@ -9,7 +9,7 @@ export function Brand({ className = "" }: { className?: string }) {
   return (
     <Link to="/" className={`inline-flex items-center ${className}`}>
       <span className="rounded-xl bg-primary px-3.5 py-1.5 font-display text-lg font-extrabold tracking-tight text-primary-foreground shadow-soft">
-        REKO UF
+        REK<span className="text-accent">O</span> UF
       </span>
     </Link>
   );
