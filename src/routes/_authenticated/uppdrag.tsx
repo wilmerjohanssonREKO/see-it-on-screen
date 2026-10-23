@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { STATUS_LABELS, formatTime } from "@/lib/subjects";
 import { RatingSummary, StarRatingForm } from "@/components/StarRating";
+import { notifyAssignmentClaimed } from "@/lib/assignment-emails.functions";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/uppdrag")({
@@ -93,8 +94,12 @@ function UppdragPage() {
       if (error) throw error;
       return data as string;
     },
-    onSuccess: (result) => {
-      if (result === "claimed") toast.success("Du har fått uppdraget! Vi hör av oss till skolan.");
+    onSuccess: (result, assignmentId) => {
+      if (result === "claimed") {
+        toast.success("Du har fått uppdraget! Vi hör av oss till skolan.");
+        // Skicka bekräftelsemejl till vikarie och skola (server-side; fel här påverkar inte matchningen).
+        void notifyAssignmentClaimed({ data: { assignmentId } }).catch(() => {});
+      }
       else if (result === "already_filled") toast.error("Redan tillsatt");
       else toast.error("Din profil är inte godkänd ännu");
       qc.invalidateQueries({ queryKey: ["my-assignments"] });
