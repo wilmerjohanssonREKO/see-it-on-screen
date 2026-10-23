@@ -41,7 +41,8 @@ export const notifyAssignmentClaimed = createServerFn({ method: "POST" })
       endTime: assignment.end_time?.slice(0, 5) ?? undefined,
     };
 
-    const results: { substitute?: unknown; school?: unknown } = {};
+    type SendOutcome = { sent: boolean; reason?: string };
+    const results: { substitute?: SendOutcome; school?: SendOutcome } = {};
 
     if (substitute?.email) {
       try {
