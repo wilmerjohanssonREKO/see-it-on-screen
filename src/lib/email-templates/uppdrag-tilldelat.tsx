@@ -42,7 +42,7 @@ const Email = ({ name, schoolName, subject, date, startTime, endTime }: Props) =
 
 export const template = {
   component: Email,
-  subject: (d: Record<string, any>) => `Du har fått uppdraget hos ${d.schoolName ?? 'skolan'}`,
+  subject: (d: Record<string, any>) => `Du har fått uppdraget hos ${d['schoolName'] ?? 'skolan'}`,
   displayName: 'Uppdrag tilldelat (vikarie)',
   previewData: {
     name: 'Anna',

@@ -39,7 +39,7 @@ const Email = ({ schoolName, substituteName, subject, date, startTime, endTime }
 
 export const template = {
   component: Email,
-  subject: (d: Record<string, any>) => `En vikarie har tagit ert uppdrag (${d.subject ?? 'vikariebehov'})`,
+  subject: (d: Record<string, any>) => `En vikarie har tagit ert uppdrag (${d['subject'] ?? 'vikariebehov'})`,
   displayName: 'Vikarie tilldelad (skola)',
   previewData: {
     schoolName: 'Testgymnasiet',

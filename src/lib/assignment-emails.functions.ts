@@ -41,7 +41,7 @@ export const notifyAssignmentClaimed = createServerFn({ method: "POST" })
       endTime: assignment.end_time?.slice(0, 5) ?? undefined,
     };
 
-    const results: Record<string, unknown> = {};
+    const results: { substitute?: unknown; school?: unknown } = {};
 
     if (substitute?.email) {
       try {
