@@ -11,7 +11,7 @@ import { isOwnedPrivatePath } from "./private-files";
  */
 export const getAvatarUrls = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({ ids: z.array(z.string().uuid()).max(100) }).parse(d),
   )
   .handler(async ({ data, context }) => {

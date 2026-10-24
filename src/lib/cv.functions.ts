@@ -14,7 +14,7 @@ import { isOwnedPrivatePath } from "./private-files";
  */
 export const getCvSignedUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ substituteId: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ substituteId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const targetId = data.substituteId;
