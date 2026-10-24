@@ -7,7 +7,7 @@ import { getCvSignedUrl } from "@/lib/cv.functions";
 import { generateSchoolCode, listTeachers, removeTeacher } from "@/lib/teacher.functions";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Check, FileText, Plus, Send, Star, Trash2 } from "lucide-react";
+import { FileText, Plus, Send, Star, Trash2 } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import type { TablesUpdate } from "@/integrations/supabase/types";

@@ -9,7 +9,6 @@ import {
   exportMetricsCsv,
   exportEventLogCsv,
   purgeOldLogs,
-  type AssignmentMetric,
 } from "@/lib/stats.functions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

@@ -58,7 +58,6 @@ type FeedbackRow = {
 
 function FeedbackPage() {
   const { session } = useAuth();
-  const { data: profile } = useProfile(session?.user.id);
   const { data: schoolId } = useMySchoolId(session?.user.id);
   const queryClient = useQueryClient();
   const [category, setCategory] = useState("upplevelse");
