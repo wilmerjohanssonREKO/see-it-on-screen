@@ -11,7 +11,7 @@ const input = z.object({
 
 export const createSchoolLogin = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => input.parse(d))
+  .validator((d: unknown) => input.parse(d))
   .handler(async ({ data, context }) => {
     const { data: isAdmin } = await context.supabase.rpc("is_admin");
     if (!isAdmin) throw new Error("Endast admin kan skapa skolinlogg");

@@ -37,7 +37,7 @@ async function assertAdmin(supabase: { rpc: (fn: "is_admin") => PromiseLike<{ da
 
 export const generateSchoolCode = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ schoolId: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ schoolId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -61,7 +61,7 @@ export const listSchoolsForSignup = createServerFn({ method: "GET" }).handler(as
 });
 
 export const registerTeacher = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => teacherRegistrationSchema.parse(d))
+  .validator((d: unknown) => teacherRegistrationSchema.parse(d))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const ipValue = (
@@ -171,7 +171,7 @@ export const listTeachers = createServerFn({ method: "GET" })
 
 export const removeTeacher = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ userId: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ userId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

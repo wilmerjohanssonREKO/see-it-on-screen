@@ -5,7 +5,7 @@ import { contactShape, schoolContactSchema, substituteContactSchema } from "./co
 
 export const saveSchoolContact = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     schoolContactSchema.extend({ id: z.string().uuid().optional() }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -23,7 +23,7 @@ export const saveSchoolContact = createServerFn({ method: "POST" })
 
 export const saveProfileContact = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.record(z.unknown()).parse(d))
+  .validator((d: unknown) => z.record(z.unknown()).parse(d))
   .handler(async ({ data, context }) => {
     const { data: schoolId, error: schoolError } = await context.supabase.rpc("my_school_id");
     if (schoolError) throw new Error("Kunde inte kontrollera kontot");

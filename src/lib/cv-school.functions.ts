@@ -11,7 +11,7 @@ import { isOwnedPrivatePath } from "./private-files";
  */
 export const getCvForAssignment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ assignmentId: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ assignmentId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
 

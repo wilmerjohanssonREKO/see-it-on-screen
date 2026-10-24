@@ -9,7 +9,6 @@ import {
   exportMetricsCsv,
   exportEventLogCsv,
   purgeOldLogs,
-  type AssignmentMetric,
 } from "@/lib/stats.functions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,14 +29,14 @@ function fmtMinutes(min: number | null): string {
   return `${(min / 60).toLocaleString("sv-SE", { maximumFractionDigits: 1 })} h`;
 }
 
-
 const OUTCOME_LABELS: Record<string, string> = {
   open: "Öppet",
   filled: "Tillsatt",
   expired: "Utgånget",
 };
 
-type SortKey = "published_at" | "subject" | "school_name" | "notified_count" | "minutes_to_filled" | "outcome";
+type SortKey =
+  "published_at" | "subject" | "school_name" | "notified_count" | "minutes_to_filled" | "outcome";
 
 function downloadCsv(filename: string, csv: string) {
   const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" });
@@ -93,10 +92,7 @@ export function DataTab() {
     setBusy(true);
     try {
       const csv = kind === "metrics" ? await getMetricsCsv() : await getLogCsv();
-      downloadCsv(
-        kind === "metrics" ? "uppdragsstatistik.csv" : "handelselogg.csv",
-        csv,
-      );
+      downloadCsv(kind === "metrics" ? "uppdragsstatistik.csv" : "handelselogg.csv", csv);
     } catch {
       toast.error("Kunde inte exportera — bara admin kan exportera");
     } finally {
@@ -224,13 +220,13 @@ export function DataTab() {
             <p className="font-semibold text-foreground">Vad loggas och varför?</p>
             <p className="mt-1">
               För att förbättra matchningen loggar REKO UF händelser i tjänsten: när ett
-              vikariebehov skapas och publiceras, när en notis skickas (med avstånd i km och om
-              det var kort varsel), när en vikarie öppnar ett uppdrag, när någon tackar ja, när en
-              skola tackar nej till en vikarie, samt när ett uppdrag tillsätts eller går ut.
-              Loggen innehåller aldrig namn, e-post, telefonnummer eller postnummer. Vikarier
-              lagras som en pseudonym (en envägskryptering av användar-id:t) så att samma vikarie
-              kan räknas samman utan att kunna identifieras i exporterad data. Tidsstämplar sätts
-              av databasen. Loggdata äldre än 12 månader raderas. Denna text kan återanvändas i
+              vikariebehov skapas och publiceras, när en notis skickas (med avstånd i km och om det
+              var kort varsel), när en vikarie öppnar ett uppdrag, när någon tackar ja, när en skola
+              tackar nej till en vikarie, samt när ett uppdrag tillsätts eller går ut. Loggen
+              innehåller aldrig namn, e-post, telefonnummer eller postnummer. Vikarier lagras som en
+              pseudonym (en envägskryptering av användar-id:t) så att samma vikarie kan räknas
+              samman utan att kunna identifieras i exporterad data. Tidsstämplar sätts av databasen.
+              Loggdata äldre än 12 månader raderas. Denna text kan återanvändas i
               integritetspolicyn.
             </p>
           </div>
