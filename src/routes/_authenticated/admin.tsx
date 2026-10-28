@@ -9,6 +9,7 @@ import { RatingsTab } from "@/components/admin/RatingsTab";
 import { SchoolsTab } from "@/components/admin/SchoolsTab";
 import { FeedbackTab } from "@/components/admin/FeedbackTab";
 import { TeachersTab } from "@/components/admin/TeachersTab";
+import { SandboxTab } from "@/components/admin/SandboxTab";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -68,6 +69,7 @@ function AdminPage() {
             <TabsTrigger value="betyg">Betyg</TabsTrigger>
             <TabsTrigger value="feedback">Feedback</TabsTrigger>
             <TabsTrigger value="data">Data</TabsTrigger>
+            <TabsTrigger value="sandlada">Sandlåda</TabsTrigger>
           </TabsList>
           <TabsContent value="behov">
             <AssignmentsTab />
