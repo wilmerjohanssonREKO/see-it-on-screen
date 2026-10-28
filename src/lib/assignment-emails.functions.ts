@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { sendTemplateEmail } from "@/lib/email-templates/send-email";
+import { isSandbox } from "@/lib/sandbox";
 
 /**
  * Sends the two match emails after a substitute claims an assignment:
@@ -29,8 +30,8 @@ export const notifyAssignmentClaimed = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const [{ data: substitute }, { data: school }] = await Promise.all([
-      supabaseAdmin.from("profiles").select("full_name, email").eq("id", userId).maybeSingle(),
-      supabaseAdmin.from("schools").select("name, email").eq("id", assignment.school_id).maybeSingle(),
+      supabaseAdmin.from("profiles").select("full_name, email, is_test").eq("id", userId).maybeSingle(),
+      supabaseAdmin.from("schools").select("name, email, is_test").eq("id", assignment.school_id).maybeSingle(),
     ]);
 
     const details = {
@@ -43,6 +44,27 @@ export const notifyAssignmentClaimed = createServerFn({ method: "POST" })
 
     type SendOutcome = { sent: boolean; reason?: string };
     const results: { substitute?: SendOutcome; school?: SendOutcome } = {};
+
+    // Sandlådeläge: test-data never leaves the system — capture to the test inbox instead.
+    if (isSandbox(substitute?.is_test, school?.is_test)) {
+      const rows = [
+        substitute?.email && {
+          template: "uppdrag-tilldelat",
+          recipient: substitute.email,
+          assignment_id: assignment.id,
+          data: { name: substitute.full_name, ...details },
+        },
+        school?.email && {
+          template: "vikarie-tilldelad",
+          recipient: school.email,
+          assignment_id: assignment.id,
+          data: { substituteName: substitute?.full_name, ...details },
+        },
+      ].filter(Boolean) as { template: string; recipient: string; assignment_id: string; data: Record<string, unknown> }[];
+      if (rows.length) await supabaseAdmin.from("sandbox_emails").insert(rows as never);
+      return { substitute: { sent: false, reason: "sandbox" }, school: { sent: false, reason: "sandbox" } };
+    }
+
 
     if (substitute?.email) {
       try {

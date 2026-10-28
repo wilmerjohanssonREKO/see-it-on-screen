@@ -259,6 +259,7 @@ export type Database = {
           full_name: string
           graduation_year: number | null
           id: string
+          is_test: boolean
           lat: number | null
           lng: number | null
           phone: string | null
@@ -283,6 +284,7 @@ export type Database = {
           full_name?: string
           graduation_year?: number | null
           id: string
+          is_test?: boolean
           lat?: number | null
           lng?: number | null
           phone?: string | null
@@ -307,6 +309,7 @@ export type Database = {
           full_name?: string
           graduation_year?: number | null
           id?: string
+          is_test?: boolean
           lat?: number | null
           lng?: number | null
           phone?: string | null
@@ -365,6 +368,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sandbox_emails: {
+        Row: {
+          assignment_id: string | null
+          created_at: string
+          data: Json
+          id: string
+          recipient: string
+          template: string
+        }
+        Insert: {
+          assignment_id?: string | null
+          created_at?: string
+          data?: Json
+          id?: string
+          recipient: string
+          template: string
+        }
+        Update: {
+          assignment_id?: string | null
+          created_at?: string
+          data?: Json
+          id?: string
+          recipient?: string
+          template?: string
+        }
+        Relationships: []
       }
       school_codes: {
         Row: {
@@ -516,6 +546,7 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          is_test: boolean
           lat: number | null
           lng: number | null
           name: string
@@ -529,6 +560,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          is_test?: boolean
           lat?: number | null
           lng?: number | null
           name: string
@@ -542,6 +574,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          is_test?: boolean
           lat?: number | null
           lng?: number | null
           name?: string
@@ -658,6 +691,10 @@ export type Database = {
           substitute_ref: string
         }[]
       }
+      admin_set_test: {
+        Args: { p_id: string; p_kind: string; p_value: boolean }
+        Returns: undefined
+      }
       assignment_completed: {
         Args: { p_assignment_id: string }
         Returns: boolean
@@ -714,6 +751,7 @@ export type Database = {
       notify_matching: { Args: { p_assignment_id: string }; Returns: number }
       publish_assignment: { Args: { p_assignment_id: string }; Returns: number }
       purge_old_event_log: { Args: never; Returns: number }
+      purge_sandbox_data: { Args: never; Returns: number }
       rate_school: {
         Args: { p_assignment_id: string; p_comment: string; p_score: number }
         Returns: undefined
@@ -721,6 +759,10 @@ export type Database = {
       rate_substitute: {
         Args: { p_assignment_id: string; p_comment: string; p_score: number }
         Returns: undefined
+      }
+      same_sandbox: {
+        Args: { p_school: string; p_substitute: string }
+        Returns: boolean
       }
       school_assignments: {
         Args: never

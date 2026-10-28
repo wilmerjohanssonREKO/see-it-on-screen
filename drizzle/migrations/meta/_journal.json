@@ -113,6 +113,13 @@
       "when": 1792574680199,
       "tag": "0015_audit_private_file_path_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1793221423490,
+      "tag": "0016_sandbox_mode",
+      "breakpoints": true
     }
   ]
 }
