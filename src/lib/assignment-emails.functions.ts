@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { sendTemplateEmail } from "@/lib/email-templates/send-email";
+import { isSandbox } from "@/lib/sandbox";
 
 /**
  * Sends the two match emails after a substitute claims an assignment:
