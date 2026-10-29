@@ -27,14 +27,14 @@ export function SandboxTab() {
 
   async function toggle(kind: "school" | "substitute", row: Row) {
     const { error } = await supabase.rpc("admin_set_test", { p_kind: kind, p_id: row.id, p_value: !row.is_test });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     qc.invalidateQueries({ queryKey: ["admin-sandbox"] });
   }
 
   async function purge() {
     if (!confirm("Radera alla testuppdrag och testmejl? Riktiga uppdrag påverkas inte.")) return;
     const { data: n, error } = await supabase.rpc("purge_sandbox_data");
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success(`${n ?? 0} testuppdrag raderade`);
     qc.invalidateQueries({ queryKey: ["admin-sandbox"] });
   }
