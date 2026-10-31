@@ -1,15 +1,16 @@
-import { describe, expect, it } from "vitest";
+import { describe, it } from "node:test";
+import assert from "node:assert/strict";
 import { isSandbox } from "./sandbox";
 
 describe("isSandbox", () => {
   it("blocks delivery when the substitute is a test account", () => {
-    expect(isSandbox(true, false)).toBe(true);
+    assert.equal(isSandbox(true, false), true);
   });
   it("blocks delivery when the school is a test school", () => {
-    expect(isSandbox(false, true)).toBe(true);
+    assert.equal(isSandbox(false, true), true);
   });
   it("delivers normally when both are real", () => {
-    expect(isSandbox(false, false)).toBe(false);
-    expect(isSandbox(null, undefined)).toBe(false);
+    assert.equal(isSandbox(false, false), false);
+    assert.equal(isSandbox(null, undefined), false);
   });
 });
