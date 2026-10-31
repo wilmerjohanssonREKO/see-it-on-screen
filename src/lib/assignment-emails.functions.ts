@@ -29,10 +29,15 @@ export const notifyAssignmentClaimed = createServerFn({ method: "POST" })
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const [{ data: substitute }, { data: school }] = await Promise.all([
+    const [substituteResult, schoolResult] = await Promise.all([
       supabaseAdmin.from("profiles").select("full_name, email, is_test").eq("id", userId).maybeSingle(),
       supabaseAdmin.from("schools").select("name, email, is_test").eq("id", assignment.school_id).maybeSingle(),
     ]);
+    if (substituteResult.error || schoolResult.error || !substituteResult.data || !schoolResult.data) {
+      throw new Error("Kunde inte kontrollera mottagarnas testläge. Inga mejl skickades.");
+    }
+    const substitute = substituteResult.data;
+    const school = schoolResult.data;
 
     const details = {
       schoolName: school?.name ?? undefined,
@@ -61,7 +66,10 @@ export const notifyAssignmentClaimed = createServerFn({ method: "POST" })
           data: { substituteName: substitute?.full_name, ...details },
         },
       ].filter(Boolean) as { template: string; recipient: string; assignment_id: string; data: Record<string, unknown> }[];
-      if (rows.length) await supabaseAdmin.from("sandbox_emails").insert(rows as never);
+      if (rows.length) {
+        const { error } = await supabaseAdmin.from("sandbox_emails").insert(rows as never);
+        if (error) throw new Error("Kunde inte spara testmejlen. Inga riktiga mejl skickades.");
+      }
       return { substitute: { sent: false, reason: "sandbox" }, school: { sent: false, reason: "sandbox" } };
     }
 
