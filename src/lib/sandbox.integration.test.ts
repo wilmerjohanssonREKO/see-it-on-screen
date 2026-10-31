@@ -20,6 +20,7 @@ it("sandbox database isolation (rollback-only)", async (t) => {
       const test = users[1]?.id;
       if (!real || !test) throw new Error('Missing test fixtures');
       await tx`select set_config('request.jwt.claim.sub',${admin},true)`;
+      await tx`set local role authenticated`;
       // Test-only changes to existing accounts are uncommitted and rolled back.
       await tx`update public.profiles set approved=true,background_status='approved',is_test=(id=${test}) where id in (${real},${test})`;
       const schools = await tx<{id:string,is_test:boolean}[]>`insert into public.schools(name,is_test) values ('REKO_TEST_ROLLBACK_REAL',false),('REKO_TEST_ROLLBACK_SANDBOX',true) returning id,is_test`;
