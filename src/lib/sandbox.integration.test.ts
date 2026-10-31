@@ -10,6 +10,11 @@ it("sandbox database isolation (rollback-only)", async (t) => {
   const sql = postgres(url, { max: 1, prepare: false });
   const rollback = new Error("sandbox-test-rollback");
   try {
+    const [capability] = await sql<{can_impersonate:boolean}[]>`select pg_has_role(current_user,'authenticated','MEMBER') as can_impersonate`;
+    if (!capability?.can_impersonate) {
+      t.skip("The available connection is read-only; rollback-only role tests require an authorized test connection");
+      return;
+    }
     await sql.begin(async (tx) => {
       const admins = await tx<{user_id:string}[]>`select user_id from public.user_roles where role='admin' limit 1`;
       const users = await tx<{id:string}[]>`select id from public.profiles p where not exists(select 1 from public.school_members m where m.user_id=p.id) and not exists(select 1 from public.user_roles r where r.user_id=p.id and r.role='admin') and not exists(select 1 from public.assignments a where a.assigned_substitute_id=p.id) and not exists(select 1 from public.assignment_declines d where d.substitute_id=p.id) order by id limit 2`;
