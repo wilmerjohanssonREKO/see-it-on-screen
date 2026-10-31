@@ -120,6 +120,13 @@
       "when": 1793221423490,
       "tag": "0016_sandbox_mode",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1793454763340,
+      "tag": "0017_harden_sandbox_boundaries",
+      "breakpoints": true
     }
   ]
 }

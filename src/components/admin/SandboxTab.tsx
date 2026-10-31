@@ -9,17 +9,22 @@ type Row = { id: string; name: string; is_test: boolean };
 export function SandboxTab() {
   const qc = useQueryClient();
 
-  const { data } = useQuery({
+  const { data, error } = useQuery({
     queryKey: ["admin-sandbox"],
     queryFn: async () => {
-      const [schools, subs, mails] = await Promise.all([
+      const [schools, subs, mails, members] = await Promise.all([
         supabase.from("schools").select("id, name, is_test").order("name"),
         supabase.from("profiles").select("id, full_name, is_test").order("full_name"),
         supabase.from("sandbox_emails").select("*").order("created_at", { ascending: false }).limit(50),
+        supabase.from("school_members").select("user_id"),
       ]);
+      for (const result of [schools, subs, mails, members]) {
+        if (result.error) throw result.error;
+      }
+      const schoolUsers = new Set((members.data ?? []).map((member) => member.user_id));
       return {
         schools: (schools.data ?? []).map((s) => ({ id: s.id, name: s.name, is_test: s.is_test })) as Row[],
-        subs: (subs.data ?? []).map((p) => ({ id: p.id, name: p.full_name || "(namnlös)", is_test: p.is_test })) as Row[],
+        subs: (subs.data ?? []).filter((p) => !schoolUsers.has(p.id)).map((p) => ({ id: p.id, name: p.full_name || "(namnlös)", is_test: p.is_test })) as Row[],
         mails: mails.data ?? [],
       };
     },
@@ -29,6 +34,7 @@ export function SandboxTab() {
     const { error } = await supabase.rpc("admin_set_test", { p_kind: kind, p_id: row.id, p_value: !row.is_test });
     if (error) { toast.error(error.message); return; }
     qc.invalidateQueries({ queryKey: ["admin-sandbox"] });
+    qc.invalidateQueries({ queryKey: ["substitutes"] });
   }
 
   async function purge() {
@@ -57,6 +63,7 @@ export function SandboxTab() {
 
   return (
     <div className="mt-4 space-y-6">
+      {error && <p role="alert" className="text-destructive">Kunde inte läsa sandlådans data. Försök igen.</p>}
       <Card>
         <CardHeader>
           <CardTitle>Sandlådeläge</CardTitle>
@@ -74,7 +81,7 @@ export function SandboxTab() {
           <CardContent>{list("school", data?.schools ?? [])}</CardContent>
         </Card>
         <Card>
-          <CardHeader><CardTitle>Användare</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Vikarier</CardTitle></CardHeader>
           <CardContent>{list("substitute", data?.subs ?? [])}</CardContent>
         </Card>
       </div>

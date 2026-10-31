@@ -27,6 +27,11 @@ export const getCvForAssignment = createServerFn({ method: "POST" })
     });
     if (!canManage) throw new Error("Du har inte behörighet att läsa detta CV");
 
+    const { data: canView, error: accessError } = await supabase.rpc("can_view_substitute", {
+      p_substitute: assignment.assigned_substitute_id,
+    });
+    if (accessError || !canView) return { url: null };
+
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: profile } = await supabaseAdmin
       .from("profiles")

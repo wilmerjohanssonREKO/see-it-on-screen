@@ -92,6 +92,9 @@ function AdminPage() {
           <TabsContent value="data">
             <DataTab />
           </TabsContent>
+          <TabsContent value="sandlada">
+            <SandboxTab />
+          </TabsContent>
         </Tabs>
       </main>
     </div>
