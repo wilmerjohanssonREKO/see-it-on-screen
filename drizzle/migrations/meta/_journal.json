@@ -127,6 +127,13 @@
       "when": 1793454763340,
       "tag": "0017_harden_sandbox_boundaries",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1793778418399,
+      "tag": "0018_reject_past_assignment_dates",
+      "breakpoints": true
     }
   ]
 }
