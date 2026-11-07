@@ -126,11 +126,11 @@ function AuthPage() {
           </CardTitle>
           <CardDescription>
             {mode === "signin"
-              ? "För vikarier och REKO UF-teamet."
+              ? "För vikarier, skolor, lärare och REKO UF-teamet."
               : "Registrera dig som vikarie. Din profil granskas av oss innan du kan matchas."}
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4">
+        <CardContent className="grid gap-4 [&_button]:min-h-11 [&_input:not([type=checkbox])]:min-h-11">
           <Button type="button" variant="outline" onClick={handleGoogle}>
             Fortsätt med Google
           </Button>
@@ -165,18 +165,19 @@ function AuthPage() {
               {busy ? "Vänta…" : mode === "signin" ? "Logga in" : "Skapa konto"}
             </Button>
           </form>
-          <button
+          <Button
             type="button"
+            variant="ghost"
             className="text-sm text-muted-foreground hover:text-foreground"
             onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
           >
             {mode === "signin"
               ? "Har du inget konto? Bli vikarie"
               : "Har du redan ett konto? Logga in"}
-          </button>
+          </Button>
           <a
             href="/larare/registrera"
-            className="text-center text-sm text-muted-foreground hover:text-foreground"
+            className="flex min-h-11 items-center justify-center text-center text-sm text-muted-foreground hover:text-foreground"
           >
             Är du lärare? Skapa lärarkonto med skolkod
           </a>
