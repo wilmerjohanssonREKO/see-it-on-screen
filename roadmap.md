@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Granska UX enligt fem principer, presentera prioriterad rapport och invänta godkännande före ändringar.
+- [x] Granska UX enligt fem principer och sammanställ prioriterad rapport med förbättringsförslag.
 - [ ] Genomför godkända UX-förbättringar och kontrollera skolans och vikariens sidor på mobil och dator. Blockerat: inväntar godkännande av förslagen.
 
 - [x] Slutför sandlådans adminvy och rätta testfel.
