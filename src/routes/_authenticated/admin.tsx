@@ -61,7 +61,7 @@ function AdminPage() {
         <h1 className="text-3xl font-bold">Adminpanel</h1>
         <p className="mt-1 text-muted-foreground">Hantera behov, vikarier, skolor och lärare.</p>
         <Tabs defaultValue="behov" className="mt-6">
-          <TabsList className="flex-wrap">
+          <TabsList className="h-auto w-full flex-wrap justify-start gap-1 [&_button]:min-h-11">
             <TabsTrigger value="behov">Vikariebehov</TabsTrigger>
             <TabsTrigger value="vikarier">Vikarier</TabsTrigger>
             <TabsTrigger value="skolor">Skolor</TabsTrigger>

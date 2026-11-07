@@ -104,7 +104,7 @@ function TeacherSignup() {
           <CardDescription>Du behöver skolkoden som din skola fått från REKO UF.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="grid gap-4" onSubmit={submit}>
+          <form className="grid gap-4 [&_input:not([type=checkbox])]:min-h-11 [&_button]:min-h-11" onSubmit={submit}>
             <div className="grid gap-2">
               <Label htmlFor="full_name">Namn</Label>
               <Input id="full_name" name="full_name" required maxLength={120} />
@@ -137,9 +137,9 @@ function TeacherSignup() {
               />
             </div>
             <div className="grid gap-2">
-              <Label>Skola</Label>
+              <Label htmlFor="teacher-school">Skola</Label>
               <Select value={schoolId} onValueChange={setSchoolId}>
-                <SelectTrigger>
+                <SelectTrigger id="teacher-school" aria-describedby={error ? "teacher-error" : undefined} aria-invalid={error === "Välj skola"}>
                   <SelectValue placeholder="Välj skola" />
                 </SelectTrigger>
                 <SelectContent>
@@ -153,11 +153,11 @@ function TeacherSignup() {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="code">Skolkod</Label>
-              <Input id="code" name="code" required maxLength={40} autoComplete="off" />
+              <Input id="code" name="code" required maxLength={40} autoComplete="off" aria-describedby={error ? "teacher-error" : undefined} />
             </div>
             <PolicyCheckbox />
             {error && (
-              <p className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</p>
+              <p id="teacher-error" role="alert" className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</p>
             )}
             <Button type="submit" disabled={busy}>
               {busy ? "Skapar…" : "Skapa lärarkonto"}
@@ -165,7 +165,7 @@ function TeacherSignup() {
           </form>
           <Link
             to="/auth"
-            className="mt-4 block text-center text-sm text-muted-foreground hover:text-foreground"
+            className="mt-4 flex min-h-11 items-center justify-center text-center text-sm text-muted-foreground hover:text-foreground"
           >
             Har du redan ett konto? Logga in
           </Link>

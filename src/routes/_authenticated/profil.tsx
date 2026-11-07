@@ -4,7 +4,7 @@ import { saveProfileContact } from "@/lib/contact.functions";
 import { getCvSignedUrl } from "@/lib/cv.functions";
 import { contactShape, substituteContactSchema } from "@/lib/contact-schemas";
 import { z } from "zod";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { FileText, Trash2, Upload } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -56,6 +56,8 @@ function ProfilPage() {
   const getCvUrl = useServerFn(getCvSignedUrl);
   const [avatarConsent, setAvatarConsent] = useState(false);
   const [avatarBusy, setAvatarBusy] = useState(false);
+  const avatarInput = useRef<HTMLInputElement>(null);
+  const cvInput = useRef<HTMLInputElement>(null);
   const { data: ratingSummary } = useQuery({
     queryKey: ["my-rating-summary", userId],
     enabled: !!userId,
@@ -252,7 +254,7 @@ function ProfilPage() {
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
-      <main className="mx-auto max-w-3xl px-4 py-8">
+      <main className="mx-auto max-w-3xl px-4 py-8 [&_input:not([type=checkbox])]:min-h-11 [&_button:not([role=checkbox])]:min-h-11">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-3xl font-bold">Min profil</h1>
@@ -341,8 +343,9 @@ function ProfilPage() {
                   <Label>Ämnen du kan vikariera i</Label>
                   <div className="grid gap-2 rounded-lg border border-border p-4 sm:grid-cols-2">
                     {SUBJECTS.map((s) => (
-                      <label key={s} className="flex items-center gap-2 text-sm">
+                      <label key={s} htmlFor={`subject-${s}`} className="flex min-h-11 items-center gap-2 text-sm">
                         <Checkbox
+                          id={`subject-${s}`}
                           checked={subjects.includes(s)}
                           onCheckedChange={(v) =>
                             setSubjects((prev) => (v ? [...prev, s] : prev.filter((x) => x !== s)))
@@ -407,27 +410,23 @@ function ProfilPage() {
                 <p className="text-sm">{profile?.avatar_path ? <strong>Bild uppladdad</strong> : "Ingen bild uppladdad"}</p>
               </div>
               {!profile?.avatar_consent_at && (
-                <label className="flex items-start gap-2 text-sm">
-                  <Checkbox checked={avatarConsent} onCheckedChange={(v) => setAvatarConsent(v === true)} />
+                <label htmlFor="avatar-consent" className="flex min-h-11 items-start gap-2 text-sm">
+                  <Checkbox id="avatar-consent" checked={avatarConsent} onCheckedChange={(v) => setAvatarConsent(v === true)} />
                   Jag samtycker till att skolor jag anmäler mig till kan se min bild.
                 </label>
               )}
               <div className="flex flex-wrap gap-2">
                 <input
                   id="avatarfile"
+                  ref={avatarInput}
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
                   className="hidden"
                   onChange={handleAvatarUpload}
                 />
-                <Button asChild variant="outline" disabled={avatarBusy || (!profile?.avatar_consent_at && !avatarConsent)}>
-                  <label
-                    htmlFor="avatarfile"
-                    className={`cursor-pointer ${avatarBusy || (!profile?.avatar_consent_at && !avatarConsent) ? "pointer-events-none opacity-50" : ""}`}
-                  >
+                <Button type="button" variant="outline" onClick={() => avatarInput.current?.click()} disabled={avatarBusy || (!profile?.avatar_consent_at && !avatarConsent)}>
                     <Upload className="h-4 w-4" />
                     {avatarBusy ? "Laddar upp…" : profile?.avatar_path ? "Byt bild" : "Ladda upp bild"}
-                  </label>
                 </Button>
                 {profile?.avatar_path && (
                   <Button variant="ghost" onClick={handleAvatarRemove} disabled={avatarBusy}>
@@ -459,8 +458,9 @@ function ProfilPage() {
               )}
             </p>
             {!profile?.cv_consent_at && (
-              <label className="flex items-start gap-2 text-sm">
+              <label htmlFor="cv-consent" className="flex min-h-11 items-start gap-2 text-sm">
                 <Checkbox
+                  id="cv-consent"
                   checked={cvConsent}
                   onCheckedChange={(v) => setCvConsent(v === true)}
                 />
@@ -470,24 +470,24 @@ function ProfilPage() {
             <div className="flex flex-wrap gap-2">
               <input
                 id="cvfile"
+                ref={cvInput}
                 type="file"
                 accept="application/pdf"
                 className="hidden"
                 onChange={handleCvUpload}
               />
               <Button
-                asChild
+                type="button"
+                onClick={() => cvInput.current?.click()}
                 variant="outline"
                 disabled={cvBusy || (!profile?.cv_consent_at && !cvConsent)}
               >
-                <label htmlFor="cvfile" className="cursor-pointer">
                   <Upload className="h-4 w-4" />
                   {cvBusy
                     ? "Laddar upp…"
                     : profile?.cv_file_path
                       ? "Ersätt CV"
                       : "Ladda upp CV"}
-                </label>
               </Button>
               {profile?.cv_file_path && (
                 <>
