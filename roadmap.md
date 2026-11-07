@@ -1,5 +1,8 @@
 # Roadmap
 
+- [ ] Granska UX enligt fem principer, presentera prioriterad rapport och invänta godkännande före ändringar.
+- [ ] Genomför godkända UX-förbättringar och kontrollera skolans och vikariens sidor på mobil och dator. Blockerat: inväntar godkännande av förslagen.
+
 - [x] Slutför sandlådans adminvy och rätta testfel.
 - [x] Granska och täpp till läckvägar vid lägesbyte, skoluppgifter, notiser och privata filer; testa mejlspärrens lägesregler.
 - [ ] Kör hela skol-/vikarieflödet och testmejlfångsten med separata sandlådekonton. Blockerat: befintliga testkonton är ännu märkta som riktiga och har historik; återställbara skrivtester saknar behörig anslutning. Fördjupad säkerhetsskanning inväntar resultat.
