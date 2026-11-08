@@ -182,11 +182,11 @@ function UppdragPage() {
                   <CalendarDayButton
                     {...props}
                     modifiers={modifiers}
-                    aria-label={`${props["aria-label"] ?? format(props.day.date, "d MMMM yyyy", { locale: sv })}${modifiers.mine ? ", ditt uppdrag" : ""}${modifiers.available ? ", lediga uppdrag" : ""}`}
-                    title={modifiers.mine && modifiers.available ? "Ditt uppdrag och lediga uppdrag" : modifiers.mine ? "Ditt uppdrag" : modifiers.available ? "Lediga uppdrag" : undefined}
+                    aria-label={`${props["aria-label"] ?? format(props.day.date, "d MMMM yyyy", { locale: sv })}${modifiers["mine"] ? ", ditt uppdrag" : ""}${modifiers["available"] ? ", lediga uppdrag" : ""}`}
+                    title={modifiers["mine"] && modifiers["available"] ? "Ditt uppdrag och lediga uppdrag" : modifiers["mine"] ? "Ditt uppdrag" : modifiers["available"] ? "Lediga uppdrag" : undefined}
                   >
                     {props.children}
-                    {(modifiers.mine || modifiers.available) && <span aria-hidden="true" className="absolute bottom-0.5 text-[8px] leading-none">{modifiers.mine && modifiers.available ? "◆ ○" : modifiers.mine ? "◆" : "○"}</span>}
+                    {(modifiers["mine"] || modifiers["available"]) && <span aria-hidden="true" className="absolute bottom-0.5 text-[8px] leading-none">{modifiers["mine"] && modifiers["available"] ? "◆ ○" : modifiers["mine"] ? "◆" : "○"}</span>}
                   </CalendarDayButton>
                 ),
               }}
