@@ -130,12 +130,13 @@ export function AssignmentsTab() {
               Lägg till en skola under fliken Skolor först.
             </p>
           ) : (
-            <form className="grid gap-4" onSubmit={createAssignment}>
-              <div className="grid gap-4 sm:grid-cols-2">
+            <form className="grid gap-6 [&_input]:min-h-11 [&_button]:min-h-11" onSubmit={createAssignment}>
+              <fieldset className="grid gap-4 sm:grid-cols-2">
+                <legend className="mb-3 font-semibold">Skola, ämne och tid</legend>
                 <div className="grid gap-2">
-                  <Label>Skola</Label>
+                  <Label htmlFor="admin-school">Skola</Label>
                   <Select value={schoolId} onValueChange={setSchoolId}>
-                    <SelectTrigger>
+                    <SelectTrigger id="admin-school">
                       <SelectValue placeholder="Välj skola" />
                     </SelectTrigger>
                     <SelectContent>
@@ -148,9 +149,9 @@ export function AssignmentsTab() {
                   </Select>
                 </div>
                 <div className="grid gap-2">
-                  <Label>Ämne</Label>
+                  <Label htmlFor="admin-subject">Ämne</Label>
                   <Select value={subject} onValueChange={setSubject}>
-                    <SelectTrigger>
+                    <SelectTrigger id="admin-subject">
                       <SelectValue placeholder="Välj ämne" />
                     </SelectTrigger>
                     <SelectContent>
@@ -166,10 +167,7 @@ export function AssignmentsTab() {
                   <Label htmlFor="assignment_date">Datum</Label>
                   <Input id="assignment_date" name="assignment_date" type="date" required />
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="compensation">Ersättning</Label>
-                  <Input id="compensation" name="compensation" placeholder="T.ex. 180 kr/tim" />
-                </div>
+                <div className="grid grid-cols-2 gap-4 sm:col-span-2">
                 <div className="grid gap-2">
                   <Label htmlFor="start_time">Från</Label>
                   <Input id="start_time" name="start_time" type="time" required />
@@ -178,11 +176,19 @@ export function AssignmentsTab() {
                   <Label htmlFor="end_time">Till</Label>
                   <Input id="end_time" name="end_time" type="time" required />
                 </div>
+                </div>
+              </fieldset>
+              <fieldset className="grid gap-4 border-t border-border pt-4">
+                <legend className="font-semibold">Valfria uppgifter</legend>
+              <div className="grid gap-2">
+                <Label htmlFor="compensation">Ersättning (valfritt)</Label>
+                <Input id="compensation" name="compensation" placeholder="T.ex. 180 kr/tim" />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="description">Beskrivning</Label>
+                <Label htmlFor="description">Beskrivning (valfritt)</Label>
                 <Textarea id="description" name="description" rows={3} maxLength={1000} />
               </div>
+              </fieldset>
               <Button type="submit" disabled={saving}>
                 <Send className="h-4 w-4" />
                 {saving ? "Publicerar…" : "Publicera och notifiera vikarier"}
@@ -233,7 +239,7 @@ export function AssignmentsTab() {
                 ) : (
                   <p className="text-sm text-muted-foreground">Ingen har tackat ja ännu.</p>
                 )}
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 [&_button]:min-h-11">
                   {a.status !== "expired" && (
                     <Button size="sm" variant="outline" onClick={() => setStatus(a.id, "expired")}>
                       Markera utgånget
