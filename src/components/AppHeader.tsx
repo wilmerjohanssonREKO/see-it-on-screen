@@ -34,7 +34,7 @@ export function AppHeader() {
     <header className="sticky top-0 z-40 border-b border-border/70 bg-card/85 backdrop-blur">
       <div className="mx-auto flex min-h-16 max-w-6xl items-center justify-between gap-2 px-4">
         <Brand />
-        <nav aria-label="Huvudnavigation" className="hidden items-center gap-1 text-sm md:flex">
+        <nav aria-label="Huvudnavigation" className="hidden items-center gap-1 text-sm md:flex [&>a]:min-h-11 [&>a]:items-center [&>a]:inline-flex">
           {!session && (
             <Link to="/kontakt" className="rounded-md px-3 py-2 font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground" activeProps={{ className: "bg-secondary text-foreground" }}>
               Kontakt

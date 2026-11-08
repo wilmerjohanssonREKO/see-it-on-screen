@@ -23,7 +23,7 @@ export const Route = createFileRoute("/auth")({
           "Skapa ett vikariekonto hos REKO UF eller logga in för att se och tacka ja till vikariebehov på gymnasieskolor.",
       },
       { property: "og:title", content: "Logga in eller bli vikarie — REKO UF" },
-      { property: "og:description", content: "Konto för vikarier och REKO UF-teamet." },
+      { property: "og:description", content: "Gemensam inloggning för vikarier, skolor, lärare och REKO UF-teamet." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
