@@ -57,7 +57,7 @@ function CvButton({ assignmentId }: { assignmentId: string }) {
   });
   if (!data) return null;
   return (
-    <Button size="sm" variant="outline" onClick={async () => {
+    <Button size="sm" className="min-h-11" variant="outline" onClick={async () => {
       const tab = window.open("about:blank", "_blank");
       if (tab) tab.opener = null;
       try {
@@ -180,11 +180,13 @@ function SchoolPage() {
             <CardDescription>Första godkända vikarien som tackar ja får uppdraget.</CardDescription>
           </CardHeader>
           <CardContent>
-            <form className="grid gap-4 sm:grid-cols-2" onSubmit={submit}>
+            <form className="grid gap-6 [&_input]:min-h-11 [&_button]:min-h-11" onSubmit={submit}>
+              <fieldset className="grid gap-4 sm:grid-cols-2">
+                <legend className="mb-3 font-semibold">Ämne och tid</legend>
               <div className="grid gap-2">
-                <Label>Ämne</Label>
+                <Label htmlFor="school-subject">Ämne</Label>
                 <Select value={subject} onValueChange={setSubject}>
-                  <SelectTrigger>
+                  <SelectTrigger id="school-subject">
                     <SelectValue placeholder="Välj ämne" />
                   </SelectTrigger>
                   <SelectContent>
@@ -200,6 +202,7 @@ function SchoolPage() {
                 <Label htmlFor="date">Datum</Label>
                 <Input id="date" name="date" type="date" required />
               </div>
+              <div className="grid grid-cols-2 gap-4 sm:col-span-2">
               <div className="grid gap-2">
                 <Label htmlFor="start">Från</Label>
                 <Input id="start" name="start" type="time" required />
@@ -208,11 +211,15 @@ function SchoolPage() {
                 <Label htmlFor="end">Till</Label>
                 <Input id="end" name="end" type="time" required />
               </div>
-              <div className="grid gap-2 sm:col-span-2">
+              </div>
+              </fieldset>
+              <fieldset className="grid gap-4 border-t border-border pt-4">
+                <legend className="font-semibold">Valfria uppgifter</legend>
+              <div className="grid gap-2">
                 <Label htmlFor="compensation">Ersättning (valfritt)</Label>
                 <Input id="compensation" name="compensation" maxLength={120} />
               </div>
-              <div className="grid gap-2 sm:col-span-2">
+              <div className="grid gap-2">
                 <Label htmlFor="description">Beskrivning (valfritt)</Label>
                 <Textarea
                   id="description"
@@ -221,7 +228,8 @@ function SchoolPage() {
                   placeholder="Klass, lokal, vad som ska göras…"
                 />
               </div>
-              <Button type="submit" className="sm:col-span-2" disabled={busy}>
+              </fieldset>
+              <Button type="submit" disabled={busy}>
                 <Send className="h-4 w-4" /> {busy ? "Publicerar…" : "Publicera vikariebehov"}
               </Button>
             </form>
@@ -252,20 +260,20 @@ function SchoolPage() {
                   )}
                 </div>
                 </div>
-                <div className="flex items-center gap-2">
+                  <Badge variant={a.status === "open" ? "secondary" : "default"}>
+                    {STATUS_LABELS[a.status as keyof typeof STATUS_LABELS] ?? a.status}
+                  </Badge>
+              </div>
+                <div className="flex flex-wrap items-center gap-3">
                   {a.status === "filled" && a.substitute_name && (
                     <CvButton assignmentId={a.id} />
                   )}
                   {a.status === "filled" && a.substitute_name && !a.completed && (
-                    <Button size="sm" variant="outline" onClick={() => decline(a.id)}>
+                    <Button size="sm" className="min-h-11" variant="outline" onClick={() => decline(a.id)}>
                       Tacka nej
                     </Button>
                   )}
-                  <Badge variant={a.status === "open" ? "secondary" : "default"}>
-                    {STATUS_LABELS[a.status as keyof typeof STATUS_LABELS] ?? a.status}
-                  </Badge>
                 </div>
-              </div>
                 {a.completed && !a.rated && (
                   <StarRatingForm label="Betygsätt vikarien" onSubmit={(score, comment) => rate(a.id, score, comment)} />
                 )}

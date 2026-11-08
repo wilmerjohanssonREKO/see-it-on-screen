@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { sv } from "date-fns/locale";
 import { format } from "date-fns";
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar, CalendarDayButton } from "@/components/ui/calendar";
 import { toast } from "sonner";
 import { CalendarDays, Clock, MapPin, Wallet } from "lucide-react";
 
@@ -177,6 +177,19 @@ function UppdragPage() {
               selected={selected}
               onSelect={setSelected}
               modifiers={{ mine: mineDays, available: openDays }}
+              components={{
+                DayButton: ({ modifiers, ...props }) => (
+                  <CalendarDayButton
+                    {...props}
+                    modifiers={modifiers}
+                    aria-label={`${props["aria-label"] ?? format(props.day.date, "d MMMM yyyy", { locale: sv })}${modifiers["mine"] ? ", ditt uppdrag" : ""}${modifiers["available"] ? ", lediga uppdrag" : ""}`}
+                    title={modifiers["mine"] && modifiers["available"] ? "Ditt uppdrag och lediga uppdrag" : modifiers["mine"] ? "Ditt uppdrag" : modifiers["available"] ? "Lediga uppdrag" : undefined}
+                  >
+                    {props.children}
+                    {(modifiers["mine"] || modifiers["available"]) && <span aria-hidden="true" className="absolute bottom-0.5 text-[8px] leading-none">{modifiers["mine"] && modifiers["available"] ? "◆ ○" : modifiers["mine"] ? "◆" : "○"}</span>}
+                  </CalendarDayButton>
+                ),
+              }}
               modifiersClassNames={{
                 mine: "[&_button]:bg-primary [&_button]:text-primary-foreground [&_button]:font-bold",
                 available: "[&_button]:bg-accent/40 [&_button]:font-bold",
@@ -190,7 +203,7 @@ function UppdragPage() {
         <div className="grid gap-4">
           {subjectsInList.length > 1 && (
             <Select value={subjectFilter} onValueChange={setSubjectFilter}>
-              <SelectTrigger className="w-full sm:w-64" aria-label="Filtrera på ämne">
+              <SelectTrigger className="min-h-11 w-full sm:w-64" aria-label="Filtrera på ämne">
                 <SelectValue placeholder="Alla ämnen" />
               </SelectTrigger>
               <SelectContent>
@@ -204,7 +217,7 @@ function UppdragPage() {
           {selected && (
             <div className="flex items-center justify-between gap-2 text-sm">
               <span className="text-muted-foreground">Visar {format(selected, "d MMMM", { locale: sv })}</span>
-              <Button size="sm" variant="outline" onClick={() => setSelected(undefined)}>Visa alla</Button>
+              <Button size="sm" className="min-h-11" variant="outline" onClick={() => setSelected(undefined)}>Visa alla</Button>
             </div>
           )}
           {selected && visible.length === 0 && (
@@ -263,7 +276,7 @@ function UppdragPage() {
                   )}
                   {a.status === "open" ? (
                     <Button
-                      className="w-full sm:w-auto"
+                      className="min-h-11 w-full sm:w-auto"
                       variant="accent"
                       disabled={!approved || claim.isPending}
                       onClick={() => claim.mutate(a.id)}
