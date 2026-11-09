@@ -53,17 +53,17 @@ export const template = {
 
 const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
 const container = { padding: '24px 28px' }
-const heading = { color: '#302D2B', fontSize: '22px' }
-const text = { color: '#302D2B', fontSize: '15px', lineHeight: '22px' }
+const heading = { color: '#303465', fontSize: '22px' }
+const text = { color: '#303465', fontSize: '15px', lineHeight: '22px' }
 const box = {
-  backgroundColor: '#F8F1E8',
+  backgroundColor: '#F5F3F7',
   borderRadius: '8px',
   padding: '12px 16px',
   margin: '12px 0',
 }
-const row = { color: '#302D2B', fontSize: '15px', margin: '4px 0' }
+const row = { color: '#303465', fontSize: '15px', margin: '4px 0' }
 const button = {
-  backgroundColor: '#A94D3A',
+  backgroundColor: '#303465',
   color: '#ffffff',
   borderRadius: '8px',
   padding: '12px 20px',
@@ -72,4 +72,4 @@ const button = {
   display: 'inline-block',
   marginTop: '8px',
 }
-const footer = { color: '#8a8580', fontSize: '12px', marginTop: '24px' }
+const footer = { color: '#55586F', fontSize: '12px', marginTop: '24px' }
