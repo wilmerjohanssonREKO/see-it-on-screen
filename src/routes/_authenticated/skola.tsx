@@ -170,7 +170,7 @@ function SchoolPage() {
             </p>
           )}
           <p className="text-muted-foreground">
-            Lägg upp ett vikariebehov — matchade vikarier får besked direkt.
+            Lägg upp ett vikariebehov
           </p>
         </div>
 
