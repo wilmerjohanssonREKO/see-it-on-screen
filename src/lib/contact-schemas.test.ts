@@ -18,7 +18,7 @@ describe("Obligatoriska kontaktuppgifter", () => {
     expect(substituteContactSchema.safeParse({ ...profile, subjects: [] }).success).toBe(true);
   });
   test("lärare kräver giltig e-post och telefon utan hemadress", () => {
-    const teacher = { fullName: contact.full_name, email: contact.email, phone: contact.phone, password: "testpassword123", schoolId: "11111111-1111-4111-8111-111111111111", code: "ABCDE12345" };
+    const teacher = { fullName: contact.full_name, email: contact.email, phone: contact.phone, password: "testpassword123", code: "ABCDE12345" };
     expect(teacherRegistrationSchema.safeParse(teacher).success).toBe(true);
     expect(teacherRegistrationSchema.safeParse({ ...teacher, email: "fel" }).success).toBe(false);
     expect(teacherRegistrationSchema.safeParse({ ...teacher, phone: "" }).success).toBe(false);

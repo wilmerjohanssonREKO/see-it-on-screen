@@ -54,12 +54,6 @@ export const generateSchoolCode = createServerFn({ method: "POST" })
     return { code };
   });
 
-export const listSchoolsForSignup = createServerFn({ method: "GET" }).handler(async () => {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data } = await supabaseAdmin.from("schools").select("id, name").order("name");
-  return data ?? [];
-});
-
 export const registerTeacher = createServerFn({ method: "POST" })
   .validator((d: unknown) => teacherRegistrationSchema.parse(d))
   .handler(async ({ data }) => {
@@ -85,13 +79,18 @@ export const registerTeacher = createServerFn({ method: "POST" })
       };
     }
 
-    const { data: row } = await supabaseAdmin
+    const { data: codes, error: codesError } = await supabaseAdmin
       .from("school_codes")
-      .select("code_hash, salt")
-      .eq("school_id", data.schoolId)
-      .maybeSingle();
-    const valid = !!row && (await hashCode(data.code, row.salt)) === row.code_hash;
-    if (!valid) {
+      .select("school_id, code_hash, salt");
+    if (codesError) return { ok: false as const, error: "Kunde inte kontrollera skolkoden. Försök igen senare." };
+    let schoolId: string | null = null;
+    for (const row of codes ?? []) {
+      if ((await hashCode(data.code, row.salt)) === row.code_hash) {
+        schoolId = row.school_id;
+        break;
+      }
+    }
+    if (!schoolId) {
       const { error } = await supabaseAdmin.from("teacher_code_attempts").insert({ email: data.email, ip });
       if (error) return { ok: false as const, error: "Kunde inte kontrollera försöken. Försök igen senare." };
       return { ok: false as const, error: "Fel skolkod. Kontrollera koden med din skola." };
@@ -100,7 +99,7 @@ export const registerTeacher = createServerFn({ method: "POST" })
     const { data: school, error: schoolError } = await supabaseAdmin
       .from("schools")
       .select("name")
-      .eq("id", data.schoolId)
+      .eq("id", schoolId)
       .maybeSingle();
     if (schoolError || !school) return { ok: false as const, error: "Kunde inte hitta skolan." };
     const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
@@ -136,7 +135,7 @@ export const registerTeacher = createServerFn({ method: "POST" })
     }
     const { error: mErr } = await supabaseAdmin
       .from("school_members")
-      .insert({ user_id: uid, school_id: data.schoolId, member_type: "teacher" });
+      .insert({ user_id: uid, school_id: schoolId, member_type: "teacher" });
     if (mErr) {
       await supabaseAdmin.auth.admin.deleteUser(uid);
       return { ok: false as const, error: "Kunde inte koppla kontot till skolan." };
