@@ -341,7 +341,7 @@ function ProfilPage() {
               {!schoolId && (
                 <div className="grid gap-2">
                   <Label>Ämnen du kan vikariera i</Label>
-                  <div className="grid gap-2 rounded-lg border border-border p-4 sm:grid-cols-2">
+                  <div className="grid gap-2 rounded-panel border border-border p-4 sm:grid-cols-2">
                     {SUBJECTS.map((s) => (
                       <label key={s} htmlFor={`subject-${s}`} className="flex min-h-11 items-center gap-2 text-sm">
                         <Checkbox

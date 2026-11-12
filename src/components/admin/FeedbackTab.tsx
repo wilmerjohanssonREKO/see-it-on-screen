@@ -64,7 +64,7 @@ export function FeedbackTab() {
           ) : (
             <ul className="space-y-3">
               {feedback.map((f) => (
-                <li key={f.id} className="rounded-lg border border-border p-4">
+                <li key={f.id} className="rounded-panel border border-border p-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <Badge variant="secondary">
