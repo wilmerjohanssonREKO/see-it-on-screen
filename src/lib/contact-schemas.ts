@@ -40,6 +40,5 @@ export const teacherRegistrationSchema = z.object({
   email: emailField.transform((v) => v.toLowerCase()),
   password: z.string().min(8).max(72),
   phone: phoneField,
-  schoolId: z.string().uuid(),
   code: z.string().trim().min(1).max(40),
 });

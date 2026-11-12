@@ -1,25 +1,17 @@
 import { PolicyCheckbox } from "@/components/PolicyCheckbox";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
-import { listSchoolsForSignup, registerTeacher } from "@/lib/teacher.functions";
+import { registerTeacher } from "@/lib/teacher.functions";
 import { teacherRegistrationSchema } from "@/lib/contact-schemas";
 import { Brand } from "@/components/AppHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 export const Route = createFileRoute("/larare/registrera")({
   head: () => ({
@@ -41,12 +33,6 @@ export const Route = createFileRoute("/larare/registrera")({
 function TeacherSignup() {
   const navigate = useNavigate();
   const register = useServerFn(registerTeacher);
-  const fetchSchools = useServerFn(listSchoolsForSignup);
-  const { data: schools } = useQuery({
-    queryKey: ["signup-schools"],
-    queryFn: () => fetchSchools(),
-  });
-  const [schoolId, setSchoolId] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,10 +40,6 @@ function TeacherSignup() {
     e.preventDefault();
     if (!e.currentTarget.reportValidity()) return;
     setError(null);
-    if (!schoolId) {
-      setError("Välj skola");
-      return;
-    }
     const fd = new FormData(e.currentTarget);
     const email = String(fd.get("email") ?? "").trim();
     const password = String(fd.get("password") ?? "");
@@ -66,7 +48,6 @@ function TeacherSignup() {
       email,
       password,
       phone: String(fd.get("phone") ?? ""),
-      schoolId,
       code: String(fd.get("code") ?? ""),
     });
     if (!parsed.success) {
@@ -135,21 +116,6 @@ function TeacherSignup() {
                 maxLength={40}
                 pattern="[+0-9 ()-]+"
               />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="teacher-school">Skola</Label>
-              <Select value={schoolId} onValueChange={setSchoolId}>
-                <SelectTrigger id="teacher-school" aria-describedby={error ? "teacher-error" : undefined} aria-invalid={error === "Välj skola"}>
-                  <SelectValue placeholder="Välj skola" />
-                </SelectTrigger>
-                <SelectContent>
-                  {schools?.map((s) => (
-                    <SelectItem key={s.id} value={s.id}>
-                      {s.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="code">Skolkod</Label>
