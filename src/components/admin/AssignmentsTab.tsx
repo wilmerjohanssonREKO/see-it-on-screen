@@ -223,7 +223,7 @@ export function AssignmentsTab() {
                   </Badge>
                 </div>
                 {sub ? (
-                  <div className="rounded-lg bg-secondary p-3 text-sm">
+                  <div className="rounded-panel bg-secondary p-3 text-sm">
                     <p className="font-medium">Tackade ja: {sub.full_name || sub.email}</p>
                     <p className="text-muted-foreground">
                       {sub.email} {sub.phone ? `· ${sub.phone}` : ""}

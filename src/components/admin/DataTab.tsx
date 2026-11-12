@@ -216,7 +216,7 @@ export function DataTab() {
               <Trash2 className="mr-2 h-4 w-4" /> Radera loggdata äldre än 12 månader
             </Button>
           </div>
-          <div className="rounded-lg bg-muted p-4 text-sm text-muted-foreground">
+          <div className="rounded-panel bg-muted p-4 text-sm text-muted-foreground">
             <p className="font-semibold text-foreground">Vad loggas och varför?</p>
             <p className="mt-1">
               För att förbättra matchningen loggar REKO UF händelser i tjänsten: när ett

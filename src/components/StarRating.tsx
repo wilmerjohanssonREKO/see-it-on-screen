@@ -27,7 +27,7 @@ export function StarRatingForm({
   const [comment, setComment] = useState("");
   const [busy, setBusy] = useState(false);
   return (
-    <div className="grid gap-2 rounded-md border border-border p-3">
+    <div className="grid gap-2 rounded-panel border border-border p-3">
       <p className="text-sm font-semibold">{label}</p>
       <div className="flex gap-1" role="radiogroup" aria-label="Betyg 1–5">
         {[1, 2, 3, 4, 5].map((n) => (

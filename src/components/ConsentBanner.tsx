@@ -47,7 +47,7 @@ export function ConsentBanner({ userId }: { userId: string }) {
       aria-labelledby="consent-title"
       className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4"
     >
-      <div className="w-full max-w-md rounded-lg border bg-card p-6 shadow-lg">
+      <div className="w-full max-w-md rounded-panel border bg-card p-6 shadow-lg">
         <h2 id="consent-title" className="text-lg font-bold text-foreground">
           Så hanterar vi dina uppgifter
         </h2>
