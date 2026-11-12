@@ -45,7 +45,7 @@ export const generateSchoolCode = createServerFn({ method: "POST" })
     const salt = toHex(crypto.getRandomValues(new Uint8Array(16)).buffer);
     const code_hash = await hashCode(code, salt);
     const { error } = await supabaseAdmin.from("school_codes").upsert({
-      school_id: schoolId,
+      school_id: data.schoolId,
       code_hash,
       salt,
       updated_at: new Date().toISOString(),
