@@ -1,102 +1,44 @@
-import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { sendTemplateEmail } from "@/lib/email-templates/send-email";
-import { isSandbox } from "@/lib/sandbox";
+import { createServerFn } from '@tanstack/react-start';
+import { z } from 'zod';
+import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 
-/**
- * Sends the two match emails after a substitute claims an assignment:
- * one to the substitute, one to the school. Called from the browser right
- * after a successful claim_assignment RPC. The caller must be the assigned
- * substitute — verified server-side before anything is sent. Email failures
- * never fail the claim itself.
- */
-export const notifyAssignmentClaimed = createServerFn({ method: "POST" })
+/** Booking commits its own outbox rows; browsers can never initiate delivery. */
+export const notifyAssignmentClaimed = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
-  .validator((d: unknown) => z.object({ assignmentId: z.string().uuid() }).parse(d))
+  .validator((value: unknown) => z.object({ assignmentId: z.string().uuid() }).parse(value))
+  .handler(async () => {
+    throw new Error('Bokningsbesked hanteras automatiskt av utskickskön.');
+  });
+
+export const getEmailOutbox = createServerFn({ method: 'GET' })
+  .middleware([requireSupabaseAuth])
+  .validator((value: unknown) => z.object({ offset: z.number().int().min(0).default(0) }).parse(value ?? {}))
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
+    const { data: rows, error } = await context.supabase.rpc('admin_email_outbox' as never, { p_offset: data.offset } as never);
+    if (error) throw new Error('Kunde inte läsa utskickskön');
+    return (rows ?? []) as unknown as EmailOutboxRow[];
+  });
 
-    const { data: assignment } = await supabase
-      .from("assignments")
-      .select("id, school_id, subject, assignment_date, start_time, end_time, assigned_substitute_id")
-      .eq("id", data.assignmentId)
-      .maybeSingle();
+export type EmailOutboxRow = {
+  id: string; assignment_id: string; template: string; recipient_kind: string;
+  status: string; attempts: number; last_error: string | null; created_at: string;
+  available_at: string; test_snapshot: boolean;
+};
 
-    if (!assignment || assignment.assigned_substitute_id !== userId) {
-      throw new Error("Uppdraget hittades inte");
-    }
+export const retryEmailOutbox = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .validator((value: unknown) => z.object({ id: z.string().uuid() }).parse(value))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.rpc('admin_retry_email' as never, { p_id: data.id } as never);
+    if (error) throw new Error('Kunde inte köa ett nytt försök');
+    return { ok: true };
+  });
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    const [substituteResult, schoolResult] = await Promise.all([
-      supabaseAdmin.from("profiles").select("full_name, email, is_test").eq("id", userId).maybeSingle(),
-      supabaseAdmin.from("schools").select("name, email, is_test").eq("id", assignment.school_id).maybeSingle(),
-    ]);
-    if (substituteResult.error || schoolResult.error || !substituteResult.data || !schoolResult.data) {
-      throw new Error("Kunde inte kontrollera mottagarnas testläge. Inga mejl skickades.");
-    }
-    const substitute = substituteResult.data;
-    const school = schoolResult.data;
-
-    const details = {
-      schoolName: school?.name ?? undefined,
-      subject: assignment.subject ?? undefined,
-      date: assignment.assignment_date ?? undefined,
-      startTime: assignment.start_time?.slice(0, 5) ?? undefined,
-      endTime: assignment.end_time?.slice(0, 5) ?? undefined,
-    };
-
-    type SendOutcome = { sent: boolean; reason?: string };
-    const results: { substitute?: SendOutcome; school?: SendOutcome } = {};
-
-    // Sandlådeläge: test-data never leaves the system — capture to the test inbox instead.
-    if (isSandbox(substitute?.is_test, school?.is_test)) {
-      const rows = [
-        substitute?.email && {
-          template: "uppdrag-tilldelat",
-          recipient: substitute.email,
-          assignment_id: assignment.id,
-          data: { name: substitute.full_name, ...details },
-        },
-        school?.email && {
-          template: "vikarie-tilldelad",
-          recipient: school.email,
-          assignment_id: assignment.id,
-          data: { substituteName: substitute?.full_name, ...details },
-        },
-      ].filter(Boolean) as { template: string; recipient: string; assignment_id: string; data: Record<string, unknown> }[];
-      if (rows.length) {
-        const { error } = await supabaseAdmin.from("sandbox_emails").insert(rows as never);
-        if (error) throw new Error("Kunde inte spara testmejlen. Inga riktiga mejl skickades.");
-      }
-      return { substitute: { sent: false, reason: "sandbox" }, school: { sent: false, reason: "sandbox" } };
-    }
-
-
-    if (substitute?.email) {
-      try {
-        results.substitute = await sendTemplateEmail("uppdrag-tilldelat", substitute.email, {
-          templateData: { name: substitute.full_name ?? undefined, ...details },
-          idempotencyKey: `uppdrag-tilldelat-${assignment.id}`,
-        });
-      } catch (error) {
-        console.error("Kunde inte skicka mejl till vikarie:", error);
-        results.substitute = { sent: false, reason: "send_failed" };
-      }
-    }
-
-    if (school?.email) {
-      try {
-        results.school = await sendTemplateEmail("vikarie-tilldelad", school.email, {
-          templateData: { substituteName: substitute?.full_name ?? undefined, ...details },
-          idempotencyKey: `vikarie-tilldelad-${assignment.id}`,
-        });
-      } catch (error) {
-        console.error("Kunde inte skicka mejl till skola:", error);
-        results.school = { sent: false, reason: "send_failed" };
-      }
-    }
-
-    return results;
+export const dispatchQueuedEmails = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: isAdmin, error } = await context.supabase.rpc('is_admin');
+    if (error || isAdmin !== true) throw new Error('Endast admin');
+    const { dispatchEmailOutbox } = await import('./outbox.server');
+    return dispatchEmailOutbox(10);
   });

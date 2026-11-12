@@ -1,4 +1,5 @@
 import { useServerFn } from "@tanstack/react-start";
+import { useAuth } from "@/hooks/useAuth";
 import { listTeachers, removeTeacher } from "@/lib/teacher.functions";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -7,18 +8,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 export function TeachersTab() {
+  const { user } = useAuth();
   const qc = useQueryClient();
   const fetchTeachers = useServerFn(listTeachers);
   const remove = useServerFn(removeTeacher);
-  const { data } = useQuery({ queryKey: ["admin-teachers"], queryFn: () => fetchTeachers() });
+  const { data } = useQuery({
+    queryKey: ["admin-teachers", user?.id],
+    enabled: !!user,
+    queryFn: () => fetchTeachers(),
+  });
   async function del(userId: string) {
     if (!window.confirm("Ta bort läraren från skolan? Hen kan inte längre publicera vikariebehov."))
       return;
     try {
       await remove({ data: { userId } });
-      toast.success(
-        "Läraren är borttagen. Generera gärna en ny skolkod så att koden inte kan användas igen.",
-      );
+      toast.success("Läraren är borttagen. En ny personlig inbjudan krävs för att gå med igen.");
       qc.invalidateQueries({ queryKey: ["admin-teachers"] });
     } catch {
       toast.error("Kunde inte ta bort läraren");

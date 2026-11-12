@@ -1,3 +1,7 @@
+import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { getAdminSubstitutes } from "@/lib/admin-data";
+import { PageControls } from "./PageControls";
 import { useServerFn } from "@tanstack/react-start";
 import { deleteUserCompletely } from "@/lib/user-admin.functions";
 import { getCvSignedUrl } from "@/lib/cv.functions";
@@ -23,17 +27,12 @@ export function SubstitutesTab() {
   const deleteUser = useServerFn(deleteUserCompletely);
   const getCvUrl = useServerFn(getCvSignedUrl);
   const qc = useQueryClient();
-  const { data } = useQuery({
-    queryKey: ["substitutes"],
-    queryFn: async () => {
-      const [{ data: profiles, error }, { data: members }] = await Promise.all([
-        supabase.from("profiles").select("*").order("created_at", { ascending: false }),
-        supabase.from("school_members").select("user_id"),
-      ]);
-      if (error) throw error;
-      const schoolUsers = new Set((members ?? []).map((m) => m.user_id));
-      return (profiles ?? []).filter((p) => !schoolUsers.has(p.id));
-    },
+  const { user } = useAuth();
+  const [page, setPage] = useState(0);
+  const { data, isLoading, isFetching, error, refetch } = useQuery({
+    queryKey: ["substitutes", user?.id, page],
+    enabled: !!user,
+    queryFn: () => getAdminSubstitutes(50, page * 50),
   });
 
   async function update(id: string, patch: TablesUpdate<"profiles">) {
@@ -57,16 +56,30 @@ export function SubstitutesTab() {
   }
 
   async function openCv(substituteId: string) {
+    const popup = window.open("about:blank", "_blank");
+    if (popup) popup.opener = null;
     try {
       const { url } = await getCvUrl({ data: { substituteId } });
-      window.open(url, "_blank", "noopener");
+      if (popup) popup.location.href = url;
+      else toast.error("Tillåt popupfönster för att öppna CV:t.");
     } catch (err) {
+      popup?.close();
       toast.error(err instanceof Error ? err.message : "Kunde inte öppna CV:t");
     }
   }
 
   return (
     <div className="mt-4 grid gap-3">
+      {isLoading && <p role="status">Laddar vikarier…</p>}
+      {error && (
+        <div role="alert">
+          <p>Kunde inte läsa vikarier.</p>
+          <Button variant="outline" onClick={() => refetch()}>
+            Försök igen
+          </Button>
+        </div>
+      )}
+      {!isLoading && !error && !data?.length && <p>Inga vikarier på denna sida.</p>}
       {data?.map((p) => (
         <Card key={p.id}>
           <CardContent className="grid gap-2 pt-6">
@@ -85,7 +98,7 @@ export function SubstitutesTab() {
                   {p.approved ? "Godkänd" : "Ej godkänd"}
                 </Badge>
                 <Badge variant="outline">{BACKGROUND_LABELS[p.background_status]}</Badge>
-                <Badge variant="outline">{p.cv_file_path ? "CV uppladdat" : "Inget CV"}</Badge>
+                <Badge variant="outline">{p.has_cv ? "CV uppladdat" : "Inget CV"}</Badge>
               </div>
             </div>
             <p className="text-sm text-muted-foreground">
@@ -130,7 +143,7 @@ export function SubstitutesTab() {
                   <SelectItem value="needs_renewal">Behöver förnyas</SelectItem>
                 </SelectContent>
               </Select>
-              {p.cv_file_path && (
+              {p.has_cv && (
                 <Button size="sm" variant="ghost" onClick={() => openCv(p.id)}>
                   <FileText className="h-4 w-4" /> Visa CV
                 </Button>
@@ -142,6 +155,12 @@ export function SubstitutesTab() {
           </CardContent>
         </Card>
       ))}
+      <PageControls
+        page={page}
+        hasNext={(data?.length ?? 0) === 50}
+        busy={isFetching}
+        onPage={setPage}
+      />
     </div>
   );
 }

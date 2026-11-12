@@ -1,46 +1,52 @@
-import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { createServerFn } from '@tanstack/react-start';
+import { z } from 'zod';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 
-export const deleteUserCompletely = createServerFn({ method: "POST" })
+/** Repeat calls resume the same deletion job; completed assignments never reopen. */
+export const deleteUserCompletely = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
-  .validator((d: unknown) => z.object({ userId: z.string().uuid() }).parse(d))
+  .validator((value: unknown) => z.object({ userId: z.string().uuid() }).parse(value))
   .handler(async ({ data, context }) => {
-    const { data: isAdmin } = await context.supabase.rpc("is_admin");
-    if (!isAdmin) throw new Error("Endast admin kan ta bort användare");
-    if (data.userId === context.userId) throw new Error("Du kan inte ta bort dig själv");
-
-    const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
+    const { data: isAdmin, error: authError } = await context.supabase.rpc('is_admin');
+    if (authError || isAdmin !== true) throw new Error('Endast admin kan ta bort användare');
+    if (data.userId === context.userId) throw new Error('Du kan inte ta bort dig själv');
+    const prepared = await context.supabase.rpc('admin_prepare_user_deletion' as never, { p_user_id: data.userId } as never);
+    if (prepared.error) throw new Error('Kunde inte förbereda borttagningen. Hantera eventuella kommande skoluppdrag först.');
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const db = supabaseAdmin as SupabaseClient;
     const id = data.userId;
-    async function checked(operation: PromiseLike<{ error: unknown }>) {
-      const { error } = await operation;
-      if (error) throw new Error("Kunde inte ta bort alla kontouppgifter. Försök igen.");
-    }
-
-    // Free up assignments this person held, then remove everything linked to them
-    await checked(db.from("assignments")
-      .update({ status: "open", assigned_substitute_id: null, assigned_at: null })
-      .eq("assigned_substitute_id", id).eq("status", "filled"));
-    await checked(db.from("assignments").update({ assigned_substitute_id: null }).eq("assigned_substitute_id", id));
-    await checked(db.from("notifications").delete().eq("substitute_id", id));
-    await checked(db.from("ratings").delete().eq("substitute_id", id));
-    await checked(db.from("school_ratings").delete().eq("substitute_id", id));
-    await checked(db.from("feedback").delete().eq("user_id", id));
-    await checked(db.from("school_members").delete().eq("user_id", id));
-    await checked(db.from("user_roles").delete().eq("user_id", id));
-
-    for (const bucket of ["background-checks", "cvs", "avatars"]) {
-      while (true) {
-        const { data: files, error } = await db.storage.from(bucket).list(id, { limit: 100 });
-        if (error) throw new Error("Kunde inte läsa kontots filer. Försök igen.");
-        if (!files?.length) break;
-        await checked(db.storage.from(bucket).remove(files.map((f) => `${id}/${f.name}`)));
+    const checked = async (operation: PromiseLike<{ error: unknown }>) => {
+      const result = await operation;
+      if (result.error) throw new Error('deletion_step_failed');
+    };
+    try {
+      const { data: job, error } = await db.from('account_deletion_jobs').select('stage').eq('user_id', id).single();
+      if (error || !job) throw new Error('missing_deletion_job');
+      if (job.stage === 'completed') return { ok: true };
+      // Database deactivation already blocks booking/role access even if Auth is temporarily unavailable.
+      const banned = await db.auth.admin.updateUserById(id, { ban_duration: '876000h' });
+      if (banned.error && banned.error.status !== 404) throw new Error('auth_deactivation_failed');
+      if (job.stage === 'prepared') {
+        for (const bucket of ['background-checks', 'cvs', 'avatars']) {
+          while (true) {
+            const files = await db.storage.from(bucket).list(id, { limit: 100 });
+            if (files.error) throw new Error('storage_list_failed');
+            if (!files.data?.length) break;
+            await checked(db.storage.from(bucket).remove(files.data.map((file) => `${id}/${file.name}`)));
+          }
+        }
+        await checked(db.from('account_deletion_jobs').update({ stage: 'files_removed', updated_at: new Date().toISOString() }).eq('user_id', id));
       }
+      if (job.stage === 'prepared' || job.stage === 'files_removed') {
+        await checked(db.rpc('finalize_user_deletion_data', { p_user_id: id }));
+      }
+      const removed = await db.auth.admin.deleteUser(id);
+      if (removed.error && removed.error.status !== 404) throw new Error('auth_deletion_failed');
+      await checked(db.from('account_deletion_jobs').update({ stage: 'completed', last_error: null, updated_at: new Date().toISOString() }).eq('user_id', id));
+      return { ok: true };
+    } catch {
+      await db.from('account_deletion_jobs').update({ last_error: 'cleanup_incomplete', updated_at: new Date().toISOString() }).eq('user_id', id);
+      throw new Error('Kontot är avaktiverat men borttagningen är inte klar. Försök igen för att fortsätta samma borttagning.');
     }
-
-    const { error: pErr } = await db.from("profiles").delete().eq("id", id);
-    if (pErr) throw new Error(pErr.message);
-    const { error } = await db.auth.admin.deleteUser(id);
-    if (error && !/not found/i.test(error.message)) throw new Error(error.message);
-    return { ok: true };
   });

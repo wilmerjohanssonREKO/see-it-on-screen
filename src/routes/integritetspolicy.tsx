@@ -21,13 +21,13 @@ const sections: { title: string; body: string[] }[] = [
     title: "Vem ansvarar för dina uppgifter",
     body: [
       "REKO UF är personuppgiftsansvarig. REKO UF är en förmedlingstjänst: vi kopplar ihop gymnasieskolor med vikarier. Vi är inte arbetsgivare och hyr inte ut personal — anställningen sker mellan skolan och vikarien. Vi tar aldrig betalt av vikarier.",
-      "Kontakt: [ERT NAMN], [ER E-POST], [ERT TELEFONNUMMER].",
+      "Kontakt: REKO UF, hej@rekoweb.com.",
     ],
   },
   {
     title: "Vilka uppgifter vi sparar",
     body: [
-      "Namn, mejladress och telefonnummer. Som vikarie även adress (för att räkna ut avstånd till skolor), ämnen, tillgänglighet och ditt CV om du laddar upp det.",
+      "Namn, mejladress och telefonnummer. Som vikarie även adress, ämnen, tillgänglighet, dina intresseanmälningar och ditt CV om du laddar upp det. Hemadressen visas inte för skolor.",
       "Vi sparar inte ditt utdrag ur belastningsregistret. Du visar upp originalet och vi noterar bara att det är kontrollerat och när.",
       "Skolor och lärare: skolans namn, kontaktperson, kontaktuppgifter och adress.",
       "Du måste vara 18 år eller äldre för att bli vikarie.",
@@ -44,15 +44,15 @@ const sections: { title: string; body: string[] }[] = [
   {
     title: "Vem som får del av uppgifterna",
     body: [
-      "Skolor ser namn, kontaktuppgifter och ungefärligt avstånd för vikarier som anmält sig till deras uppdrag — aldrig din hemadress.",
-      "Uppgifterna lagras hos vår molnleverantör inom EU/EES. Postnummer och ort skickas till kartjänsten OpenStreetMap (Nominatim) för att räkna fram en ungefärlig position.",
+      "Skolor får granska behöriga sökandes namn, profil och CV inför val av vikarie. Hemadressen delas inte. Tillgång till privata filer kräver även vikariens samtycke.",
+      "Vi använder Lovable och Supabase för webbplats, inloggning, databas och privat fillagring samt en mejltjänst för kontomeddelanden och bokningsbesked. Kontakta oss för uppgifter om personuppgiftsbiträden och lagringsplats. Avstånd används inte för att filtrera vikarieuppdrag.",
     ],
   },
   {
     title: "Hur länge vi sparar dem",
     body: [
-      "Kontouppgifter sparas så länge du har ett konto. Tar du bort kontot raderas profil, CV och kopplingar. Konton som inte använts på 24 månader raderas.",
-      "Användningsloggen raderas efter 12 månader.",
+      "Kontouppgifter sparas för att driva ditt konto och hantera uppdrag. Du kan begära radering genom att kontakta oss. Radering av kontouppgifter och filer hanteras separat från uppdragshistorik för att avslutade uppdrag inte ska öppnas igen.",
+      "Det finns en administrativ rutin för att rensa användningsloggar äldre än 12 månader. Automatiska lagringstider för övriga uppgifter fastställs av REKO; kontakta oss för besked om vilka uppgifter som finns kvar om dig.",
     ],
   },
   {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -11,6 +11,11 @@ import { toast } from "sonner";
 export function ConsentBanner({ userId }: { userId: string }) {
   const [needsConsent, setNeedsConsent] = useState(false);
   const [saving, setSaving] = useState(false);
+  const dialog = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    if (needsConsent && dialog.current && !dialog.current.open) dialog.current.showModal();
+  }, [needsConsent]);
 
   useEffect(() => {
     let cancelled = false;
@@ -41,13 +46,12 @@ export function ConsentBanner({ userId }: { userId: string }) {
   };
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
+    <dialog
+      ref={dialog}
+      onCancel={event => event.preventDefault()}
       aria-labelledby="consent-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4"
+      className="m-auto w-[calc(100%-2rem)] max-w-md rounded-panel border bg-card p-6 text-foreground shadow-lg backdrop:bg-foreground/40"
     >
-      <div className="w-full max-w-md rounded-panel border bg-card p-6 shadow-lg">
         <h2 id="consent-title" className="text-lg font-bold text-foreground">
           Så hanterar vi dina uppgifter
         </h2>
@@ -66,7 +70,10 @@ export function ConsentBanner({ userId }: { userId: string }) {
         >
           {saving ? "Sparar…" : "Jag har läst och accepterar integritetspolicyn"}
         </Button>
-      </div>
-    </div>
+        <Button variant="ghost" className="mt-2 w-full" disabled={saving} onClick={async () => {
+          const { error } = await supabase.auth.signOut();
+          if (error) toast.error("Kunde inte logga ut. Försök igen.");
+        }}>Logga ut</Button>
+    </dialog>
   );
 }

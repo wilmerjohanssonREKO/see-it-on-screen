@@ -14,13 +14,13 @@ interface Props {
 const Email = ({ schoolName, substituteName, subject, date, startTime, endTime }: Props) => (
   <Html lang="sv" dir="ltr">
     <Head />
-    <Preview>En vikarie har tagit ert uppdrag ({subject ?? 'vikariebehov'})</Preview>
+    <Preview>Vikarien är bokad ({subject ?? 'vikariebehov'})</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={heading}>En vikarie har tagit ert uppdrag</Heading>
+        <Heading style={heading}>Vikarien är bokad</Heading>
         <Text style={text}>{schoolName ? `Hej ${schoolName}!` : 'Hej!'}</Text>
         <Text style={text}>
-          Ert vikariebehov har tillsatts. Vikarien ser era kontaktuppgifter i sitt schema.
+          Den vikarie ni valde har bokats för uppdraget. Vikarien ser era kontaktuppgifter i sitt schema.
         </Text>
         <Section style={box}>
           <Text style={row}><strong>Vikarie:</strong> {substituteName ?? '—'}</Text>
@@ -39,7 +39,7 @@ const Email = ({ schoolName, substituteName, subject, date, startTime, endTime }
 
 export const template = {
   component: Email,
-  subject: (d: Record<string, any>) => `En vikarie har tagit ert uppdrag (${d['subject'] ?? 'vikariebehov'})`,
+  subject: (d: Record<string, any>) => `Vikarien är bokad (${d['subject'] ?? 'vikariebehov'})`,
   displayName: 'Vikarie tilldelad (skola)',
   previewData: {
     schoolName: 'Testgymnasiet',

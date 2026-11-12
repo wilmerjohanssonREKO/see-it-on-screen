@@ -10,6 +10,8 @@ import {
   exportEventLogCsv,
   purgeOldLogs,
 } from "@/lib/stats.functions";
+import { useAuth } from "@/hooks/useAuth";
+import { EmailOutboxPanel } from "./EmailOutboxPanel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -49,6 +51,8 @@ function downloadCsv(filename: string, csv: string) {
 }
 
 export function DataTab() {
+  const { user } = useAuth();
+  const [offset, setOffset] = useState(0);
   const getMetrics = useServerFn(getAssignmentMetrics);
   const getMetricsCsv = useServerFn(exportMetricsCsv);
   const getLogCsv = useServerFn(exportEventLogCsv);
@@ -57,9 +61,10 @@ export function DataTab() {
   const [sortAsc, setSortAsc] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  const { data: metrics, refetch } = useQuery({
-    queryKey: ["admin-metrics"],
-    queryFn: () => getMetrics(),
+  const { data: metrics, refetch, isPending, isError, isFetching } = useQuery({
+    queryKey: ["admin-metrics", user?.id, offset],
+    enabled: !!user,
+    queryFn: () => getMetrics({ data: { offset, limit: 100 } }),
   });
 
   const rows = metrics ?? [];
@@ -130,25 +135,25 @@ export function DataTab() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Uppdrag totalt</CardDescription>
+            <CardDescription>Uppdrag på denna sida</CardDescription>
             <CardTitle className="text-3xl">{rows.length}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Andel tillsatta</CardDescription>
+            <CardDescription>Andel tillsatta på sidan</CardDescription>
             <CardTitle className="text-3xl">{fillRate === null ? "–" : `${fillRate} %`}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Mediantid till svar</CardDescription>
+            <CardDescription>Mediantid till svar på sidan</CardDescription>
             <CardTitle className="text-3xl">{fmtMinutes(medResponse)}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Mediantid till tillsatt</CardDescription>
+            <CardDescription>Mediantid till tillsatt på sidan</CardDescription>
             <CardTitle className="text-3xl">{fmtMinutes(medFilled)}</CardTitle>
           </CardHeader>
         </Card>
@@ -156,10 +161,12 @@ export function DataTab() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Alla uppdrag</CardTitle>
-          <CardDescription>Klicka på en kolumnrubrik för att sortera.</CardDescription>
+          <CardTitle>Uppdragsstatistik</CardTitle>
+          <CardDescription>Visar högst 100 uppdrag per sida. Summeringarna gäller denna sida; CSV-exporten omfattar samtliga sidor.</CardDescription>
         </CardHeader>
         <CardContent className="overflow-x-auto">
+          {isPending && <p>Laddar statistik…</p>}
+          {isError && <p role="alert">Kunde inte hämta statistiken. <Button variant="link" onClick={() => void refetch()}>Försök igen</Button></p>}
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b text-muted-foreground">
@@ -197,8 +204,11 @@ export function DataTab() {
               )}
             </tbody>
           </table>
+          <div className="mt-4 flex gap-3"><Button variant="outline" disabled={offset === 0 || isFetching} onClick={() => setOffset(Math.max(0, offset - 100))}>Föregående</Button><Button variant="outline" disabled={isFetching || rows.length < 100} onClick={() => setOffset(offset + 100)}>Nästa</Button></div>
         </CardContent>
       </Card>
+
+      <EmailOutboxPanel />
 
       <Card>
         <CardHeader>
@@ -220,14 +230,12 @@ export function DataTab() {
             <p className="font-semibold text-foreground">Vad loggas och varför?</p>
             <p className="mt-1">
               För att förbättra matchningen loggar REKO UF händelser i tjänsten: när ett
-              vikariebehov skapas och publiceras, när en notis skickas (med avstånd i km och om det
-              var kort varsel), när en vikarie öppnar ett uppdrag, när någon tackar ja, när en skola
+              vikariebehov skapas och publiceras, när en notis skapas, när en vikarie öppnar ett uppdrag, när någon anmäler intresse, när en skola
               tackar nej till en vikarie, samt när ett uppdrag tillsätts eller går ut. Loggen
               innehåller aldrig namn, e-post, telefonnummer eller postnummer. Vikarier lagras som en
               pseudonym (en envägskryptering av användar-id:t) så att samma vikarie kan räknas
               samman utan att kunna identifieras i exporterad data. Tidsstämplar sätts av databasen.
-              Loggdata äldre än 12 månader raderas. Denna text kan återanvändas i
-              integritetspolicyn.
+              Admin kan radera loggdata äldre än 12 månader med knappen ovan. Automatisk gallring ska inte betraktas som aktiv innan ett schema har konfigurerats och verifierats.
             </p>
           </div>
         </CardContent>

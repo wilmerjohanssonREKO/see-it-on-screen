@@ -1,10 +1,13 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useRouter } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { LogOut, Menu } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useAuth, useIsAdmin, useMySchoolId, useProfile } from "@/hooks/useAuth";
 import { SubstituteAvatar } from "@/components/SubstituteAvatar";
+import { clearPrivateCache } from "@/lib/auth-cache";
+import { toast } from "sonner";
 
 export function Brand({ className = "" }: { className?: string }) {
   return (
@@ -22,12 +25,17 @@ export function AppHeader() {
   const { data: schoolId } = useMySchoolId(session?.user.id);
   const { data: profile } = useProfile(session?.user.id);
   const navigate = useNavigate();
+  const router = useRouter();
+  const client = useQueryClient();
   const [menuOpen, setMenuOpen] = useState(false);
   const navClass = "flex min-h-11 items-center rounded-button px-3 py-2 font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground";
   async function signOut() {
-    await supabase.auth.signOut();
+    clearPrivateCache(client);
+    const { error } = await supabase.auth.signOut();
+    if (error) { toast.error("Kunde inte logga ut. Försök igen."); return; }
     setMenuOpen(false);
-    navigate({ to: "/" });
+    await navigate({ to: "/" });
+    await router.invalidate();
   }
 
   return (

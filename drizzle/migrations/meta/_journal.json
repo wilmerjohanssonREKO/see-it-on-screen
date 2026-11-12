@@ -134,6 +134,34 @@
       "when": 1793778418399,
       "tag": "0018_reject_past_assignment_dates",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1794517200000,
+      "tag": "0019_verified_invitations",
+      "breakpoints": false
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1794517201000,
+      "tag": "0020_school_selection_lifecycle",
+      "breakpoints": false
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1794517202000,
+      "tag": "0021_transactional_outbox",
+      "breakpoints": false
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1794517203000,
+      "tag": "0022_efficiency",
+      "breakpoints": false
     }
   ]
 }

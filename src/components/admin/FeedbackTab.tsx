@@ -1,3 +1,7 @@
+import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { PageControls } from "./PageControls";
+import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,12 +29,23 @@ export function FeedbackTab() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const feedbackTable = () => (supabase as any).from("feedback");
 
-  const { data: feedback = [], isLoading } = useQuery<FeedbackRow[]>({
-    queryKey: ["admin-feedback"],
+  const { user } = useAuth();
+  const [page, setPage] = useState(0);
+  const {
+    data: feedback = [],
+    isLoading,
+    isFetching,
+    error,
+    refetch,
+  } = useQuery<FeedbackRow[]>({
+    queryKey: ["admin-feedback", user?.id, page],
+    enabled: !!user,
     queryFn: async () => {
       const { data, error } = await feedbackTable()
         .select("id, role, category, message, score, created_at, profiles(full_name, email)")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .order("id")
+        .range(page * 50, page * 50 + 49);
       if (error) throw error;
       return data as FeedbackRow[];
     },
@@ -50,12 +65,19 @@ export function FeedbackTab() {
         <CardHeader>
           <CardTitle>Kundfeedback</CardTitle>
           <CardDescription>
-            {feedback.length} synpunkter insamlade
-            {avgScore ? ` · snittbetyg ${avgScore}/5` : ""}
+            {feedback.length} synpunkter på denna sida
+            {avgScore ? ` · sidans snittbetyg ${avgScore}/5` : ""}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
+          {error ? (
+            <div role="alert">
+              <p>Kunde inte läsa feedback.</p>
+              <Button variant="outline" onClick={() => refetch()}>
+                Försök igen
+              </Button>
+            </div>
+          ) : isLoading ? (
             <p className="text-sm text-muted-foreground">Laddar…</p>
           ) : feedback.length === 0 ? (
             <p className="text-sm text-muted-foreground">
@@ -90,6 +112,12 @@ export function FeedbackTab() {
               ))}
             </ul>
           )}
+          <PageControls
+            page={page}
+            hasNext={feedback.length === 50}
+            busy={isFetching}
+            onPage={setPage}
+          />
         </CardContent>
       </Card>
     </div>
