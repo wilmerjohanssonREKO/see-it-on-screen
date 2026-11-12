@@ -23,7 +23,7 @@ export function AppHeader() {
   const { data: profile } = useProfile(session?.user.id);
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
-  const navClass = "flex min-h-11 items-center rounded-md px-3 py-2 font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground";
+  const navClass = "flex min-h-11 items-center rounded-button px-3 py-2 font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground";
   async function signOut() {
     await supabase.auth.signOut();
     setMenuOpen(false);
@@ -36,7 +36,7 @@ export function AppHeader() {
         <Brand />
         <nav aria-label="Huvudnavigation" className="hidden items-center gap-1 text-sm md:flex [&>a]:min-h-11 [&>a]:items-center [&>a]:inline-flex">
           {!session && (
-            <Link to="/kontakt" className="rounded-md px-3 py-2 font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground" activeProps={{ className: "bg-secondary text-foreground" }}>
+            <Link to="/kontakt" className="rounded-button px-3 py-2 font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground" activeProps={{ className: "bg-secondary text-foreground" }}>
               Kontakt
             </Link>
           )}
@@ -45,7 +45,7 @@ export function AppHeader() {
               {schoolId ? (
                 <Link
                   to="/skola"
-                  className="rounded-md px-3 py-2 font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                  className="rounded-button px-3 py-2 font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                 activeProps={{ className: "bg-secondary text-foreground" }}
                 >
                   Vikariebehov
@@ -54,14 +54,14 @@ export function AppHeader() {
                 <>
               <Link
                 to="/uppdrag"
-                className="rounded-md px-3 py-2 font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                className="rounded-button px-3 py-2 font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                 activeProps={{ className: "bg-secondary text-foreground" }}
               >
                 Schema
               </Link>
               <Link
                 to="/profil"
-                className="rounded-md px-3 py-2 font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                className="rounded-button px-3 py-2 font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                 activeProps={{ className: "bg-secondary text-foreground" }}
               >
                 Min profil
@@ -70,7 +70,7 @@ export function AppHeader() {
               )}
               <Link
                 to="/feedback"
-                className="rounded-md px-3 py-2 font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                className="rounded-button px-3 py-2 font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                 activeProps={{ className: "bg-secondary text-foreground" }}
               >
                 Feedback
@@ -78,7 +78,7 @@ export function AppHeader() {
               {isAdmin && (
                 <Link
                   to="/admin"
-                  className="rounded-md px-3 py-2 font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                  className="rounded-button px-3 py-2 font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                   activeProps={{ className: "bg-secondary text-foreground" }}
                 >
                   Admin
