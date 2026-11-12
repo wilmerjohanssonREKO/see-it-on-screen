@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Mail, Phone, UserRound } from "lucide-react";
+import { Mail, UserRound } from "lucide-react";
 import { AppHeader } from "@/components/AppHeader";
 import { PublicFooter } from "@/components/PublicFooter";
 
@@ -27,15 +27,14 @@ function KontaktPage() {
         <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground">Vill din skola använda REKO? Kontakta oss så bokar vi in ett möte</p>
         <dl className="mt-10 divide-y divide-border border-y border-border">
           {[
-            { icon: UserRound, label: "Kontaktperson", value: "[ERT NAMN]" },
-            { icon: Mail, label: "E-post", value: "[ER E-POST]" },
-            { icon: Phone, label: "Telefon", value: "[ERT TELEFONNUMMER]" },
+            { icon: UserRound, label: "Kontakt", value: "REKO UF" },
+            { icon: Mail, label: "E-post", value: "hej@rekoweb.com" },
           ].map(({ icon: Icon, label, value }) => (
             <div key={label} className="flex items-start gap-4 py-6">
               <Icon className="mt-1 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
               <div className="min-w-0">
                 <dt className="text-sm text-muted-foreground">{label}</dt>
-                <dd className="mt-1 break-words font-medium text-foreground">{value}</dd>
+                <dd className="mt-1 break-words font-medium text-foreground">{label === "E-post" ? <a href={`mailto:${value}`} className="underline underline-offset-2">{value}</a> : value}</dd>
               </div>
             </div>
           ))}

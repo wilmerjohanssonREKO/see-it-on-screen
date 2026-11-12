@@ -60,7 +60,8 @@ export function useMySchoolId(userId: string | undefined) {
     queryKey: ["my-school-id", userId],
     enabled: !!userId,
     queryFn: async () => {
-      const { data } = await supabase.rpc("my_school_id");
+      const { data, error } = await supabase.rpc("my_school_id");
+      if (error) throw error;
       return (data as string | null) ?? null;
     },
   });

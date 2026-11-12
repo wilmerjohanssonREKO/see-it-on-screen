@@ -25,10 +25,16 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { STATUS_LABELS, SUBJECTS, formatTime } from "@/lib/subjects";
+import { useAuth } from "@/hooks/useAuth";
+import { bookingRpc, hasAssignmentStarted } from "@/lib/booking";
+import { QueryError } from "@/components/booking/QueryState";
+import { AssignmentApplicants } from "@/components/booking/AssignmentApplicants";
+import { CancellationRequest } from "@/components/booking/CancellationRequest";
 
 export const Route = createFileRoute("/_authenticated/skola")({
   beforeLoad: async () => {
-    const { data } = await supabase.rpc("my_school_id");
+    const { data, error } = await supabase.rpc("my_school_id");
+    if (error) throw new Error("Kunde inte kontrollera skolbehörigheten. Försök igen.");
     if (!data) throw redirect({ to: "/uppdrag" });
     return { schoolId: data as string };
   },
@@ -45,62 +51,63 @@ export const Route = createFileRoute("/_authenticated/skola")({
   component: SchoolPage,
 });
 
+type SchoolAssignment = {
+  id: string; subject: string; assignment_date: string; start_time: string; end_time: string;
+  description: string | null; compensation: string | null; status: string; substitute_id: string | null;
+  substitute_name: string | null; substitute_phone: string | null; substitute_rating_avg: number | null;
+  substitute_rating_count: number; completed: boolean; rated: boolean; created_at: string;
+  applicant_count: number; cancellation_status: string | null; has_cv: boolean;
+};
+const PAGE_SIZE = 25;
+
 function CvButton({ assignmentId }: { assignmentId: string }) {
   const getCv = useServerFn(getCvForAssignment);
-  const { data } = useQuery({
-    queryKey: ["cv-for-assignment", assignmentId],
-    queryFn: async () => {
+  const [busy, setBusy] = useState(false);
+  return <Button type="button" size="sm" className="min-h-11" variant="outline" disabled={busy} onClick={async () => {
+    const tab = window.open("about:blank", "_blank");
+    if (tab) tab.opener = null;
+    setBusy(true);
+    try {
       const { url } = await getCv({ data: { assignmentId } });
-      return url;
-    },
-    staleTime: 30_000,
-  });
-  if (!data) return null;
-  return (
-    <Button size="sm" className="min-h-11" variant="outline" onClick={async () => {
-      const tab = window.open("about:blank", "_blank");
-      if (tab) tab.opener = null;
-      try {
-        const { url } = await getCv({ data: { assignmentId } });
-        if (!url) throw new Error("CV saknas");
-        if (tab) tab.location.href = url;
-        else window.open(url, "_blank", "noopener,noreferrer");
-      } catch {
-        tab?.close();
-        toast.error("Kunde inte öppna CV:t");
-      }
-    }}>
-      <FileText className="h-4 w-4" /> Läs CV
-    </Button>
-  );
+      if (!url) throw new Error("CV saknas");
+      if (tab) tab.location.href = url;
+      else window.open(url, "_blank", "noopener,noreferrer");
+    } catch { tab?.close(); toast.error("Kunde inte öppna CV:t"); }
+    finally { setBusy(false); }
+  }}><FileText className="h-4 w-4" /> {busy ? "Öppnar…" : "Läs CV"}</Button>;
 }
 
 function SchoolPage() {
   const { schoolId } = Route.useRouteContext();
+  const { user } = useAuth();
+  const userId = user?.id;
+  const [page, setPage] = useState(0);
   const qc = useQueryClient();
   const [subject, setSubject] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const { data: school } = useQuery({
-    queryKey: ["my-school", schoolId],
+  const schoolQuery = useQuery({
+    queryKey: ["my-school", userId, schoolId],
+    enabled: !!userId,
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("schools")
         .select("name, street_address, postal_code, city")
         .eq("id", schoolId)
         .maybeSingle();
-      return data;
-    },
-  });
-
-  const { data: list } = useQuery({
-    queryKey: ["school-assignments"],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc("school_assignments");
       if (error) throw error;
       return data;
     },
   });
+
+  const school = schoolQuery.data;
+  const listQuery = useQuery({
+    queryKey: ["school-assignments", userId, schoolId, page],
+    enabled: !!userId,
+    queryFn: () => bookingRpc<SchoolAssignment[]>("school_assignments_page", { p_limit: PAGE_SIZE, p_offset: page * PAGE_SIZE }),
+    refetchInterval: 15_000,
+  });
+  const list = listQuery.data;
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -126,7 +133,8 @@ function SchoolPage() {
       );
       return;
     }
-    toast.success(`Publicerat! ${count ?? 0} vikarier har fått notis.`);
+    toast.success(`Publicerat! Behovet är tillgängligt för ${count ?? 0} godkända vikarier.`);
+    setPage(0);
     form.reset();
     setSubject("");
     qc.invalidateQueries({ queryKey: ["school-assignments"] });
@@ -146,17 +154,6 @@ function SchoolPage() {
     qc.invalidateQueries({ queryKey: ["school-assignments"] });
   }
 
-  async function decline(id: string) {
-    if (!window.confirm("Tacka nej till vikarien? Uppdraget blir öppet igen för andra vikarier."))
-      return;
-    const { error } = await supabase.rpc("decline_substitute", { p_assignment_id: id });
-    if (error) {
-      toast.error("Kunde inte tacka nej");
-      return;
-    }
-    toast.success("Vikarien är borttagen från uppdraget — det är öppet igen.");
-    qc.invalidateQueries({ queryKey: ["school-assignments"] });
-  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -169,15 +166,14 @@ function SchoolPage() {
               {school.street_address}, {school.postal_code} {school.city}
             </p>
           )}
-          <p className="text-muted-foreground">
-            Lägg upp ett vikariebehov
-          </p>
+          <p className="text-muted-foreground">Lägg upp ett vikariebehov och välj bland intresserade vikarier.</p>
+          {schoolQuery.isError && <QueryError retry={() => { void schoolQuery.refetch(); }} message="Kunde inte hämta skolans uppgifter." />}
         </div>
 
         <Card className="shadow-soft">
           <CardHeader>
             <CardTitle>Nytt vikariebehov</CardTitle>
-            <CardDescription>Första godkända vikarien som tackar ja får uppdraget.</CardDescription>
+            <CardDescription>Vikarier anmäler intresse. Ni granskar profiler och väljer vem som får uppdraget.</CardDescription>
           </CardHeader>
           <CardContent>
             <form className="grid gap-6 [&_input]:min-h-11 [&_button]:min-h-11" onSubmit={submit}>
@@ -238,7 +234,10 @@ function SchoolPage() {
 
         <section className="grid gap-3">
           <h2 className="font-display text-xl font-semibold">Era vikariebehov</h2>
-          {list?.length === 0 && <p className="text-muted-foreground">Inga behov än.</p>}
+          <p className="text-sm text-muted-foreground">Uppdateras automatiskt var 15:e sekund.</p>
+          {listQuery.isPending && <p role="status">Hämtar era uppdrag…</p>}
+          {listQuery.isError && <QueryError retry={() => { void listQuery.refetch(); }} message="Kunde inte hämta era uppdrag." />}
+          {!listQuery.isPending && !listQuery.isError && list?.length === 0 && <p className="text-muted-foreground">Inga behov än.</p>}
           {list?.map((a) => (
             <Card key={a.id}>
               <CardContent className="grid gap-3 pt-6">
@@ -265,22 +264,29 @@ function SchoolPage() {
                   </Badge>
               </div>
                 <div className="flex flex-wrap items-center gap-3">
-                  {a.status === "filled" && a.substitute_name && (
+                  {a.status === "filled" && a.has_cv && !a.completed && (
                     <CvButton assignmentId={a.id} />
                   )}
-                  {a.status === "filled" && a.substitute_name && !a.completed && (
-                    <Button size="sm" className="min-h-11" variant="outline" onClick={() => decline(a.id)}>
-                      Tacka nej
-                    </Button>
-                  )}
+
                 </div>
-                {a.completed && !a.rated && (
+                {a.status === "open" && !hasAssignmentStarted(a.assignment_date, a.start_time) && userId && (
+                  <AssignmentApplicants assignmentId={a.id} schoolId={schoolId} userId={userId} count={a.applicant_count} />
+                )}
+                {(a.cancellation_status || ((a.status === "open" || a.status === "filled") && !hasAssignmentStarted(a.assignment_date, a.start_time))) && (
+                  <CancellationRequest assignmentId={a.id} status={a.cancellation_status} canRequest={(a.status === "open" || a.status === "filled") && !hasAssignmentStarted(a.assignment_date, a.start_time)} />
+                )}
+                {a.completed && !a.rated && a.substitute_id && (
                   <StarRatingForm label="Betygsätt vikarien" onSubmit={(score, comment) => rate(a.id, score, comment)} />
                 )}
                 {a.completed && a.rated && <p className="text-sm text-muted-foreground">Ni har betygsatt vikarien.</p>}
               </CardContent>
             </Card>
           ))}
+          <div className="flex items-center justify-between gap-3">
+            <Button type="button" variant="outline" disabled={page === 0 || listQuery.isFetching} onClick={() => setPage((p) => p - 1)}>Föregående</Button>
+            <span className="text-sm text-muted-foreground">Sida {page + 1}</span>
+            <Button type="button" variant="outline" disabled={listQuery.isFetching || !list || list.length < PAGE_SIZE} onClick={() => setPage((p) => p + 1)}>Nästa</Button>
+          </div>
         </section>
       </main>
     </div>

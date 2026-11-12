@@ -30,3 +30,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Runtime credentials belong in hosting settings, never in Git.
+.env*
+!.env.example

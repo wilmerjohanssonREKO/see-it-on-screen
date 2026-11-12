@@ -1,7 +1,7 @@
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import { useServerFn } from "@tanstack/react-start";
-import { createSchoolLogin } from "@/lib/school-admin.functions";
-import { generateSchoolCode } from "@/lib/teacher.functions";
+import { InvitationForm } from "@/components/admin/InvitationForm";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
@@ -15,12 +15,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export function SchoolsTab() {
+  const { user } = useAuth();
   const saveContact = useServerFn(saveSchoolContact);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const qc = useQueryClient();
   const { data } = useQuery({
-    queryKey: ["schools"],
+    queryKey: ["schools", user?.id],
+    enabled: !!user,
     queryFn: async () => {
       const { data, error } = await supabase.from("schools").select("*").order("name");
       if (error) throw error;
@@ -53,8 +55,9 @@ export function SchoolsTab() {
   }
 
   async function deleteSchool(id: string) {
+    if (!window.confirm("Radera skolan? Skolor med uppdragshistorik kan inte raderas eftersom historiken ska bevaras.")) return;
     const { error } = await supabase.from("schools").delete().eq("id", id);
-    if (error) toast.error("Kunde inte ta bort skolan");
+    if (error) toast.error("Skolan kunde inte raderas. Befintlig uppdragshistorik måste bevaras.");
     else {
       toast.success("Skola borttagen");
       qc.invalidateQueries({ queryKey: ["schools"] });
@@ -159,107 +162,12 @@ export function SchoolsTab() {
               >
                 Ändra uppgifter
               </Button>
-              <SchoolLoginForm schoolId={s.id} defaultEmail={s.email ?? ""} />
-              <SchoolCodeButton schoolId={s.id} />
+              <InvitationForm schoolId={s.id} defaultEmail={s.email ?? ""} memberType="school" />
+              <InvitationForm schoolId={s.id} memberType="teacher" />
             </CardContent>
           </Card>
         ))}
       </div>
-    </div>
-  );
-}
-
-/* ---------------- Feedback ---------------- */
-
-function SchoolLoginForm({ schoolId, defaultEmail }: { schoolId: string; defaultEmail: string }) {
-  const create = useServerFn(createSchoolLogin);
-  const [busy, setBusy] = useState(false);
-  async function submit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const fd = new FormData(form);
-    setBusy(true);
-    try {
-      await create({
-        data: {
-          schoolId,
-          email: String(fd.get("email") ?? ""),
-          password: String(fd.get("password") ?? ""),
-        },
-      });
-      toast.success("Inlogg skapat! Skicka uppgifterna till skolan.");
-      form.reset();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Kunde inte skapa inlogg");
-    } finally {
-      setBusy(false);
-    }
-  }
-  return (
-    <form
-      onSubmit={submit}
-      className="mt-4 grid gap-2 border-t border-border pt-4 sm:grid-cols-[1fr_1fr_auto]"
-    >
-      <Input
-        name="email"
-        type="email"
-        placeholder="Skolans inlogg (e-post)"
-        defaultValue={defaultEmail}
-        required
-        maxLength={255}
-      />
-      <Input
-        name="password"
-        type="text"
-        placeholder="Lösenord (minst 8 tecken)"
-        required
-        minLength={8}
-        maxLength={72}
-      />
-      <Button type="submit" size="sm" disabled={busy}>
-        {busy ? "Skapar…" : "Skapa skolinlogg"}
-      </Button>
-    </form>
-  );
-}
-
-function SchoolCodeButton({ schoolId }: { schoolId: string }) {
-  const gen = useServerFn(generateSchoolCode);
-  const [code, setCode] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  async function run() {
-    if (
-      !window.confirm(
-        "Generera ny skolkod? Den gamla koden slutar fungera för nya lärare (redan registrerade lärare behåller åtkomst).",
-      )
-    )
-      return;
-    setBusy(true);
-    try {
-      const res = await gen({ data: { schoolId } });
-      setCode(res.code);
-    } catch {
-      toast.error("Kunde inte generera kod");
-    } finally {
-      setBusy(false);
-    }
-  }
-  return (
-    <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-border pt-4">
-      <Button type="button" size="sm" variant="outline" onClick={run} disabled={busy}>
-        {busy ? "Genererar…" : "Generera ny kod"}
-      </Button>
-      {code ? (
-        <span className="text-sm">
-          Skolkod:{" "}
-          <code className="rounded bg-secondary px-2 py-1 font-mono font-semibold">{code}</code>{" "}
-          <span className="text-muted-foreground">— visas bara nu, ge den till skolan.</span>
-        </span>
-      ) : (
-        <span className="text-sm text-muted-foreground">
-          Lärare använder skolkoden för att skapa konto.
-        </span>
-      )}
     </div>
   );
 }

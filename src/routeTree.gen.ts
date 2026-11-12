@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AterstallLosenordRouteImport } from './routes/aterstall-losenord'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as InbjudanRouteImport } from './routes/inbjudan'
 import { Route as IntegritetspolicyRouteImport } from './routes/integritetspolicy'
 import { Route as KontaktRouteImport } from './routes/kontakt'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -20,6 +22,7 @@ import { Route as AuthenticatedProfilRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedSkolaRouteImport } from './routes/_authenticated/skola'
 import { Route as AuthenticatedUppdragRouteImport } from './routes/_authenticated/uppdrag'
 import { Route as LarareRegistreraRouteImport } from './routes/larare.registrera'
+import { Route as ApiCronOutboxRouteImport } from './routes/api.cron.outbox'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 
 const IndexRoute = IndexRouteImport.update({
@@ -31,9 +34,19 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AterstallLosenordRoute = AterstallLosenordRouteImport.update({
+  id: '/aterstall-losenord',
+  path: '/aterstall-losenord',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InbjudanRoute = InbjudanRouteImport.update({
+  id: '/inbjudan',
+  path: '/inbjudan',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IntegritetspolicyRoute = IntegritetspolicyRouteImport.update({
@@ -76,6 +89,11 @@ const LarareRegistreraRoute = LarareRegistreraRouteImport.update({
   path: '/larare/registrera',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCronOutboxRoute = ApiCronOutboxRouteImport.update({
+  id: '/api/cron/outbox',
+  path: '/api/cron/outbox',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailTransactionalPreviewRoute =
   LovableEmailTransactionalPreviewRouteImport.update({
     id: '/lovable/email/transactional/preview',
@@ -85,7 +103,9 @@ const LovableEmailTransactionalPreviewRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/aterstall-losenord': typeof AterstallLosenordRoute
   '/auth': typeof AuthRoute
+  '/inbjudan': typeof InbjudanRoute
   '/integritetspolicy': typeof IntegritetspolicyRoute
   '/kontakt': typeof KontaktRoute
   '/admin': typeof AuthenticatedAdminRoute
@@ -94,11 +114,14 @@ export interface FileRoutesByFullPath {
   '/skola': typeof AuthenticatedSkolaRoute
   '/uppdrag': typeof AuthenticatedUppdragRoute
   '/larare/registrera': typeof LarareRegistreraRoute
+  '/api/cron/outbox': typeof ApiCronOutboxRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/aterstall-losenord': typeof AterstallLosenordRoute
   '/auth': typeof AuthRoute
+  '/inbjudan': typeof InbjudanRoute
   '/integritetspolicy': typeof IntegritetspolicyRoute
   '/kontakt': typeof KontaktRoute
   '/admin': typeof AuthenticatedAdminRoute
@@ -107,13 +130,16 @@ export interface FileRoutesByTo {
   '/skola': typeof AuthenticatedSkolaRoute
   '/uppdrag': typeof AuthenticatedUppdragRoute
   '/larare/registrera': typeof LarareRegistreraRoute
+  '/api/cron/outbox': typeof ApiCronOutboxRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/aterstall-losenord': typeof AterstallLosenordRoute
   '/auth': typeof AuthRoute
+  '/inbjudan': typeof InbjudanRoute
   '/integritetspolicy': typeof IntegritetspolicyRoute
   '/kontakt': typeof KontaktRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
@@ -122,13 +148,16 @@ export interface FileRoutesById {
   '/_authenticated/skola': typeof AuthenticatedSkolaRoute
   '/_authenticated/uppdrag': typeof AuthenticatedUppdragRoute
   '/larare/registrera': typeof LarareRegistreraRoute
+  '/api/cron/outbox': typeof ApiCronOutboxRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/aterstall-losenord'
     | '/auth'
+    | '/inbjudan'
     | '/integritetspolicy'
     | '/kontakt'
     | '/admin'
@@ -137,11 +166,14 @@ export interface FileRouteTypes {
     | '/skola'
     | '/uppdrag'
     | '/larare/registrera'
+    | '/api/cron/outbox'
     | '/lovable/email/transactional/preview'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/aterstall-losenord'
     | '/auth'
+    | '/inbjudan'
     | '/integritetspolicy'
     | '/kontakt'
     | '/admin'
@@ -150,12 +182,15 @@ export interface FileRouteTypes {
     | '/skola'
     | '/uppdrag'
     | '/larare/registrera'
+    | '/api/cron/outbox'
     | '/lovable/email/transactional/preview'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/aterstall-losenord'
     | '/auth'
+    | '/inbjudan'
     | '/integritetspolicy'
     | '/kontakt'
     | '/_authenticated/admin'
@@ -164,16 +199,20 @@ export interface FileRouteTypes {
     | '/_authenticated/skola'
     | '/_authenticated/uppdrag'
     | '/larare/registrera'
+    | '/api/cron/outbox'
     | '/lovable/email/transactional/preview'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AterstallLosenordRoute: typeof AterstallLosenordRoute
   AuthRoute: typeof AuthRoute
+  InbjudanRoute: typeof InbjudanRoute
   IntegritetspolicyRoute: typeof IntegritetspolicyRoute
   KontaktRoute: typeof KontaktRoute
   LarareRegistreraRoute: typeof LarareRegistreraRoute
+  ApiCronOutboxRoute: typeof ApiCronOutboxRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
 }
 
@@ -193,11 +232,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/aterstall-losenord': {
+      id: '/aterstall-losenord'
+      path: '/aterstall-losenord'
+      fullPath: '/aterstall-losenord'
+      preLoaderRoute: typeof AterstallLosenordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inbjudan': {
+      id: '/inbjudan'
+      path: '/inbjudan'
+      fullPath: '/inbjudan'
+      preLoaderRoute: typeof InbjudanRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/integritetspolicy': {
@@ -256,6 +309,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LarareRegistreraRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/cron/outbox': {
+      id: '/api/cron/outbox'
+      path: '/api/cron/outbox'
+      fullPath: '/api/cron/outbox'
+      preLoaderRoute: typeof ApiCronOutboxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/transactional/preview': {
       id: '/lovable/email/transactional/preview'
       path: '/lovable/email/transactional/preview'
@@ -288,10 +348,13 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AterstallLosenordRoute: AterstallLosenordRoute,
   AuthRoute: AuthRoute,
+  InbjudanRoute: InbjudanRoute,
   IntegritetspolicyRoute: IntegritetspolicyRoute,
   KontaktRoute: KontaktRoute,
   LarareRegistreraRoute: LarareRegistreraRoute,
+  ApiCronOutboxRoute: ApiCronOutboxRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
 }
 export const routeTree = rootRouteImport

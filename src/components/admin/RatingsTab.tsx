@@ -1,3 +1,6 @@
+import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { PageControls } from "./PageControls";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Star, Trash2 } from "lucide-react";
@@ -7,8 +10,11 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export function RatingsTab() {
   const qc = useQueryClient();
-  const { data } = useQuery({
-    queryKey: ["admin-ratings"],
+  const { user } = useAuth();
+  const [page, setPage] = useState(0);
+  const { data, isLoading, isFetching, error, refetch } = useQuery({
+    queryKey: ["admin-ratings", user?.id, page],
+    enabled: !!user,
     queryFn: async () => {
       const [subs, schools] = await Promise.all([
         supabase
@@ -16,14 +22,20 @@ export function RatingsTab() {
           .select(
             "id, score, comment, created_at, profiles(full_name), assignments(subject, assignment_date, schools(name))",
           )
-          .order("created_at", { ascending: false }),
+          .order("created_at", { ascending: false })
+          .order("id")
+          .range(page * 50, page * 50 + 49),
         supabase
           .from("school_ratings")
           .select(
             "id, score, comment, created_at, schools(name), assignments(subject, assignment_date)",
           )
-          .order("created_at", { ascending: false }),
+          .order("created_at", { ascending: false })
+          .order("id")
+          .range(page * 50, page * 50 + 49),
       ]);
+      if (subs.error) throw subs.error;
+      if (schools.error) throw schools.error;
       return { subs: subs.data ?? [], schools: schools.data ?? [] };
     },
   });
@@ -75,9 +87,20 @@ export function RatingsTab() {
 
   return (
     <div className="mt-4 grid gap-6">
+      {isLoading && <p role="status">Laddar omdömen…</p>}
+      {error && (
+        <div role="alert">
+          <p>Kunde inte läsa omdömen.</p>
+          <Button variant="outline" onClick={() => refetch()}>
+            Försök igen
+          </Button>
+        </div>
+      )}
       <section className="grid gap-3">
         <h2 className="text-xl font-semibold">Betyg på vikarier</h2>
-        {!data?.subs.length && <p className="text-muted-foreground">Inga betyg än.</p>}
+        {!isLoading && !error && !data?.subs.length && (
+          <p className="text-muted-foreground">Inga betyg än.</p>
+        )}
         {data?.subs.map((r) => (
           <Row
             key={r.id}
@@ -91,7 +114,9 @@ export function RatingsTab() {
       </section>
       <section className="grid gap-3">
         <h2 className="text-xl font-semibold">Betyg på skolor</h2>
-        {!data?.schools.length && <p className="text-muted-foreground">Inga betyg än.</p>}
+        {!isLoading && !error && !data?.schools.length && (
+          <p className="text-muted-foreground">Inga betyg än.</p>
+        )}
         {data?.schools.map((r) => (
           <Row
             key={r.id}
@@ -103,6 +128,12 @@ export function RatingsTab() {
           />
         ))}
       </section>
+      <PageControls
+        page={page}
+        hasNext={data?.subs.length === 50 || data?.schools.length === 50}
+        busy={isFetching}
+        onPage={setPage}
+      />
     </div>
   );
 }

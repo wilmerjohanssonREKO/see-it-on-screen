@@ -13,14 +13,17 @@ import { useAuth, useProfile } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { STATUS_LABELS, formatTime } from "@/lib/subjects";
+import { STATUS_LABELS, SUBJECTS, formatTime } from "@/lib/subjects";
 import { RatingSummary, StarRatingForm } from "@/components/StarRating";
-import { notifyAssignmentClaimed } from "@/lib/assignment-emails.functions";
+import { bookingRpc, APPLICATION_LABELS, hasAssignmentStarted } from "@/lib/booking";
+import { QueryError } from "@/components/booking/QueryState";
+import { CancellationRequest } from "@/components/booking/CancellationRequest";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/uppdrag")({
   beforeLoad: async () => {
-    const { data } = await supabase.rpc("my_school_id");
+    const { data, error } = await supabase.rpc("my_school_id");
+    if (error) throw new Error("Kunde inte kontrollera kontobehörigheten. Försök igen.");
     if (data) throw redirect({ to: "/skola" });
   },
   head: () => ({
@@ -28,10 +31,10 @@ export const Route = createFileRoute("/_authenticated/uppdrag")({
       { title: "Schema — REKO UF" },
       {
         name: "description",
-        content: "Se alla öppna vikariebehov och tacka ja till uppdrag hos REKO UF.",
+        content: "Se vikariebehov och anmäl intresse hos REKO UF. Skolan väljer vikarie.",
       },
       { property: "og:title", content: "Schema — REKO UF" },
-      { property: "og:description", content: "Vikariebehov du kan tacka ja till." },
+      { property: "og:description", content: "Vikariebehov du kan anmäla intresse för." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -57,7 +60,10 @@ type AssignmentRow = {
   school_rating_count: number;
   completed: boolean;
   rated: boolean;
+  application_status: string | null;
+  cancellation_status: string | null;
 };
+const PAGE_SIZE = 25;
 
 function UppdragPage() {
   const { session } = useAuth();
@@ -65,46 +71,39 @@ function UppdragPage() {
   const { data: profile } = useProfile(userId);
   const qc = useQueryClient();
 
-  const { data: rows, isLoading } = useQuery({
-    queryKey: ["my-assignments", userId],
+  const [page, setPage] = useState(0);
+  const [selected, setSelected] = useState<Date | undefined>();
+  const [subjectFilter, setSubjectFilter] = useState<string>("all");
+  const selectedKey = selected ? format(selected, "yyyy-MM-dd") : null;
+  const assignments = useQuery({
+    queryKey: ["my-assignments", userId, page, selectedKey, subjectFilter],
     enabled: !!userId,
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc("substitute_assignments");
-      if (error) throw error;
-      return (data ?? []) as AssignmentRow[];
-    },
+    queryFn: () => bookingRpc<AssignmentRow[]>("substitute_assignments_page", {
+      p_limit: PAGE_SIZE, p_offset: page * PAGE_SIZE,
+      p_date: selectedKey, p_subject: subjectFilter === "all" ? null : subjectFilter,
+    }),
+    refetchInterval: 15_000,
   });
-
-  // Log once per assignment that the substitute has seen it (server-side write).
-  const loggedViews = useRef<Set<string>>(new Set());
-  useEffect(() => {
-    for (const a of rows ?? []) {
-      if (!loggedViews.current.has(a.id)) {
-        loggedViews.current.add(a.id);
-        void supabase.rpc("log_assignment_view", { p_assignment_id: a.id });
-      }
-    }
-  }, [rows]);
-
-  const claim = useMutation({
-    mutationFn: async (assignmentId: string) => {
-      const { data, error } = await supabase.rpc("claim_assignment", {
-        p_assignment_id: assignmentId,
-      });
-      if (error) throw error;
-      return data as string;
+  const rows = assignments.data;
+  const apply = useMutation({
+    mutationFn: (assignmentId: string) => bookingRpc<string>("apply_assignment", { p_assignment_id: assignmentId }),
+    onSuccess: (result) => {
+      if (result === "applied") toast.success("Intresseanmälan skickad. Skolan väljer vem som får uppdraget.");
+      else if (result === "overlap") toast.error("Du har redan ett uppdrag under den här tiden.");
+      else if (result === "not_approved") toast.error("Din profil är inte godkänd ännu.");
+      else toast.error("Uppdraget är inte längre tillgängligt.");
+      void qc.invalidateQueries({ queryKey: ["my-assignments"] });
     },
-    onSuccess: (result, assignmentId) => {
-      if (result === "claimed") {
-        toast.success("Du har fått uppdraget! Vi hör av oss till skolan.");
-        // Skicka bekräftelsemejl till vikarie och skola (server-side; fel här påverkar inte matchningen).
-        void notifyAssignmentClaimed({ data: { assignmentId } }).catch(() => {});
-      }
-      else if (result === "already_filled") toast.error("Redan tillsatt");
-      else toast.error("Din profil är inte godkänd ännu");
-      qc.invalidateQueries({ queryKey: ["my-assignments"] });
+    onError: (error) => toast.error(error.message || "Kunde inte anmäla intresse"),
+  });
+  const withdraw = useMutation({
+    mutationFn: (assignmentId: string) => bookingRpc<boolean>("withdraw_application", { p_assignment_id: assignmentId }),
+    onSuccess: (changed) => {
+      if (!changed) { toast.error("Intresseanmälan kunde inte återkallas. Den kan redan vara behandlad."); void qc.invalidateQueries({ queryKey: ["my-assignments"] }); return; }
+      toast.success("Din intresseanmälan är återkallad.");
+      void qc.invalidateQueries({ queryKey: ["my-assignments"] });
     },
-    onError: () => toast.error("Något gick fel, försök igen"),
+    onError: (error) => toast.error(error.message || "Kunde inte återkalla intresseanmälan"),
   });
 
   async function rateSchool(id: string, score: number, comment: string) {
@@ -117,7 +116,6 @@ function UppdragPage() {
     qc.invalidateQueries({ queryKey: ["my-assignments"] });
   }
 
-  const [selected, setSelected] = useState<Date | undefined>();
   const toDate = (d: string) => new Date(`${d}T00:00:00`);
   const { mineDays, openDays } = useMemo(() => {
     const mine: Date[] = [];
@@ -128,16 +126,26 @@ function UppdragPage() {
     }
     return { mineDays: mine, openDays: open };
   }, [rows]);
-  const [subjectFilter, setSubjectFilter] = useState<string>("all");
-  const subjectsInList = useMemo(
-    () => Array.from(new Set((rows ?? []).map((a) => a.subject))).sort((x, y) => x.localeCompare(y, "sv")),
-    [rows],
-  );
-  const selectedKey = selected ? format(selected, "yyyy-MM-dd") : null;
-  const visible = (rows ?? [])
-    .filter((a) => (selectedKey ? a.assignment_date === selectedKey : true))
-    .filter((a) => subjectFilter === "all" || a.subject === subjectFilter)
-    .sort((a, b) => (a.assignment_date + a.start_time).localeCompare(b.assignment_date + b.start_time));
+  const visible = rows ?? [];
+  const loggedViews = useRef<Set<string>>(new Set());
+  useEffect(() => { loggedViews.current.clear(); }, [userId]);
+  // Log only cards actually entering the viewport. Server deduplicates repeat views.
+  useEffect(() => {
+    if (!userId || !rows?.length || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        const id = (entry.target as HTMLElement).dataset["assignmentId"];
+        if (!entry.isIntersecting || !id || loggedViews.current.has(id)) continue;
+        loggedViews.current.add(id);
+        observer.unobserve(entry.target);
+        void supabase.rpc("log_assignment_view", { p_assignment_id: id }).then(({ error }) => {
+          if (error) loggedViews.current.delete(id);
+        });
+      }
+    }, { threshold: 0.25 });
+    document.querySelectorAll("[data-assignment-id]").forEach((element) => observer.observe(element));
+    return () => observer.disconnect();
+  }, [rows, userId]);
 
   const approved = profile?.approved && profile?.background_status === "approved";
   const firstName = profile?.full_name?.trim().split(/\s+/)[0];
@@ -148,11 +156,11 @@ function UppdragPage() {
       <main className="mx-auto max-w-5xl px-4 py-8">
         <h1 className="text-3xl font-bold">Schema</h1>
         <p className="mt-1 text-muted-foreground">
-          {firstName ? `God dag, ${firstName}` : "God dag"}
+          {firstName ? `God dag, ${firstName}` : "God dag"}. Anmäl intresse för ett uppdrag – skolan väljer vikarie.
         </p>
 
 
-        {!approved && (
+        {profile && !approved && (
           <Card className="mt-6 border-accent bg-accent/15">
             <CardContent className="pt-6 text-sm">
               <p className="font-semibold">Din profil är inte godkänd ännu</p>
@@ -175,7 +183,7 @@ function UppdragPage() {
               locale={sv}
               weekStartsOn={1}
               selected={selected}
-              onSelect={setSelected}
+              onSelect={(date) => { setSelected(date); setPage(0); }}
               modifiers={{ mine: mineDays, available: openDays }}
               components={{
                 DayButton: ({ modifiers, ...props }) => (
@@ -201,30 +209,23 @@ function UppdragPage() {
         </Card>
 
         <div className="grid gap-4">
-          {subjectsInList.length > 1 && (
-            <Select value={subjectFilter} onValueChange={setSubjectFilter}>
-              <SelectTrigger className="min-h-11 w-full sm:w-64" aria-label="Filtrera på ämne">
-                <SelectValue placeholder="Alla ämnen" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Alla ämnen</SelectItem>
-                {subjectsInList.map((sub) => (
-                  <SelectItem key={sub} value={sub}>{sub}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+          <Select value={subjectFilter} onValueChange={(value) => { setSubjectFilter(value); setPage(0); }}>
+            <SelectTrigger className="min-h-11 w-full sm:w-64" aria-label="Filtrera på ämne"><SelectValue placeholder="Alla ämnen" /></SelectTrigger>
+            <SelectContent><SelectItem value="all">Alla ämnen</SelectItem>{SUBJECTS.map((subject) => <SelectItem key={subject} value={subject}>{subject}</SelectItem>)}</SelectContent>
+          </Select>
+          <p className="text-sm text-muted-foreground">Uppdateras automatiskt var 15:e sekund. Välj ett datum för att se den dagens uppdrag.</p>
           {selected && (
             <div className="flex items-center justify-between gap-2 text-sm">
               <span className="text-muted-foreground">Visar {format(selected, "d MMMM", { locale: sv })}</span>
-              <Button size="sm" className="min-h-11" variant="outline" onClick={() => setSelected(undefined)}>Visa alla</Button>
+              <Button size="sm" className="min-h-11" variant="outline" onClick={() => { setSelected(undefined); setPage(0); }}>Visa alla</Button>
             </div>
           )}
-          {selected && visible.length === 0 && (
+          {!assignments.isPending && !assignments.isError && selected && visible.length === 0 && (
             <p className="text-center text-muted-foreground">Inga jobb den här dagen.</p>
           )}
-          {isLoading && <p className="text-muted-foreground">Laddar…</p>}
-          {!isLoading && (rows?.length ?? 0) === 0 && (
+          {assignments.isPending && <p role="status" className="text-muted-foreground">Hämtar uppdrag…</p>}
+          {assignments.isError && <QueryError retry={() => { void assignments.refetch(); }} message="Kunde inte hämta uppdragen." />}
+          {!assignments.isPending && !assignments.isError && !selected && (rows?.length ?? 0) === 0 && (
             <Card>
               <CardContent className="py-10 text-center text-muted-foreground">
                 Inga öppna uppdrag just nu.
@@ -234,7 +235,7 @@ function UppdragPage() {
           {visible.map((a) => {
             const mine = a.assigned_to_me;
             return (
-              <Card key={a.id} className="shadow-soft">
+              <Card key={a.id} className="shadow-soft" data-assignment-id={a.id}>
                 <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
                   <div>
                     <CardTitle className="text-lg">{a.subject}</CardTitle>
@@ -274,24 +275,23 @@ function UppdragPage() {
                   {mine && a.completed && a.rated && (
                     <p className="text-sm text-muted-foreground">Du har betygsatt skolan.</p>
                   )}
-                  {a.status === "open" ? (
-                    <Button
-                      className="min-h-11 w-full sm:w-auto"
-                      variant="accent"
-                      disabled={!approved || claim.isPending}
-                      onClick={() => claim.mutate(a.id)}
-                    >
-                      Jag kan
-                    </Button>
-                  ) : (
-                    <p className="text-sm font-medium">
-                      {mine ? "Du är tilldelad detta uppdrag." : "Redan tillsatt"}
-                    </p>
+                  {a.application_status && <p role="status" className="text-sm text-muted-foreground">{APPLICATION_LABELS[a.application_status] ?? a.application_status}</p>}
+                  {(a.cancellation_status || (mine && !hasAssignmentStarted(a.assignment_date, a.start_time))) && <CancellationRequest assignmentId={a.id} status={a.cancellation_status} canRequest={mine && a.status === "filled" && !hasAssignmentStarted(a.assignment_date, a.start_time)} />}
+                  {a.status === "open" && !mine && !hasAssignmentStarted(a.assignment_date, a.start_time) && a.application_status !== "rejected" && (
+                    a.application_status === "pending" ? <Button type="button" className="min-h-11 w-full sm:w-auto" variant="outline" disabled={withdraw.isPending} onClick={() => { if (window.confirm("Återkalla din intresseanmälan?")) withdraw.mutate(a.id); }}>Återkalla intresse</Button> :
+                    <Button type="button" className="min-h-11 w-full sm:w-auto" variant="accent" disabled={!approved || apply.isPending} onClick={() => apply.mutate(a.id)}>Anmäl intresse</Button>
                   )}
+                  {mine && <p className="text-sm font-medium">Du är tilldelad detta uppdrag.</p>}
+
                 </CardContent>
               </Card>
             );
           })}
+          <div className="flex items-center justify-between gap-3">
+            <Button type="button" variant="outline" disabled={page === 0 || assignments.isFetching} onClick={() => setPage((p) => p - 1)}>Föregående</Button>
+            <span className="text-sm text-muted-foreground">Sida {page + 1}</span>
+            <Button type="button" variant="outline" disabled={assignments.isFetching || !rows || rows.length < PAGE_SIZE} onClick={() => setPage((p) => p + 1)}>Nästa</Button>
+          </div>
         </div>
         </div>
       </main>

@@ -9,10 +9,10 @@ import { TEMPLATES } from './registry'
 const SITE_NAME = "REKO UF"
 // SENDER_DOMAIN is the verified sender subdomain FQDN (e.g., "notify.example.com").
 // It MUST match the subdomain delegated to Lovable's nameservers. NEVER use the root domain.
-const SENDER_DOMAIN = "notify.rekoweb.com"
+const SENDER_DOMAIN = process.env['REKO_EMAIL_SENDER_DOMAIN'] || "notify.rekoweb.com"
 // FROM_DOMAIN is the domain shown in the From: header (e.g., "example.com").
 // Can be the root domain when display_from_root is enabled — this is cosmetic only.
-const FROM_DOMAIN = "rekoweb.com"
+const FROM_ADDRESS = process.env['REKO_EMAIL_FROM'] || "hej@rekoweb.com"
 
 export type SendTemplateEmailResult =
   | { sent: true }
@@ -37,6 +37,9 @@ export async function sendTemplateEmail(
   to: string,
   options: SendTemplateEmailOptions = {}
 ): Promise<SendTemplateEmailResult> {
+  if (process.env['REKO_EMAIL_SENDER_VERIFIED'] !== 'true') {
+    throw new Error('Email sender must be verified before enabling delivery')
+  }
   const apiKey = process.env['LOVABLE_API_KEY']
   if (!apiKey) {
     throw new Error('LOVABLE_API_KEY is not configured')
@@ -69,7 +72,7 @@ export async function sendTemplateEmail(
     await sendLovableEmail(
       {
         to: recipient,
-        from: { name: SITE_NAME, address: `noreply@${FROM_DOMAIN}` },
+        from: { name: SITE_NAME, address: FROM_ADDRESS },
         sender_domain: SENDER_DOMAIN,
         subject,
         html,
@@ -77,7 +80,7 @@ export async function sendTemplateEmail(
         purpose: 'transactional',
         label: templateName,
         idempotency_key: options.idempotencyKey || crypto.randomUUID(),
-        ...(options.replyTo ? { reply_to: options.replyTo } : {}),
+        reply_to: options.replyTo || process.env['REKO_EMAIL_REPLY_TO'] || 'hej@rekoweb.com',
       },
       { apiKey, sendUrl: process.env['LOVABLE_SEND_URL'] }
     )

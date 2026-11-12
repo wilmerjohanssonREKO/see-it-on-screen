@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { csvCell } from "./csv";
+import { z } from "zod";
+import { pagedCsv } from "./csv-pages";
 
 export type AssignmentMetric = {
   assignment_id: string;
@@ -29,16 +30,43 @@ type EventLogRow = {
   metadata: Record<string, unknown>;
 };
 
-function toCsv(headers: string[], rows: unknown[][]): string {
-  const lines = [headers.join(";")];
-  for (const row of rows) lines.push(row.map(csvCell).join(";"));
-  return lines.join("\n");
-}
+type PagingArgs = { p_limit: number; p_offset: number };
+type ExportArgs = {
+  p_before: string;
+  p_cursor_at: string | null;
+  p_cursor_id: string | null;
+  p_limit: number;
+};
+type PagedRpc = {
+  (
+    name: "admin_assignment_metrics_page",
+    args: PagingArgs,
+  ): PromiseLike<{ data: AssignmentMetric[] | null; error: unknown }>;
+  (
+    name: "admin_assignment_metrics_export_page",
+    args: ExportArgs,
+  ): PromiseLike<{ data: AssignmentMetric[] | null; error: unknown }>;
+  (
+    name: "admin_event_log_export_page",
+    args: ExportArgs,
+  ): PromiseLike<{ data: EventLogRow[] | null; error: unknown }>;
+};
+const paging = z
+  .object({
+    offset: z.number().int().min(0).default(0),
+    limit: z.number().int().min(1).max(100).default(100),
+  })
+  .default({ offset: 0, limit: 100 });
 
 export const getAssignmentMetrics = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<AssignmentMetric[]> => {
-    const { data, error } = await context.supabase.rpc("admin_assignment_metrics");
+  .validator((input: unknown) => paging.parse(input))
+  .handler(async ({ data: page, context }): Promise<AssignmentMetric[]> => {
+    const rpc = context.supabase.rpc.bind(context.supabase) as unknown as PagedRpc;
+    const { data, error } = await rpc("admin_assignment_metrics_page", {
+      p_limit: page.limit,
+      p_offset: page.offset,
+    });
     if (error) throw new Error("Kunde inte hämta statistiken");
     return (data ?? []) as AssignmentMetric[];
   });
@@ -46,51 +74,80 @@ export const getAssignmentMetrics = createServerFn({ method: "GET" })
 export const exportMetricsCsv = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<string> => {
-    const { data, error } = await context.supabase.rpc("admin_assignment_metrics");
-    if (error) throw new Error("Kunde inte hämta statistiken");
-    const rows = ((data ?? []) as AssignmentMetric[]).map((m) => [
-      m.assignment_id,
-      m.subject,
-      m.school_name,
-      m.created_at,
-      m.published_at,
-      m.starts_at,
-      m.notified_count,
-      m.viewed_count,
-      m.accepted_count,
-      m.minutes_to_first_response,
-      m.minutes_to_filled,
-      m.outcome,
-      m.rating,
-    ]);
-    return toCsv(
+    const rpc = context.supabase.rpc.bind(context.supabase) as unknown as PagedRpc;
+    const before = new Date().toISOString();
+    return pagedCsv<AssignmentMetric>(
       [
-        "uppdrag_id", "amne", "skola", "skapad", "publicerad", "startar",
-        "notifierade", "oppnat", "tackat_ja",
-        "minuter_till_forsta_svar", "minuter_till_tillsatt",
-        "utfall", "betyg",
+        "uppdrag_id",
+        "amne",
+        "skola",
+        "skapad",
+        "publicerad",
+        "startar",
+        "notifierade",
+        "oppnat",
+        "tackat_ja",
+        "minuter_till_forsta_svar",
+        "minuter_till_tillsatt",
+        "utfall",
+        "betyg",
       ],
-      rows,
+      async (cursor) => {
+        const { data, error } = await rpc("admin_assignment_metrics_export_page", {
+          p_before: before,
+          p_cursor_at: cursor?.at ?? null,
+          p_cursor_id: cursor?.id ?? null,
+          p_limit: 500,
+        });
+        if (error) throw new Error("Kunde inte hämta statistiken");
+        return data ?? [];
+      },
+      (m) => ({ at: m.created_at, id: m.assignment_id }),
+      (m) => [
+        m.assignment_id,
+        m.subject,
+        m.school_name,
+        m.created_at,
+        m.published_at,
+        m.starts_at,
+        m.notified_count,
+        m.viewed_count,
+        m.accepted_count,
+        m.minutes_to_first_response,
+        m.minutes_to_filled,
+        m.outcome,
+        m.rating,
+      ],
     );
   });
 
 export const exportEventLogCsv = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<string> => {
-    const { data, error } = await context.supabase.rpc("admin_event_log");
-    if (error) throw new Error("Kunde inte hämta loggen");
-    const rows = ((data ?? []) as EventLogRow[]).map((e) => [
-      e.id,
-      e.occurred_at,
-      e.event_type,
-      e.assignment_id,
-      e.school_id,
-      e.substitute_ref,
-      e.metadata,
-    ]);
-    return toCsv(
+    const rpc = context.supabase.rpc.bind(context.supabase) as unknown as PagedRpc;
+    const before = new Date().toISOString();
+    return pagedCsv<EventLogRow>(
       ["id", "tidpunkt", "handelse", "uppdrag_id", "skol_id", "vikarie_pseudonym", "metadata"],
-      rows,
+      async (cursor) => {
+        const { data, error } = await rpc("admin_event_log_export_page", {
+          p_before: before,
+          p_cursor_at: cursor?.at ?? null,
+          p_cursor_id: cursor?.id ?? null,
+          p_limit: 500,
+        });
+        if (error) throw new Error("Kunde inte hämta loggen");
+        return data ?? [];
+      },
+      (e) => ({ at: e.occurred_at, id: e.id }),
+      (e) => [
+        e.id,
+        e.occurred_at,
+        e.event_type,
+        e.assignment_id,
+        e.school_id,
+        e.substitute_ref,
+        e.metadata,
+      ],
     );
   });
 
