@@ -38,6 +38,8 @@ const schema = z.object({
   password: z.string().min(8, "Lösenordet måste vara minst 8 tecken").max(72),
 });
 function AuthPage() {
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => { setHydrated(true); }, []);
   const search = Route.useSearch();
   const navigate = useNavigate();
   const [mode, setMode] = useState<"signin" | "signup" | "forgot">(search.mode ?? "signin");
@@ -207,7 +209,7 @@ function AuthPage() {
               </div>
             </>
           )}
-          <form className="grid gap-4" onSubmit={submit}>
+          <form method="post" action="/auth" className="grid gap-4" onSubmit={submit}>
             {mode === "signup" && (
               <div className="grid gap-2">
                 <Label htmlFor="full_name">Namn</Label>
@@ -259,7 +261,7 @@ function AuthPage() {
                 <PolicyCheckbox />
               </>
             )}
-            <Button type="submit" disabled={busy}>
+            <Button type="submit" disabled={!hydrated || busy}>
               {busy
                 ? "Vänta…"
                 : mode === "signin"

@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "checks": [
+    "SSR form explicitly uses POST",
+    "Submit disabled without hydration",
+    "No credentials in navigation URL"
+  ],
+  "scope": "local SSR; JavaScript disabled; no real credentials"
+}
