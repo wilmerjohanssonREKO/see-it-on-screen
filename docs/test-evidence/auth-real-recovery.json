@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "checks": [
+    "unverified signup cannot log in",
+    "real SMTP confirmation link verifies signup",
+    "verified account can log in",
+    "app recovery form sends real internally captured SMTP mail",
+    "app accepts recovery session and saves replacement password",
+    "old password rejected and new password accepted"
+  ],
+  "external_mail": false,
+  "scope": "real local GoTrue, internal SMTP capture and application recovery UI; synthetic identity only"
+}
