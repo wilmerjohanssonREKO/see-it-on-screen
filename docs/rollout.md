@@ -1,8 +1,15 @@
 # REKO: rollout and operational checks
 
-This branch implements the approved account security, school-selection workflow,
-booking lifecycle and reliable email queue. It has not been deployed and no live
-migrations, account changes or external test emails were performed.
+Release status: PR #1 was merged and version `96d0005` was verified ready in the
+Lovable preview on 2026-11-12. Migrations 0019–0022 were applied and recorded in
+the migration ledger; existing accounts and assignments were preserved. No external
+test emails were sent and the site was not published by this work.
+
+PR #2 proposes migration 0023 and additional flow fixes. Those changes have not
+been applied to the live project. For an upgrade from `96d0005`, apply only the
+new pending migration through the normal migration runner; do not replay applied
+migrations. Review `flow-test-report-2026-11-13.md` before deploying that upgrade.
+The steps below also describe prerequisites for a fresh rollout.
 
 ## Apply safely to the connected project
 
