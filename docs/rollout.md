@@ -5,10 +5,12 @@ Lovable preview on 2026-11-12. Migrations 0019–0022 were applied and recorded 
 the migration ledger; existing accounts and assignments were preserved. No external
 test emails were sent and the site was not published by this work.
 
-PR #2 proposes migration 0023 and additional flow fixes. Those changes have not
-been applied to the live project. For an upgrade from `96d0005`, apply only the
-new pending migration through the normal migration runner; do not replay applied
-migrations. Review `flow-test-report-2026-11-13.md` before deploying that upgrade.
+PR #2 was merged on 2026-11-13 as `5d1ecb7`. Migration 0023 was applied
+atomically and recorded as ledger entry 24. The Lovable preview was verified
+ready on that commit. Existing profiles, school and assignment were unchanged.
+A targeted function/policy restore and reapply rehearsal passed locally; this
+is not verification of a complete hosted backup restore. See
+`test-evidence/release-0023.json`. Do not replay already applied migrations.
 The steps below also describe prerequisites for a fresh rollout.
 
 ## Apply safely to the connected project

@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "scope": "cold boot using installed repository runner; initial seeded fixtures",
+  "real_auth_http_health": 200,
+  "app_auth_http": 200,
+  "fixture_counts": {
+    "schools": 4,
+    "test_schools": 4,
+    "test_profiles": 10,
+    "jobs": 0
+  },
+  "storage_ready": false,
+  "production_used": false
+}

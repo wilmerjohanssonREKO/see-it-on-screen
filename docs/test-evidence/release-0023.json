@@ -1,0 +1,26 @@
+{
+  "date": "2026-11-13",
+  "pull_request": 2,
+  "merged_commit": "5d1ecb76ff5596a073a4b28009df04a7987879cd",
+  "migration": "0023_flow_regressions",
+  "sha256": "0b19a556c27a0e131668a9dfbf21299a7c967731fd364f56fb84091818c06014",
+  "ledger_id": 24,
+  "atomic_migration": true,
+  "preview_ready": true,
+  "published_by_this_change": false,
+  "existing_records_unchanged": true,
+  "preserved_counts": {
+    "profiles": 7,
+    "schools": 1,
+    "assignments": 1
+  },
+  "rls_tables": 21,
+  "pre_change_cancellation_requests": 0,
+  "targeted_function_policy_restore_and_reapply_rehearsal": "passed",
+  "full_backup_restore_in_live_hosting": "not_verified",
+  "local_extended_sql": {
+    "passed": 35,
+    "failed": 0
+  },
+  "github_checks": "success"
+}

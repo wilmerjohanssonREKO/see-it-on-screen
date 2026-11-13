@@ -1,0 +1,2445 @@
+{
+  "run_id": "pilot-20261113T091643-eb5e37",
+  "source_commit": "5d1ecb76ff5596a073a4b28009df04a7987879cd",
+  "model": {
+    "version": 1,
+    "seed": 20261113,
+    "stage_users": [
+      5,
+      10,
+      25,
+      50,
+      100,
+      250
+    ],
+    "initial_stage_only": true,
+    "roles": "one admin, one independent school/substitute pair per two users; odd spare user browses assignments",
+    "think_seconds": {
+      "read": [
+        2,
+        8
+      ],
+      "write": [
+        15,
+        45
+      ],
+      "navigate": [
+        1,
+        4
+      ]
+    },
+    "gates": {
+      "required_task_success_rate": 1,
+      "max_page_errors": 0,
+      "max_external_messages": 0,
+      "max_overlapping_allocations": 0
+    },
+    "timeouts_seconds": {
+      "action": 30,
+      "coordination": 180,
+      "stage": 900
+    },
+    "notes": [
+      "Think times are assumptions, not measurements of real people",
+      "UI timing is local browser/app timing, not a claim about production capacity",
+      "Higher stages require enough unique fixture accounts and explicit run selection",
+      "The first model covers publishing, apply/withdraw/reapply, selection, contact, cancellation, admin decision and queue capture; onboarding/Storage/mail verification are separate integration suites"
+    ],
+    "max_users_per_run": 10,
+    "resource_note": "Current executor cgroup: 2 CPU and 8 GiB. Start5 then10. Reassess runner/app resource saturation before configuring25 or more; no production capacity inference."
+  },
+  "model_version": 1,
+  "seed": 20261113,
+  "users": 10,
+  "max_simultaneous_contexts": 10,
+  "human_timing_scale": 1.0,
+  "think_times_are_assumptions": true,
+  "duration_ms": 222800.03,
+  "passed": true,
+  "completed_users": 10,
+  "clicks": 98,
+  "system_wait_p50_ms": 764.16,
+  "system_wait_p95_ms": 7113.56,
+  "page_errors": 0,
+  "api_requests": 588,
+  "api_http_errors": 0,
+  "api_request_p95_ms": 1700.5,
+  "errors": [],
+  "integrity": {
+    "assignments": 4,
+    "open": 4,
+    "approved_cancellations": 4,
+    "unsafe_fixtures": 0,
+    "overlapping_allocations": 0,
+    "run_outbox": 16,
+    "run_captured": 8,
+    "run_cancelled": 8,
+    "run_unexpected_notice_state": 0,
+    "external_sent": 0,
+    "pending": 0,
+    "captured": 8
+  },
+  "actors": [
+    {
+      "actor": "school-0",
+      "role": "school",
+      "completed": true,
+      "elapsed_ms": 168168.82,
+      "clicks": 12,
+      "totals_ms": {
+        "assumed_think": 54327.59,
+        "click": 4905.78,
+        "input": 237.6,
+        "navigation": 9443.68,
+        "system_wait": 16132.82,
+        "scenario_coordination": 83115.45
+      },
+      "events": [
+        {
+          "kind": "navigation",
+          "action": "open_login",
+          "duration_ms": 9052.43,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "enter_email_focus",
+          "duration_ms": 510.29,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "enter_email",
+          "duration_ms": 96.48,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "enter_password_focus",
+          "duration_ms": 352.39,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "enter_password",
+          "duration_ms": 86.29,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 1535.95,
+          "duration_ms": 1536.68
+        },
+        {
+          "kind": "click",
+          "action": "login",
+          "duration_ms": 65.97,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "login_destination",
+          "duration_ms": 1204.08,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "school_identity",
+          "duration_ms": 8196.7,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 7004.29,
+          "duration_ms": 7053.43
+        },
+        {
+          "kind": "click",
+          "action": "choose_subject",
+          "duration_ms": 3033.93,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 2092.23,
+          "duration_ms": 2092.53
+        },
+        {
+          "kind": "click",
+          "action": "subject_mathematics",
+          "duration_ms": 108.68,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "assignment_date_focus",
+          "duration_ms": 267.54,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "assignment_date",
+          "duration_ms": 9.0,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "start_time_focus",
+          "duration_ms": 46.59,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "start_time",
+          "duration_ms": 10.79,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "end_time_focus",
+          "duration_ms": 75.71,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "end_time",
+          "duration_ms": 17.5,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "write",
+          "planned_ms": 34123.2,
+          "duration_ms": 34124.81
+        },
+        {
+          "kind": "click",
+          "action": "description_focus",
+          "duration_ms": 55.08,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "description",
+          "duration_ms": 17.54,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 2057.73,
+          "duration_ms": 2059.4
+        },
+        {
+          "kind": "click",
+          "action": "publish",
+          "duration_ms": 47.79,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "published_card",
+          "duration_ms": 292.57,
+          "passed": true
+        },
+        {
+          "kind": "scenario_coordination",
+          "action": "wait_for_applicant",
+          "duration_ms": 25057.65,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 1197.08,
+          "duration_ms": 1210.45
+        },
+        {
+          "kind": "navigation",
+          "action": "reload",
+          "duration_ms": 169.4,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 2795.04,
+          "duration_ms": 2796.19
+        },
+        {
+          "kind": "click",
+          "action": "review_applicants",
+          "duration_ms": 63.43,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 2290.54,
+          "duration_ms": 2297.39
+        },
+        {
+          "kind": "click",
+          "action": "select_substitute",
+          "duration_ms": 278.38,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "selected_person_visible",
+          "duration_ms": 1568.06,
+          "passed": true
+        },
+        {
+          "kind": "scenario_coordination",
+          "action": "wait_for_admin_resolution",
+          "duration_ms": 58057.8,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 1156.34,
+          "duration_ms": 1156.71
+        },
+        {
+          "kind": "navigation",
+          "action": "reload",
+          "duration_ms": 221.85,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "reopened_without_assignee",
+          "duration_ms": 4871.41,
+          "passed": true
+        }
+      ],
+      "page_errors": [],
+      "confirmation_dialogs": 1,
+      "network_requests_recorded": 559
+    },
+    {
+      "actor": "substitute-1",
+      "role": "substitute",
+      "completed": true,
+      "elapsed_ms": 169952.04,
+      "clicks": 9,
+      "totals_ms": {
+        "assumed_think": 67300.98,
+        "click": 930.63,
+        "input": 75.67,
+        "navigation": 11481.05,
+        "system_wait": 5717.2,
+        "scenario_coordination": 69510.9
+      },
+      "events": [
+        {
+          "kind": "navigation",
+          "action": "open_login",
+          "duration_ms": 10832.12,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "enter_email_focus",
+          "duration_ms": 216.45,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "enter_email",
+          "duration_ms": 45.18,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "enter_password_focus",
+          "duration_ms": 108.33,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "enter_password",
+          "duration_ms": 15.08,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 1276.09,
+          "duration_ms": 1277.21
+        },
+        {
+          "kind": "click",
+          "action": "login",
+          "duration_ms": 205.06,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "login_destination",
+          "duration_ms": 4243.39,
+          "passed": true
+        },
+        {
+          "kind": "scenario_coordination",
+          "action": "wait_for_school_publication",
+          "duration_ms": 53416.95,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 2026.47,
+          "duration_ms": 2027.28
+        },
+        {
+          "kind": "navigation",
+          "action": "reload",
+          "duration_ms": 124.69,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 7288.95,
+          "duration_ms": 7290.99
+        },
+        {
+          "kind": "click",
+          "action": "apply",
+          "duration_ms": 24.84,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "applied_state",
+          "duration_ms": 377.92,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 3431.4,
+          "duration_ms": 3433.66
+        },
+        {
+          "kind": "click",
+          "action": "withdraw_application",
+          "duration_ms": 21.97,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "withdrawn_state",
+          "duration_ms": 297.05,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 7755.2,
+          "duration_ms": 7759.3
+        },
+        {
+          "kind": "click",
+          "action": "reapply",
+          "duration_ms": 39.71,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "reapplied_state",
+          "duration_ms": 263.29,
+          "passed": true
+        },
+        {
+          "kind": "scenario_coordination",
+          "action": "wait_for_school_selection",
+          "duration_ms": 8384.78,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 3056.08,
+          "duration_ms": 3057.16
+        },
+        {
+          "kind": "navigation",
+          "action": "reload",
+          "duration_ms": 256.57,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "allocation_visible",
+          "duration_ms": 115.42,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "permitted_contacts_visible",
+          "duration_ms": 61.73,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 3796.09,
+          "duration_ms": 3816.02
+        },
+        {
+          "kind": "click",
+          "action": "request_cancellation",
+          "duration_ms": 229.22,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "write",
+          "planned_ms": 31637.13,
+          "duration_ms": 31642.37
+        },
+        {
+          "kind": "click",
+          "action": "cancellation_reason_focus",
+          "duration_ms": 44.0,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "cancellation_reason",
+          "duration_ms": 15.41,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 5909.46,
+          "duration_ms": 5909.82
+        },
+        {
+          "kind": "click",
+          "action": "send_cancellation",
+          "duration_ms": 41.05,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "pending_admin_decision",
+          "duration_ms": 336.18,
+          "passed": true
+        },
+        {
+          "kind": "scenario_coordination",
+          "action": "wait_for_cancellation_decision",
+          "duration_ms": 7709.17,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 1075.41,
+          "duration_ms": 1087.17
+        },
+        {
+          "kind": "navigation",
+          "action": "reload",
+          "duration_ms": 267.67,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "can_reapply_after_cancellation",
+          "duration_ms": 22.22,
+          "passed": true
+        }
+      ],
+      "page_errors": [],
+      "confirmation_dialogs": 1,
+      "network_requests_recorded": 749
+    },
+    {
+      "actor": "school-2",
+      "role": "school",
+      "completed": true,
+      "elapsed_ms": 180708.11,
+      "clicks": 12,
+      "totals_ms": {
+        "assumed_think": 62426.83,
+        "click": 3390.74,
+        "input": 199.86,
+        "navigation": 10655.65,
+        "system_wait": 22193.82,
+        "scenario_coordination": 81833.29
+      },
+      "events": [
+        {
+          "kind": "navigation",
+          "action": "open_login",
+          "duration_ms": 9986.03,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "enter_email_focus",
+          "duration_ms": 333.65,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "enter_email",
+          "duration_ms": 91.13,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "enter_password_focus",
+          "duration_ms": 174.43,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "enter_password",
+          "duration_ms": 53.97,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 1685.31,
+          "duration_ms": 1686.4
+        },
+        {
+          "kind": "click",
+          "action": "login",
+          "duration_ms": 107.04,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "login_destination",
+          "duration_ms": 3075.7,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "school_identity",
+          "duration_ms": 11428.82,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 2908.15,
+          "duration_ms": 2914.43
+        },
+        {
+          "kind": "click",
+          "action": "choose_subject",
+          "duration_ms": 2080.12,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 3195.2,
+          "duration_ms": 3199.35
+        },
+        {
+          "kind": "click",
+          "action": "subject_mathematics",
+          "duration_ms": 106.54,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "assignment_date_focus",
+          "duration_ms": 235.05,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "assignment_date",
+          "duration_ms": 22.06,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "start_time_focus",
+          "duration_ms": 42.06,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "start_time",
+          "duration_ms": 18.65,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "end_time_focus",
+          "duration_ms": 44.26,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "end_time",
+          "duration_ms": 6.15,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "write",
+          "planned_ms": 33666.64,
+          "duration_ms": 33669.31
+        },
+        {
+          "kind": "click",
+          "action": "description_focus",
+          "duration_ms": 59.43,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "description",
+          "duration_ms": 7.9,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 3082.5,
+          "duration_ms": 3082.84
+        },
+        {
+          "kind": "click",
+          "action": "publish",
+          "duration_ms": 110.62,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "published_card",
+          "duration_ms": 904.86,
+          "passed": true
+        },
+        {
+          "kind": "scenario_coordination",
+          "action": "wait_for_applicant",
+          "duration_ms": 29885.72,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 2713.56,
+          "duration_ms": 2715.0
+        },
+        {
+          "kind": "navigation",
+          "action": "reload",
+          "duration_ms": 105.0,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 7011.78,
+          "duration_ms": 7012.66
+        },
+        {
+          "kind": "click",
+          "action": "review_applicants",
+          "duration_ms": 55.21,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 4377.15,
+          "duration_ms": 4379.29
+        },
+        {
+          "kind": "click",
+          "action": "select_substitute",
+          "duration_ms": 42.33,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "selected_person_visible",
+          "duration_ms": 1076.5,
+          "passed": true
+        },
+        {
+          "kind": "scenario_coordination",
+          "action": "wait_for_admin_resolution",
+          "duration_ms": 51947.57,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 3765.94,
+          "duration_ms": 3767.55
+        },
+        {
+          "kind": "navigation",
+          "action": "reload",
+          "duration_ms": 564.62,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "reopened_without_assignee",
+          "duration_ms": 5707.94,
+          "passed": true
+        }
+      ],
+      "page_errors": [],
+      "confirmation_dialogs": 1,
+      "network_requests_recorded": 559
+    },
+    {
+      "actor": "substitute-3",
+      "role": "substitute",
+      "completed": true,
+      "elapsed_ms": 181595.51,
+      "clicks": 9,
+      "totals_ms": {
+        "assumed_think": 71900.76,
+        "click": 1658.11,
+        "input": 120.07,
+        "navigation": 12437.45,
+        "system_wait": 8870.51,
+        "scenario_coordination": 74765.0
+      },
+      "events": [
+        {
+          "kind": "navigation",
+          "action": "open_login",
+          "duration_ms": 10968.68,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "enter_email_focus",
+          "duration_ms": 150.34,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "enter_email",
+          "duration_ms": 57.12,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "enter_password_focus",
+          "duration_ms": 91.4,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "enter_password",
+          "duration_ms": 16.89,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 3850.43,
+          "duration_ms": 3891.91
+        },
+        {
+          "kind": "click",
+          "action": "login",
+          "duration_ms": 803.94,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "login_destination",
+          "duration_ms": 6011.22,
+          "passed": true
+        },
+        {
+          "kind": "scenario_coordination",
+          "action": "wait_for_school_publication",
+          "duration_ms": 51439.8,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 1410.04,
+          "duration_ms": 1436.07
+        },
+        {
+          "kind": "navigation",
+          "action": "reload",
+          "duration_ms": 728.43,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 7433.97,
+          "duration_ms": 7434.81
+        },
+        {
+          "kind": "click",
+          "action": "apply",
+          "duration_ms": 35.45,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "applied_state",
+          "duration_ms": 967.6,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 6837.58,
+          "duration_ms": 6839.93
+        },
+        {
+          "kind": "click",
+          "action": "withdraw_application",
+          "duration_ms": 27.9,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "withdrawn_state",
+          "duration_ms": 261.66,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 7942.13,
+          "duration_ms": 7942.73
+        },
+        {
+          "kind": "click",
+          "action": "reapply",
+          "duration_ms": 421.72,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "reapplied_state",
+          "duration_ms": 1287.03,
+          "passed": true
+        },
+        {
+          "kind": "scenario_coordination",
+          "action": "wait_for_school_selection",
+          "duration_ms": 15386.4,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 1392.08,
+          "duration_ms": 1394.19
+        },
+        {
+          "kind": "navigation",
+          "action": "reload",
+          "duration_ms": 190.12,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "allocation_visible",
+          "duration_ms": 23.75,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "permitted_contacts_visible",
+          "duration_ms": 4.59,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 4934.6,
+          "duration_ms": 4935.72
+        },
+        {
+          "kind": "click",
+          "action": "request_cancellation",
+          "duration_ms": 38.92,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "write",
+          "planned_ms": 30665.58,
+          "duration_ms": 30701.83
+        },
+        {
+          "kind": "click",
+          "action": "cancellation_reason_focus",
+          "duration_ms": 61.91,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "cancellation_reason",
+          "duration_ms": 46.06,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 3591.21,
+          "duration_ms": 3591.99
+        },
+        {
+          "kind": "click",
+          "action": "send_cancellation",
+          "duration_ms": 26.53,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "pending_admin_decision",
+          "duration_ms": 298.46,
+          "passed": true
+        },
+        {
+          "kind": "scenario_coordination",
+          "action": "wait_for_cancellation_decision",
+          "duration_ms": 7938.8,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 3729.85,
+          "duration_ms": 3731.58
+        },
+        {
+          "kind": "navigation",
+          "action": "reload",
+          "duration_ms": 550.22,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "can_reapply_after_cancellation",
+          "duration_ms": 16.2,
+          "passed": true
+        }
+      ],
+      "page_errors": [],
+      "confirmation_dialogs": 1,
+      "network_requests_recorded": 751
+    },
+    {
+      "actor": "school-4",
+      "role": "school",
+      "completed": true,
+      "elapsed_ms": 187106.94,
+      "clicks": 12,
+      "totals_ms": {
+        "assumed_think": 50668.09,
+        "click": 3848.18,
+        "input": 275.7,
+        "navigation": 8383.59,
+        "system_wait": 20757.55,
+        "scenario_coordination": 103160.92
+      },
+      "events": [
+        {
+          "kind": "navigation",
+          "action": "open_login",
+          "duration_ms": 8165.78,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "enter_email_focus",
+          "duration_ms": 720.73,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "enter_email",
+          "duration_ms": 72.9,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "enter_password_focus",
+          "duration_ms": 343.7,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "enter_password",
+          "duration_ms": 158.01,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 3774.32,
+          "duration_ms": 3794.05
+        },
+        {
+          "kind": "click",
+          "action": "login",
+          "duration_ms": 223.76,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "login_destination",
+          "duration_ms": 4191.04,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "school_identity",
+          "duration_ms": 10605.66,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 2179.46,
+          "duration_ms": 2180.47
+        },
+        {
+          "kind": "click",
+          "action": "choose_subject",
+          "duration_ms": 1444.91,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 2702.14,
+          "duration_ms": 2703.66
+        },
+        {
+          "kind": "click",
+          "action": "subject_mathematics",
+          "duration_ms": 69.39,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "assignment_date_focus",
+          "duration_ms": 463.36,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "assignment_date",
+          "duration_ms": 6.26,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "start_time_focus",
+          "duration_ms": 46.41,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "start_time",
+          "duration_ms": 19.62,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "end_time_focus",
+          "duration_ms": 48.11,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "end_time",
+          "duration_ms": 11.42,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "write",
+          "planned_ms": 20824.08,
+          "duration_ms": 20834.17
+        },
+        {
+          "kind": "click",
+          "action": "description_focus",
+          "duration_ms": 115.4,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "description",
+          "duration_ms": 7.49,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 7343.59,
+          "duration_ms": 7346.02
+        },
+        {
+          "kind": "click",
+          "action": "publish",
+          "duration_ms": 125.78,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "published_card",
+          "duration_ms": 866.47,
+          "passed": true
+        },
+        {
+          "kind": "scenario_coordination",
+          "action": "wait_for_applicant",
+          "duration_ms": 20644.33,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 2480.42,
+          "duration_ms": 2481.7
+        },
+        {
+          "kind": "navigation",
+          "action": "reload",
+          "duration_ms": 90.7,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 2971.23,
+          "duration_ms": 2971.33
+        },
+        {
+          "kind": "click",
+          "action": "review_applicants",
+          "duration_ms": 127.87,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 6113.61,
+          "duration_ms": 6114.3
+        },
+        {
+          "kind": "click",
+          "action": "select_substitute",
+          "duration_ms": 118.76,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "selected_person_visible",
+          "duration_ms": 1043.36,
+          "passed": true
+        },
+        {
+          "kind": "scenario_coordination",
+          "action": "wait_for_admin_resolution",
+          "duration_ms": 82516.59,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 2240.79,
+          "duration_ms": 2242.39
+        },
+        {
+          "kind": "navigation",
+          "action": "reload",
+          "duration_ms": 127.11,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "reopened_without_assignee",
+          "duration_ms": 4051.02,
+          "passed": true
+        }
+      ],
+      "page_errors": [],
+      "confirmation_dialogs": 1,
+      "network_requests_recorded": 558
+    },
+    {
+      "actor": "substitute-5",
+      "role": "substitute",
+      "completed": true,
+      "elapsed_ms": 189181.39,
+      "clicks": 9,
+      "totals_ms": {
+        "assumed_think": 78023.6,
+        "click": 1520.0,
+        "input": 66.09,
+        "navigation": 11649.17,
+        "system_wait": 8546.73,
+        "scenario_coordination": 79525.21
+      },
+      "events": [
+        {
+          "kind": "navigation",
+          "action": "open_login",
+          "duration_ms": 10942.45,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "enter_email_focus",
+          "duration_ms": 142.88,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "enter_email",
+          "duration_ms": 24.89,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "enter_password_focus",
+          "duration_ms": 107.77,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "enter_password",
+          "duration_ms": 33.58,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 2293.94,
+          "duration_ms": 2294.7
+        },
+        {
+          "kind": "click",
+          "action": "login",
+          "duration_ms": 354.65,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "login_destination",
+          "duration_ms": 5946.67,
+          "passed": true
+        },
+        {
+          "kind": "scenario_coordination",
+          "action": "wait_for_school_publication",
+          "duration_ms": 44715.66,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 2112.91,
+          "duration_ms": 2114.13
+        },
+        {
+          "kind": "navigation",
+          "action": "reload",
+          "duration_ms": 84.83,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 6179.42,
+          "duration_ms": 6182.13
+        },
+        {
+          "kind": "click",
+          "action": "apply",
+          "duration_ms": 518.16,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "applied_state",
+          "duration_ms": 775.41,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 4996.76,
+          "duration_ms": 4999.16
+        },
+        {
+          "kind": "click",
+          "action": "withdraw_application",
+          "duration_ms": 100.61,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "withdrawn_state",
+          "duration_ms": 211.01,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 3434.93,
+          "duration_ms": 3437.44
+        },
+        {
+          "kind": "click",
+          "action": "reapply",
+          "duration_ms": 31.43,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "reapplied_state",
+          "duration_ms": 268.02,
+          "passed": true
+        },
+        {
+          "kind": "scenario_coordination",
+          "action": "wait_for_school_selection",
+          "duration_ms": 12948.39,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 1879.74,
+          "duration_ms": 1881.44
+        },
+        {
+          "kind": "navigation",
+          "action": "reload",
+          "duration_ms": 91.2,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "allocation_visible",
+          "duration_ms": 119.66,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "permitted_contacts_visible",
+          "duration_ms": 91.43,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 3469.58,
+          "duration_ms": 3470.79
+        },
+        {
+          "kind": "click",
+          "action": "request_cancellation",
+          "duration_ms": 194.08,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "write",
+          "planned_ms": 44641.01,
+          "duration_ms": 44642.14
+        },
+        {
+          "kind": "click",
+          "action": "cancellation_reason_focus",
+          "duration_ms": 21.83,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "cancellation_reason",
+          "duration_ms": 7.62,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 5795.3,
+          "duration_ms": 5819.8
+        },
+        {
+          "kind": "click",
+          "action": "send_cancellation",
+          "duration_ms": 48.59,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "pending_admin_decision",
+          "duration_ms": 1117.67,
+          "passed": true
+        },
+        {
+          "kind": "scenario_coordination",
+          "action": "wait_for_cancellation_decision",
+          "duration_ms": 21861.16,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 3181.65,
+          "duration_ms": 3181.87
+        },
+        {
+          "kind": "navigation",
+          "action": "reload",
+          "duration_ms": 530.69,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "can_reapply_after_cancellation",
+          "duration_ms": 16.86,
+          "passed": true
+        }
+      ],
+      "page_errors": [],
+      "confirmation_dialogs": 1,
+      "network_requests_recorded": 752
+    },
+    {
+      "actor": "school-6",
+      "role": "school",
+      "completed": true,
+      "elapsed_ms": 196711.26,
+      "clicks": 12,
+      "totals_ms": {
+        "assumed_think": 58503.05,
+        "click": 7750.21,
+        "input": 758.37,
+        "navigation": 8429.89,
+        "system_wait": 9935.39,
+        "scenario_coordination": 111329.71
+      },
+      "events": [
+        {
+          "kind": "navigation",
+          "action": "open_login",
+          "duration_ms": 8102.0,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "enter_email_focus",
+          "duration_ms": 519.93,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "enter_email",
+          "duration_ms": 192.18,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "enter_password_focus",
+          "duration_ms": 170.53,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "enter_password",
+          "duration_ms": 152.13,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 1339.46,
+          "duration_ms": 1343.81
+        },
+        {
+          "kind": "click",
+          "action": "login",
+          "duration_ms": 401.75,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "login_destination",
+          "duration_ms": 764.16,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "school_identity",
+          "duration_ms": 5075.03,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 6457.33,
+          "duration_ms": 6459.56
+        },
+        {
+          "kind": "click",
+          "action": "choose_subject",
+          "duration_ms": 2130.03,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 1844.85,
+          "duration_ms": 1880.51
+        },
+        {
+          "kind": "click",
+          "action": "subject_mathematics",
+          "duration_ms": 1229.7,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "assignment_date_focus",
+          "duration_ms": 2211.84,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "assignment_date",
+          "duration_ms": 206.57,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "start_time_focus",
+          "duration_ms": 289.25,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "start_time",
+          "duration_ms": 174.18,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "end_time_focus",
+          "duration_ms": 216.97,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "end_time",
+          "duration_ms": 22.67,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "write",
+          "planned_ms": 22527.25,
+          "duration_ms": 22537.75
+        },
+        {
+          "kind": "click",
+          "action": "description_focus",
+          "duration_ms": 67.95,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "description",
+          "duration_ms": 10.64,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 6925.26,
+          "duration_ms": 6925.83
+        },
+        {
+          "kind": "click",
+          "action": "publish",
+          "duration_ms": 112.08,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "published_card",
+          "duration_ms": 297.39,
+          "passed": true
+        },
+        {
+          "kind": "scenario_coordination",
+          "action": "wait_for_applicant",
+          "duration_ms": 25014.21,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 3581.7,
+          "duration_ms": 3582.55
+        },
+        {
+          "kind": "navigation",
+          "action": "reload",
+          "duration_ms": 214.89,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 6547.2,
+          "duration_ms": 6570.08
+        },
+        {
+          "kind": "click",
+          "action": "review_applicants",
+          "duration_ms": 171.88,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 5326.38,
+          "duration_ms": 5328.23
+        },
+        {
+          "kind": "click",
+          "action": "select_substitute",
+          "duration_ms": 228.3,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "selected_person_visible",
+          "duration_ms": 1328.59,
+          "passed": true
+        },
+        {
+          "kind": "scenario_coordination",
+          "action": "wait_for_admin_resolution",
+          "duration_ms": 86315.5,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 3873.48,
+          "duration_ms": 3874.73
+        },
+        {
+          "kind": "navigation",
+          "action": "reload",
+          "duration_ms": 113.0,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "reopened_without_assignee",
+          "duration_ms": 2470.22,
+          "passed": true
+        }
+      ],
+      "page_errors": [],
+      "confirmation_dialogs": 1,
+      "network_requests_recorded": 558
+    },
+    {
+      "actor": "substitute-7",
+      "role": "substitute",
+      "completed": true,
+      "elapsed_ms": 194329.31,
+      "clicks": 9,
+      "totals_ms": {
+        "assumed_think": 69031.86,
+        "click": 1712.07,
+        "input": 176.83,
+        "navigation": 9191.03,
+        "system_wait": 5831.52,
+        "scenario_coordination": 98377.62
+      },
+      "events": [
+        {
+          "kind": "navigation",
+          "action": "open_login",
+          "duration_ms": 8086.74,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "enter_email_focus",
+          "duration_ms": 707.7,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "enter_email",
+          "duration_ms": 29.77,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "enter_password_focus",
+          "duration_ms": 372.3,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "enter_password",
+          "duration_ms": 101.68,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 3071.96,
+          "duration_ms": 3074.32
+        },
+        {
+          "kind": "click",
+          "action": "login",
+          "duration_ms": 159.52,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "login_destination",
+          "duration_ms": 4387.92,
+          "passed": true
+        },
+        {
+          "kind": "scenario_coordination",
+          "action": "wait_for_school_publication",
+          "duration_ms": 44563.11,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 1067.04,
+          "duration_ms": 1082.15
+        },
+        {
+          "kind": "navigation",
+          "action": "reload",
+          "duration_ms": 179.05,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 7881.78,
+          "duration_ms": 7882.66
+        },
+        {
+          "kind": "click",
+          "action": "apply",
+          "duration_ms": 163.51,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "applied_state",
+          "duration_ms": 550.43,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 7287.37,
+          "duration_ms": 7291.28
+        },
+        {
+          "kind": "click",
+          "action": "withdraw_application",
+          "duration_ms": 136.98,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "withdrawn_state",
+          "duration_ms": 235.47,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 4018.61,
+          "duration_ms": 4020.44
+        },
+        {
+          "kind": "click",
+          "action": "reapply",
+          "duration_ms": 41.83,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "reapplied_state",
+          "duration_ms": 282.44,
+          "passed": true
+        },
+        {
+          "kind": "scenario_coordination",
+          "action": "wait_for_school_selection",
+          "duration_ms": 17424.93,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 3216.0,
+          "duration_ms": 3216.6
+        },
+        {
+          "kind": "navigation",
+          "action": "reload",
+          "duration_ms": 827.99,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "allocation_visible",
+          "duration_ms": 19.58,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "permitted_contacts_visible",
+          "duration_ms": 14.09,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 6407.33,
+          "duration_ms": 6408.09
+        },
+        {
+          "kind": "click",
+          "action": "request_cancellation",
+          "duration_ms": 57.07,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "write",
+          "planned_ms": 29081.87,
+          "duration_ms": 29082.69
+        },
+        {
+          "kind": "click",
+          "action": "cancellation_reason_focus",
+          "duration_ms": 46.76,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "cancellation_reason",
+          "duration_ms": 45.38,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 5644.09,
+          "duration_ms": 5645.02
+        },
+        {
+          "kind": "click",
+          "action": "send_cancellation",
+          "duration_ms": 26.4,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "pending_admin_decision",
+          "duration_ms": 303.78,
+          "passed": true
+        },
+        {
+          "kind": "scenario_coordination",
+          "action": "wait_for_cancellation_decision",
+          "duration_ms": 36389.58,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 1326.21,
+          "duration_ms": 1328.61
+        },
+        {
+          "kind": "navigation",
+          "action": "reload",
+          "duration_ms": 97.25,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "can_reapply_after_cancellation",
+          "duration_ms": 37.81,
+          "passed": true
+        }
+      ],
+      "page_errors": [],
+      "confirmation_dialogs": 1,
+      "network_requests_recorded": 752
+    },
+    {
+      "actor": "admin-8",
+      "role": "admin",
+      "completed": true,
+      "elapsed_ms": 216422.56,
+      "clicks": 11,
+      "totals_ms": {
+        "assumed_think": 50278.25,
+        "click": 7482.44,
+        "input": 44.53,
+        "navigation": 11719.17,
+        "system_wait": 18550.67,
+        "scenario_coordination": 127116.3
+      },
+      "events": [
+        {
+          "kind": "navigation",
+          "action": "open_login",
+          "duration_ms": 10803.12,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "enter_email_focus",
+          "duration_ms": 181.86,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "enter_email",
+          "duration_ms": 20.75,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "enter_password_focus",
+          "duration_ms": 114.19,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "enter_password",
+          "duration_ms": 23.78,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 3266.5,
+          "duration_ms": 3300.03
+        },
+        {
+          "kind": "click",
+          "action": "login",
+          "duration_ms": 620.05,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "login_destination",
+          "duration_ms": 5582.75,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "admin_identity",
+          "duration_ms": 7113.56,
+          "passed": true
+        },
+        {
+          "kind": "scenario_coordination",
+          "action": "wait_for_cancellation_request",
+          "duration_ms": 126242.6,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 3272.97,
+          "duration_ms": 3274.5
+        },
+        {
+          "kind": "navigation",
+          "action": "reload",
+          "duration_ms": 109.9,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 3925.3,
+          "duration_ms": 3929.52
+        },
+        {
+          "kind": "click",
+          "action": "approve_cancellation",
+          "duration_ms": 94.78,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "approved_state",
+          "duration_ms": 299.86,
+          "passed": true
+        },
+        {
+          "kind": "scenario_coordination",
+          "action": "wait_for_cancellation_request",
+          "duration_ms": 873.55,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 1148.22,
+          "duration_ms": 1155.42
+        },
+        {
+          "kind": "navigation",
+          "action": "reload",
+          "duration_ms": 458.54,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 2625.01,
+          "duration_ms": 2651.96
+        },
+        {
+          "kind": "click",
+          "action": "approve_cancellation",
+          "duration_ms": 3348.27,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "approved_state",
+          "duration_ms": 324.26,
+          "passed": true
+        },
+        {
+          "kind": "scenario_coordination",
+          "action": "wait_for_cancellation_request",
+          "duration_ms": 0.08,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 3578.19,
+          "duration_ms": 3579.58
+        },
+        {
+          "kind": "navigation",
+          "action": "reload",
+          "duration_ms": 93.34,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 2058.99,
+          "duration_ms": 2059.29
+        },
+        {
+          "kind": "click",
+          "action": "approve_cancellation",
+          "duration_ms": 2803.61,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "approved_state",
+          "duration_ms": 1512.12,
+          "passed": true
+        },
+        {
+          "kind": "scenario_coordination",
+          "action": "wait_for_cancellation_request",
+          "duration_ms": 0.07,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 2677.48,
+          "duration_ms": 2677.98
+        },
+        {
+          "kind": "navigation",
+          "action": "reload",
+          "duration_ms": 254.27,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 6327.84,
+          "duration_ms": 6329.26
+        },
+        {
+          "kind": "click",
+          "action": "approve_cancellation",
+          "duration_ms": 59.76,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "approved_state",
+          "duration_ms": 319.6,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 7892.24,
+          "duration_ms": 7893.85
+        },
+        {
+          "kind": "click",
+          "action": "open_data_tab",
+          "duration_ms": 66.19,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 3139.21,
+          "duration_ms": 3148.8
+        },
+        {
+          "kind": "click",
+          "action": "capture_queued_test_messages",
+          "duration_ms": 127.52,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "captured_notice_visible",
+          "duration_ms": 3346.23,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 5437.09,
+          "duration_ms": 5438.47
+        },
+        {
+          "kind": "click",
+          "action": "capture_queued_test_messages",
+          "duration_ms": 29.37,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "captured_notice_visible",
+          "duration_ms": 15.5,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 4838.41,
+          "duration_ms": 4839.59
+        },
+        {
+          "kind": "click",
+          "action": "capture_queued_test_messages",
+          "duration_ms": 36.84,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "captured_notice_visible",
+          "duration_ms": 36.79,
+          "passed": true
+        }
+      ],
+      "page_errors": [],
+      "confirmation_dialogs": 7,
+      "network_requests_recorded": 1019
+    },
+    {
+      "actor": "spectator-9",
+      "role": "spectator",
+      "completed": true,
+      "elapsed_ms": 43909.42,
+      "clicks": 3,
+      "totals_ms": {
+        "assumed_think": 23583.76,
+        "click": 451.36,
+        "input": 62.4,
+        "navigation": 13274.33,
+        "system_wait": 6537.23,
+        "scenario_coordination": 0
+      },
+      "events": [
+        {
+          "kind": "navigation",
+          "action": "open_login",
+          "duration_ms": 10728.1,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "enter_email_focus",
+          "duration_ms": 167.01,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "enter_email",
+          "duration_ms": 24.04,
+          "passed": true
+        },
+        {
+          "kind": "click",
+          "action": "enter_password_focus",
+          "duration_ms": 115.15,
+          "passed": true
+        },
+        {
+          "kind": "input",
+          "action": "enter_password",
+          "duration_ms": 38.36,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 1353.55,
+          "duration_ms": 1354.95
+        },
+        {
+          "kind": "click",
+          "action": "login",
+          "duration_ms": 169.2,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "login_destination",
+          "duration_ms": 4701.64,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 7252.44,
+          "duration_ms": 7286.07
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 3976.1,
+          "duration_ms": 3980.34
+        },
+        {
+          "kind": "navigation",
+          "action": "reload",
+          "duration_ms": 2215.05,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 2911.69,
+          "duration_ms": 2913.12
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 3858.66,
+          "duration_ms": 3862.09
+        },
+        {
+          "kind": "navigation",
+          "action": "reload",
+          "duration_ms": 107.25,
+          "passed": true
+        },
+        {
+          "kind": "assumed_think",
+          "action": "read",
+          "planned_ms": 2135.01,
+          "duration_ms": 2137.1
+        },
+        {
+          "kind": "assumed_think",
+          "action": "navigate",
+          "planned_ms": 2048.33,
+          "duration_ms": 2050.09
+        },
+        {
+          "kind": "navigation",
+          "action": "reload",
+          "duration_ms": 125.33,
+          "passed": true
+        },
+        {
+          "kind": "navigation",
+          "action": "navigate_to_forbidden_admin",
+          "duration_ms": 98.6,
+          "passed": true
+        },
+        {
+          "kind": "system_wait",
+          "action": "admin_access_denied",
+          "duration_ms": 1835.59,
+          "passed": true
+        }
+      ],
+      "page_errors": [],
+      "confirmation_dialogs": 0,
+      "network_requests_recorded": 743
+    }
+  ],
+  "limitations": [
+    "Local isolated deployment; not a production-capacity measurement",
+    "Simulated think times need validation with real people",
+    "Coordination waits are test orchestration, not system response time",
+    "Initial model does not cover real onboarding, recovery, Storage, long-duration reliability or provider delivery"
+  ],
+  "evidence_note": "Per-request waterfall omitted from this shareable copy; original local evidence remains private. Aggregate timings and action events preserved."
+}
