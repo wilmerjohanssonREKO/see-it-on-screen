@@ -1,0 +1,29 @@
+{
+  "source": "96d0005",
+  "seed": 20261112,
+  "scope": "isolated local PostgreSQL/RLS/RPC; synthetic Auth schema; no browser/provider/load claim",
+  "schools": 5,
+  "substitutes": 20,
+  "assignments": 50,
+  "applications": 250,
+  "selections": 50,
+  "overlap_rejections": 0,
+  "cancellations_approved": 5,
+  "cancellations_denied": 5,
+  "replacements": 5,
+  "negative_checks": 6,
+  "errors": [],
+  "integrity": {
+    "filled": 50,
+    "applications": 250,
+    "outbox": 120,
+    "overlapping_pairs": 0,
+    "non_test_notices": 0
+  },
+  "mail": {
+    "pending": 0,
+    "captured": 120,
+    "externally_sent": 0
+  },
+  "passed": true
+}

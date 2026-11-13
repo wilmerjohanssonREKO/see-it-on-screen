@@ -29,7 +29,7 @@ export function CancellationRequest({ assignmentId, status, canRequest = true }:
     {canRequest && status !== "pending" && !open && <Button type="button" size="sm" variant="outline" className="min-h-11 justify-self-start" onClick={() => setOpen(true)}>Begär avbokning</Button>}
     {canRequest && open && <form className="grid gap-3 rounded-panel border border-border p-3" onSubmit={(e) => { e.preventDefault(); request.mutate(); }}>
       <Label htmlFor={`cancel-${assignmentId}`}>Varför behöver uppdraget avbokas?</Label>
-      <Textarea id={`cancel-${assignmentId}`} value={reason} onChange={(e) => setReason(e.target.value)} maxLength={1000} required rows={3} />
+      <Textarea id={`cancel-${assignmentId}`} value={reason} onChange={(e) => setReason(e.target.value)} maxLength={500} required rows={3} />
       <p className="text-muted-foreground">REKO behandlar begäran. Uppdraget är fortfarande bokat tills ni får ett beslut.</p>
       <div className="flex flex-wrap gap-2">
         <Button type="submit" disabled={request.isPending || !reason.trim()} className="min-h-11">{request.isPending ? "Skickar…" : "Skicka begäran"}</Button>

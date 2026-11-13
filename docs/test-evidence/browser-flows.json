@@ -1,0 +1,34 @@
+{
+  "passed": 19,
+  "checks": [
+    "School login + correct school route from simulated Auth, real role RPC",
+    "School publishes assignment via actual PostgreSQL RPC",
+    "Substitute applies without allocating job",
+    "Pending application withdrawal",
+    "Reapply after own withdrawal",
+    "School reviews and selects applicant; transaction creates exactly two outbox rows",
+    "Selected substitute sees assignment and permitted school contacts",
+    "Selected-assignment mobile layout has no horizontal overflow",
+    "Cancellation request leaves booking valid pending REKO decision",
+    "REKO denies cancellation; assignment remains filled",
+    "Substitute sees denial status",
+    "Admin worker captures both notices in sandbox using real queued rows; no external mail",
+    "REKO approves second cancellation; assignment reopens with cleared assignee",
+    "Cancelled substitute sees approved state and can apply again",
+    "School sees reopened state with no stale selected substitute",
+    "Cancellation notices also captured; four total test messages",
+    "Injected API failure renders error/retry rather than empty list",
+    "Retry recovers after simulated API outage",
+    "Substitute cannot open admin controls"
+  ],
+  "page_errors": [],
+  "outbox": {
+    "queued": 4,
+    "captured": 4,
+    "external_sent": 0
+  },
+  "limitations": [
+    "Auth provider is simulated with signed fixture JWTs; PostgREST and PostgreSQL authorization are real",
+    "No actual Supabase Auth mail, private Storage upload/sign expiry or external provider delivery tested"
+  ]
+}
