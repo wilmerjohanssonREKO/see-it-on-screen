@@ -1,7 +1,7 @@
 import { describe, it as test } from "node:test";
 import assert from "node:assert/strict";
 const expect = (actual: boolean) => ({ toBe: (expected: boolean) => assert.equal(actual, expected) });
-import { schoolContactSchema, substituteContactSchema, teacherRegistrationSchema } from "./contact-schemas";
+import { accountNameSchema, schoolContactSchema, substituteContactSchema, teacherRegistrationSchema } from "./contact-schemas";
 
 const address = { street_address: "Skolgatan 10", postal_code: "123 45", city: "Stockholm" };
 const contact = { full_name: "Test Person", email: "person@example.com", phone: "0701234567" };
@@ -18,10 +18,16 @@ describe("Obligatoriska kontaktuppgifter", () => {
     expect(substituteContactSchema.safeParse({ ...profile, subjects: [] }).success).toBe(true);
   });
   test("lärare kräver giltig e-post och telefon utan hemadress", () => {
-    const teacher = { fullName: contact.full_name, email: contact.email, phone: contact.phone, password: "testpassword123", code: "ABCDE12345" };
+    const teacher = { fullName: contact.full_name, email: contact.email, phone: contact.phone, password: "RekoTest2026!", code: "ABCDE12345" };
     expect(teacherRegistrationSchema.safeParse(teacher).success).toBe(true);
     expect(teacherRegistrationSchema.safeParse({ ...teacher, email: "fel" }).success).toBe(false);
     expect(teacherRegistrationSchema.safeParse({ ...teacher, phone: "" }).success).toBe(false);
     expect(teacherRegistrationSchema.safeParse({ ...teacher, phone: "abcde" }).success).toBe(false);
+  });
+  test("kontoregistrering kräver separat förnamn och efternamn", () => {
+    expect(accountNameSchema.safeParse({ firstName: "Test", lastName: "Person" }).success).toBe(true);
+    expect(accountNameSchema.safeParse({ firstName: "", lastName: "Person" }).success).toBe(false);
+    expect(accountNameSchema.safeParse({ firstName: "Test", lastName: "" }).success).toBe(false);
+    expect(accountNameSchema.safeParse({ firstName: "F".repeat(60), lastName: "E".repeat(60) }).success).toBe(false);
   });
 });

@@ -3,7 +3,9 @@ import { createFileRoute, Link, useNavigate, type SearchSchemaInput } from "@tan
 import { useEffect, useRef, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { z } from "zod";
-import { nameField } from "@/lib/contact-schemas";
+import { accountNameSchema } from "@/lib/contact-schemas";
+import { strongPasswordSchema } from "@/lib/password";
+import { PasswordChecklist } from "@/components/PasswordChecklist";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -35,7 +37,7 @@ export const Route = createFileRoute("/auth")({
 });
 const schema = z.object({
   email: z.string().trim().email("Ogiltig e-postadress").max(255),
-  password: z.string().min(8, "Lösenordet måste vara minst 8 tecken").max(72),
+  password: z.string().min(1).max(72),
 });
 function AuthPage() {
   const [hydrated, setHydrated] = useState(false);
@@ -44,11 +46,13 @@ function AuthPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"signin" | "signup" | "forgot">(search.mode ?? "signin");
   const [busy, setBusy] = useState(false);
+  const [password, setPassword] = useState("");
   const [session, setSession] = useState<Session | null>(null);
   const [routeError, setRouteError] = useState<string | null>(null);
   const submitting = useRef(false);
   useEffect(() => {
     setMode(search.mode ?? "signin");
+    setPassword("");
   }, [search.mode]);
   useEffect(() => {
     let active = true;
@@ -108,19 +112,26 @@ function AuthPage() {
       }
       return;
     }
-    // Existing accounts retain their old passwords; new passwords require at least 8 characters.
+    // Existing accounts keep their old passwords; new passwords must meet the visible checklist.
     const parsed = (
-      mode === "signup" ? schema : schema.extend({ password: z.string().min(1).max(72) })
+      mode === "signup" ? schema.extend({ password: strongPasswordSchema }) : schema
     ).safeParse({ email, password: String(fd.get("password") ?? "") });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0]?.message ?? "Kontrollera uppgifterna");
       return;
     }
-    const fullName = String(fd.get("full_name") ?? "").trim();
-    if (mode === "signup" && !nameField.safeParse(fullName).success) {
-      toast.error("Fyll i namn");
+    const names =
+      mode === "signup"
+        ? accountNameSchema.safeParse({
+            firstName: String(fd.get("first_name") ?? ""),
+            lastName: String(fd.get("last_name") ?? ""),
+          })
+        : null;
+    if (mode === "signup" && !names?.success) {
+      toast.error(names?.error.issues[0]?.message ?? "Fyll i förnamn och efternamn");
       return;
     }
+    const fullName = names?.success ? `${names.data.firstName} ${names.data.lastName}` : "";
     setBusy(true);
     submitting.current = true;
     try {
@@ -134,7 +145,14 @@ function AuthPage() {
         });
         if (error) throw error;
         if (!data.session) {
-          toast.success("Konto skapat! Bekräfta din e-postadress innan du loggar in.");
+          await navigate({
+            to: "/bekrafta-epost",
+            search: {
+              email: parsed.data.email,
+              mode: "signup",
+              ...(search.next ? { next: search.next } : {}),
+            },
+          });
           return;
         }
       } else {
@@ -211,15 +229,27 @@ function AuthPage() {
           )}
           <form method="post" action="/auth" className="grid gap-4" onSubmit={submit}>
             {mode === "signup" && (
-              <div className="grid gap-2">
-                <Label htmlFor="full_name">Namn</Label>
-                <Input
-                  id="full_name"
-                  name="full_name"
-                  maxLength={120}
-                  autoComplete="name"
-                  required
-                />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-2">
+                  <Label htmlFor="first_name">Förnamn</Label>
+                  <Input
+                    id="first_name"
+                    name="first_name"
+                    maxLength={120}
+                    autoComplete="given-name"
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="last_name">Efternamn</Label>
+                  <Input
+                    id="last_name"
+                    name="last_name"
+                    maxLength={120}
+                    autoComplete="family-name"
+                    required
+                  />
+                </div>
               </div>
             )}
             <div className="grid gap-2">
@@ -243,10 +273,13 @@ function AuthPage() {
                   autoComplete={mode === "signup" ? "new-password" : "current-password"}
                   minLength={mode === "signup" ? 8 : undefined}
                   maxLength={72}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
                   required
                 />
               </div>
             )}
+            {mode === "signup" && <PasswordChecklist password={password} />}
             {mode === "signup" && (
               <>
                 <label className="flex items-start gap-2 text-sm font-medium text-foreground">

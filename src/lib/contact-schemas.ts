@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { SUBJECTS } from "./subjects";
+import { strongPasswordSchema } from "./password";
 
 export const nameField = z.string().trim().min(1, "Fyll i namn").max(120);
 export const emailField = z.string().trim().email("Fyll i en giltig e-postadress").max(255);
@@ -19,6 +20,11 @@ export const addressShape = {
   city: z.string().trim().min(1, "Fyll i ort").max(120),
 };
 export const contactShape = { full_name: nameField, email: emailField, phone: phoneField };
+export const accountNameSchema = z
+  .object({ firstName: nameField, lastName: nameField })
+  .refine(({ firstName, lastName }) => `${firstName} ${lastName}`.length <= 120, {
+    message: "För- och efternamn får tillsammans vara högst 120 tecken",
+  });
 export const schoolContactSchema = z.object({
   name: nameField,
   contact_person: nameField,
@@ -38,7 +44,7 @@ export const substituteContactSchema = z.object({
 export const teacherRegistrationSchema = z.object({
   fullName: nameField,
   email: emailField.transform((v) => v.toLowerCase()),
-  password: z.string().min(8).max(72),
+  password: strongPasswordSchema,
   phone: phoneField,
   code: z.string().trim().min(1).max(40),
 });

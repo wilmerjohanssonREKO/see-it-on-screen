@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AterstallLosenordRouteImport } from './routes/aterstall-losenord'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as BekraftaEpostRouteImport } from './routes/bekrafta-epost'
 import { Route as InbjudanRouteImport } from './routes/inbjudan'
 import { Route as IntegritetspolicyRouteImport } from './routes/integritetspolicy'
 import { Route as KontaktRouteImport } from './routes/kontakt'
@@ -43,6 +44,11 @@ const AterstallLosenordRoute = AterstallLosenordRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BekraftaEpostRoute = BekraftaEpostRouteImport.update({
+  id: '/bekrafta-epost',
+  path: '/bekrafta-epost',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InbjudanRoute = InbjudanRouteImport.update({
@@ -111,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/aterstall-losenord': typeof AterstallLosenordRoute
   '/auth': typeof AuthRoute
+  '/bekrafta-epost': typeof BekraftaEpostRoute
   '/inbjudan': typeof InbjudanRoute
   '/integritetspolicy': typeof IntegritetspolicyRoute
   '/kontakt': typeof KontaktRoute
@@ -128,6 +135,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/aterstall-losenord': typeof AterstallLosenordRoute
   '/auth': typeof AuthRoute
+  '/bekrafta-epost': typeof BekraftaEpostRoute
   '/inbjudan': typeof InbjudanRoute
   '/integritetspolicy': typeof IntegritetspolicyRoute
   '/kontakt': typeof KontaktRoute
@@ -147,6 +155,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/aterstall-losenord': typeof AterstallLosenordRoute
   '/auth': typeof AuthRoute
+  '/bekrafta-epost': typeof BekraftaEpostRoute
   '/inbjudan': typeof InbjudanRoute
   '/integritetspolicy': typeof IntegritetspolicyRoute
   '/kontakt': typeof KontaktRoute
@@ -166,6 +175,7 @@ export interface FileRouteTypes {
     | '/'
     | '/aterstall-losenord'
     | '/auth'
+    | '/bekrafta-epost'
     | '/inbjudan'
     | '/integritetspolicy'
     | '/kontakt'
@@ -183,6 +193,7 @@ export interface FileRouteTypes {
     | '/'
     | '/aterstall-losenord'
     | '/auth'
+    | '/bekrafta-epost'
     | '/inbjudan'
     | '/integritetspolicy'
     | '/kontakt'
@@ -201,6 +212,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/aterstall-losenord'
     | '/auth'
+    | '/bekrafta-epost'
     | '/inbjudan'
     | '/integritetspolicy'
     | '/kontakt'
@@ -220,6 +232,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AterstallLosenordRoute: typeof AterstallLosenordRoute
   AuthRoute: typeof AuthRoute
+  BekraftaEpostRoute: typeof BekraftaEpostRoute
   InbjudanRoute: typeof InbjudanRoute
   IntegritetspolicyRoute: typeof IntegritetspolicyRoute
   KontaktRoute: typeof KontaktRoute
@@ -257,6 +270,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bekrafta-epost': {
+      id: '/bekrafta-epost'
+      path: '/bekrafta-epost'
+      fullPath: '/bekrafta-epost'
+      preLoaderRoute: typeof BekraftaEpostRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/inbjudan': {
@@ -370,6 +390,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AterstallLosenordRoute: AterstallLosenordRoute,
   AuthRoute: AuthRoute,
+  BekraftaEpostRoute: BekraftaEpostRoute,
   InbjudanRoute: InbjudanRoute,
   IntegritetspolicyRoute: IntegritetspolicyRoute,
   KontaktRoute: KontaktRoute,

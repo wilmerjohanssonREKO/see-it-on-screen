@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordChecklist } from "@/components/PasswordChecklist";
+import { strongPasswordSchema } from "@/lib/password";
 export const Route = createFileRoute("/aterstall-losenord")({
   ssr: false,
   head: () => ({
@@ -18,6 +20,7 @@ function ResetPassword() {
   const [signedIn, setSignedIn] = useState(false);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     let active = true;
@@ -40,8 +43,8 @@ function ResetPassword() {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const password = String(fd.get("password") ?? "");
-    if (password.length < 8 || password.length > 72) {
-      setError("Lösenordet ska innehålla 8–72 tecken");
+    if (!strongPasswordSchema.safeParse(password).success) {
+      setError("Lösenordet uppfyller inte alla krav i listan");
       return;
     }
     if (password !== String(fd.get("confirm") ?? "")) {
@@ -90,8 +93,11 @@ function ResetPassword() {
                 autoComplete="new-password"
                 minLength={8}
                 maxLength={72}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
                 required
               />
+              <PasswordChecklist password={password} />
               <Label htmlFor="reset-confirm">Bekräfta lösenord</Label>
               <Input
                 id="reset-confirm"

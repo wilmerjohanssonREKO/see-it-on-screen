@@ -18,6 +18,9 @@
 
 - [x] Schema för vikarier: närmast kommande uppdrag först, avslutade därefter (senast först).
 - [x] Betyg ska stå bland övrig information hos vikarier och skolor i admin, inte som en separat sektion längst ned.
+- [x] Separata fält för förnamn och efternamn vid vikarie- och lärarregistrering.
+- [x] Synlig checklista med samma starka lösenordskrav vid registrering, inbjudan och lösenordsåterställning.
+- [x] Egen sida för skickad e-postbekräftelse med återsändning för vikarier och inbjudna lärare/skolansvariga.
 
 ## Krävs inför drift — inte markerat klart av kodtester
 

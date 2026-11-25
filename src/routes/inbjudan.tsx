@@ -6,7 +6,9 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { acceptSchoolInvitation, inspectSchoolInvitation } from "@/lib/teacher.functions";
 import { INVITATION_STORAGE_KEY, invitationToken } from "@/lib/auth-navigation";
-import { nameField, phoneField } from "@/lib/contact-schemas";
+import { accountNameSchema, phoneField } from "@/lib/contact-schemas";
+import { strongPasswordSchema } from "@/lib/password";
+import { PasswordChecklist } from "@/components/PasswordChecklist";
 import { Brand } from "@/components/AppHeader";
 import { PolicyCheckbox } from "@/components/PolicyCheckbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,8 +36,8 @@ function InvitationPage() {
   const [ready, setReady] = useState(false);
   const [details, setDetails] = useState<Details | null>(null);
   const [busy, setBusy] = useState(false);
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [sent, setSent] = useState(false);
   useEffect(() => {
     const params = new URLSearchParams(window.location.hash.slice(1));
     const incoming = invitationToken(params.get("token"));
@@ -109,7 +111,7 @@ function InvitationPage() {
         },
       });
       if (authError) throw authError;
-      setSent(true);
+      await navigate({ to: "/bekrafta-epost", search: { email, mode: "invite" } });
     } catch {
       setError("Kunde inte skicka verifieringslänken. Försök igen senare.");
     } finally {
@@ -120,16 +122,24 @@ function InvitationPage() {
     e.preventDefault();
     if (!token || !details) return;
     const fd = new FormData(e.currentTarget);
-    const contact = z
-      .object({ fullName: nameField, phone: phoneField })
-      .safeParse({ fullName: String(fd.get("name") ?? ""), phone: String(fd.get("phone") ?? "") });
-    if (!contact.success) {
-      setError(contact.error.issues[0]?.message ?? "Kontrollera uppgifterna");
+    const parsedContact = accountNameSchema
+      .and(z.object({ phone: phoneField }))
+      .safeParse({
+        firstName: String(fd.get("first_name") ?? ""),
+        lastName: String(fd.get("last_name") ?? ""),
+        phone: String(fd.get("phone") ?? ""),
+      });
+    if (!parsedContact.success) {
+      setError(parsedContact.error.issues[0]?.message ?? "Kontrollera uppgifterna");
       return;
     }
+    const contact = {
+      fullName: `${parsedContact.data.firstName} ${parsedContact.data.lastName}`,
+      phone: parsedContact.data.phone,
+    };
     const password = String(fd.get("password") ?? "");
-    if (!details.has_password && !z.string().min(8).max(72).safeParse(password).success) {
-      setError("Välj ett lösenord med minst 8 tecken");
+    if (!details.has_password && !strongPasswordSchema.safeParse(password).success) {
+      setError("Lösenordet uppfyller inte alla krav i listan");
       return;
     }
     setBusy(true);
@@ -139,7 +149,7 @@ function InvitationPage() {
         const { error: passwordError } = await supabase.auth.updateUser({ password });
         if (passwordError) throw new Error("Kunde inte spara lösenordet. Försök igen.");
       }
-      await accept({ data: { token, ...contact.data } });
+      await accept({ data: { token, ...contact } });
       try {
         localStorage.removeItem(INVITATION_STORAGE_KEY);
       } catch {
@@ -190,12 +200,6 @@ function InvitationPage() {
                 />
                 <Button disabled={busy}>{busy ? "Skickar…" : "Skicka verifieringslänk"}</Button>
               </form>
-              {sent && (
-                <p role="status">
-                  Kontrollera din e-post. Öppna verifieringslänken i samma webbläsare. Om den
-                  personliga länken saknas efteråt, öppna originalinbjudan igen.
-                </p>
-              )}
               <Link to="/auth" search={{ next: "invite" }} className="text-sm underline">
                 Har du redan konto? Logga in med lösenord
               </Link>
@@ -208,15 +212,38 @@ function InvitationPage() {
                 <strong>{details.school_name}</strong>.
               </p>
               <form className="grid gap-3" onSubmit={finish}>
-                <Label htmlFor="invite-name">Namn</Label>
-                <Input
-                  id="invite-name"
-                  name="name"
-                  autoComplete="name"
-                  required
-                  maxLength={120}
-                  defaultValue={user.user_metadata?.["full_name"] ?? ""}
-                />
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="grid gap-2">
+                    <Label htmlFor="invite-first-name">Förnamn</Label>
+                    <Input
+                      id="invite-first-name"
+                      name="first_name"
+                      autoComplete="given-name"
+                      required
+                      maxLength={120}
+                      defaultValue={
+                        typeof user.user_metadata?.["full_name"] === "string"
+                          ? user.user_metadata["full_name"].trim().split(/\s+/)[0]
+                          : ""
+                      }
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="invite-last-name">Efternamn</Label>
+                    <Input
+                      id="invite-last-name"
+                      name="last_name"
+                      autoComplete="family-name"
+                      required
+                      maxLength={120}
+                      defaultValue={
+                        typeof user.user_metadata?.["full_name"] === "string"
+                          ? user.user_metadata["full_name"].trim().split(/\s+/).slice(1).join(" ")
+                          : ""
+                      }
+                    />
+                  </div>
+                </div>
                 <Label htmlFor="invite-phone">Telefon</Label>
                 <Input
                   id="invite-phone"
@@ -238,8 +265,11 @@ function InvitationPage() {
                       autoComplete="new-password"
                       minLength={8}
                       maxLength={72}
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
                       required
                     />
+                    <PasswordChecklist password={password} />
                   </>
                 )}
                 <PolicyCheckbox />
