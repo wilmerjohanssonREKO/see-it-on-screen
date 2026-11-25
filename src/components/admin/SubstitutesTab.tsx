@@ -1,3 +1,4 @@
+import { RatingsTab } from "./RatingsTab";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { getAdminSubstitutes } from "@/lib/admin-data";
@@ -161,6 +162,7 @@ export function SubstitutesTab() {
         busy={isFetching}
         onPage={setPage}
       />
+      <RatingsTab kind="ratings" />
     </div>
   );
 }

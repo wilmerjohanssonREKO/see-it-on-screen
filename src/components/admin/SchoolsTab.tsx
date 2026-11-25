@@ -1,3 +1,4 @@
+import { RatingsTab } from "./RatingsTab";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useServerFn } from "@tanstack/react-start";
@@ -168,6 +169,7 @@ export function SchoolsTab() {
           </Card>
         ))}
       </div>
+      <RatingsTab kind="school_ratings" />
     </div>
   );
 }

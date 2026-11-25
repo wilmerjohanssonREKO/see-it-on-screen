@@ -8,16 +8,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-export function RatingsTab() {
+export function RatingsTab({ kind }: { kind: "ratings" | "school_ratings" }) {
   const qc = useQueryClient();
   const { user } = useAuth();
   const [page, setPage] = useState(0);
   const { data, isLoading, isFetching, error, refetch } = useQuery({
-    queryKey: ["admin-ratings", user?.id, page],
+    queryKey: ["admin-ratings", kind, user?.id, page],
     enabled: !!user,
     queryFn: async () => {
+      const empty = Promise.resolve({ data: [], error: null });
       const [subs, schools] = await Promise.all([
-        supabase
+        kind !== "ratings" ? empty : supabase
           .from("ratings")
           .select(
             "id, score, comment, created_at, profiles(full_name), assignments(subject, assignment_date, schools(name))",
@@ -25,7 +26,7 @@ export function RatingsTab() {
           .order("created_at", { ascending: false })
           .order("id")
           .range(page * 50, page * 50 + 49),
-        supabase
+        kind !== "school_ratings" ? empty : supabase
           .from("school_ratings")
           .select(
             "id, score, comment, created_at, schools(name), assignments(subject, assignment_date)",
@@ -86,7 +87,7 @@ export function RatingsTab() {
   );
 
   return (
-    <div className="mt-4 grid gap-6">
+    <div className="mt-8 grid gap-6">
       {isLoading && <p role="status">Laddar omdömen…</p>}
       {error && (
         <div role="alert">
@@ -96,7 +97,7 @@ export function RatingsTab() {
           </Button>
         </div>
       )}
-      <section className="grid gap-3">
+      {kind === "ratings" && <section className="grid gap-3">
         <h2 className="text-xl font-semibold">Betyg på vikarier</h2>
         {!isLoading && !error && !data?.subs.length && (
           <p className="text-muted-foreground">Inga betyg än.</p>
@@ -111,8 +112,8 @@ export function RatingsTab() {
             onDelete={() => remove("ratings", r.id)}
           />
         ))}
-      </section>
-      <section className="grid gap-3">
+      </section>}
+      {kind === "school_ratings" && <section className="grid gap-3">
         <h2 className="text-xl font-semibold">Betyg på skolor</h2>
         {!isLoading && !error && !data?.schools.length && (
           <p className="text-muted-foreground">Inga betyg än.</p>
@@ -127,7 +128,7 @@ export function RatingsTab() {
             onDelete={() => remove("school_ratings", r.id)}
           />
         ))}
-      </section>
+      </section>}
       <PageControls
         page={page}
         hasNext={data?.subs.length === 50 || data?.schools.length === 50}

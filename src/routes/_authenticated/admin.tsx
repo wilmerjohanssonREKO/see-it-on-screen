@@ -5,7 +5,6 @@ import { useAuth, useIsAdmin } from "@/hooks/useAuth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AssignmentsTab } from "@/components/admin/AssignmentsTab";
 import { SubstitutesTab } from "@/components/admin/SubstitutesTab";
-import { RatingsTab } from "@/components/admin/RatingsTab";
 import { SchoolsTab } from "@/components/admin/SchoolsTab";
 import { FeedbackTab } from "@/components/admin/FeedbackTab";
 import { TeachersTab } from "@/components/admin/TeachersTab";
@@ -66,7 +65,6 @@ function AdminPage() {
             <TabsTrigger value="vikarier">Vikarier</TabsTrigger>
             <TabsTrigger value="skolor">Skolor</TabsTrigger>
             <TabsTrigger value="larare">Lärare</TabsTrigger>
-            <TabsTrigger value="betyg">Betyg</TabsTrigger>
             <TabsTrigger value="feedback">Feedback</TabsTrigger>
             <TabsTrigger value="data">Data</TabsTrigger>
             <TabsTrigger value="sandlada">Sandlåda</TabsTrigger>
@@ -82,9 +80,6 @@ function AdminPage() {
           </TabsContent>
           <TabsContent value="larare">
             <TeachersTab />
-          </TabsContent>
-          <TabsContent value="betyg">
-            <RatingsTab />
           </TabsContent>
           <TabsContent value="feedback">
             <FeedbackTab />
