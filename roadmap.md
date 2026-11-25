@@ -25,7 +25,7 @@
 - [ ] Inför migreringarna och matchande kod kontrollerat; verifiera faktisk Lovable-synk och produktionsflöden i testläge.
 - [ ] Konfigurera Supabase e-postverifiering och tillåtna återställnings-/inbjudningsadresser.
 - [ ] Verifiera transaktionell mejldomän och korrekta DNS-poster med vald leverantör.
-- [ ] Konfigurera hemligheter och schemalägg det autentiserade utskicksjobbet.
+- [x] Konfigurera hemligheter och schemalägg det autentiserade utskicksjobbet.
 - [ ] Prova verklig leverans till en av REKO kontrollerad testbrevlåda efter uttryckligt godkännande.
 - [ ] Besluta lagringstider innan ytterligare automatisk radering aktiveras.
 - [ ] Bekräfta produktionsövervakning, larm och ansvarig operatör.

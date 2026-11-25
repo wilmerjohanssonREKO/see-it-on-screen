@@ -23,6 +23,7 @@ import { Route as AuthenticatedSkolaRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedUppdragRouteImport } from './routes/_authenticated/uppdrag'
 import { Route as LarareRegistreraRouteImport } from './routes/larare.registrera'
 import { Route as ApiCronOutboxRouteImport } from './routes/api.cron.outbox'
+import { Route as ApiPublicJobsOutboxRouteImport } from './routes/api.public.jobs.outbox'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 
 const IndexRoute = IndexRouteImport.update({
@@ -94,6 +95,11 @@ const ApiCronOutboxRoute = ApiCronOutboxRouteImport.update({
   path: '/api/cron/outbox',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicJobsOutboxRoute = ApiPublicJobsOutboxRouteImport.update({
+  id: '/api/public/jobs/outbox',
+  path: '/api/public/jobs/outbox',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailTransactionalPreviewRoute =
   LovableEmailTransactionalPreviewRouteImport.update({
     id: '/lovable/email/transactional/preview',
@@ -115,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/uppdrag': typeof AuthenticatedUppdragRoute
   '/larare/registrera': typeof LarareRegistreraRoute
   '/api/cron/outbox': typeof ApiCronOutboxRoute
+  '/api/public/jobs/outbox': typeof ApiPublicJobsOutboxRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRoutesByTo {
@@ -131,6 +138,7 @@ export interface FileRoutesByTo {
   '/uppdrag': typeof AuthenticatedUppdragRoute
   '/larare/registrera': typeof LarareRegistreraRoute
   '/api/cron/outbox': typeof ApiCronOutboxRoute
+  '/api/public/jobs/outbox': typeof ApiPublicJobsOutboxRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRoutesById {
@@ -149,6 +157,7 @@ export interface FileRoutesById {
   '/_authenticated/uppdrag': typeof AuthenticatedUppdragRoute
   '/larare/registrera': typeof LarareRegistreraRoute
   '/api/cron/outbox': typeof ApiCronOutboxRoute
+  '/api/public/jobs/outbox': typeof ApiPublicJobsOutboxRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRouteTypes {
@@ -167,6 +176,7 @@ export interface FileRouteTypes {
     | '/uppdrag'
     | '/larare/registrera'
     | '/api/cron/outbox'
+    | '/api/public/jobs/outbox'
     | '/lovable/email/transactional/preview'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -183,6 +193,7 @@ export interface FileRouteTypes {
     | '/uppdrag'
     | '/larare/registrera'
     | '/api/cron/outbox'
+    | '/api/public/jobs/outbox'
     | '/lovable/email/transactional/preview'
   id:
     | '__root__'
@@ -200,6 +211,7 @@ export interface FileRouteTypes {
     | '/_authenticated/uppdrag'
     | '/larare/registrera'
     | '/api/cron/outbox'
+    | '/api/public/jobs/outbox'
     | '/lovable/email/transactional/preview'
   fileRoutesById: FileRoutesById
 }
@@ -213,6 +225,7 @@ export interface RootRouteChildren {
   KontaktRoute: typeof KontaktRoute
   LarareRegistreraRoute: typeof LarareRegistreraRoute
   ApiCronOutboxRoute: typeof ApiCronOutboxRoute
+  ApiPublicJobsOutboxRoute: typeof ApiPublicJobsOutboxRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
 }
 
@@ -316,6 +329,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCronOutboxRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/outbox': {
+      id: '/api/public/jobs/outbox'
+      path: '/api/public/jobs/outbox'
+      fullPath: '/api/public/jobs/outbox'
+      preLoaderRoute: typeof ApiPublicJobsOutboxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/transactional/preview': {
       id: '/lovable/email/transactional/preview'
       path: '/lovable/email/transactional/preview'
@@ -355,6 +375,7 @@ const rootRouteChildren: RootRouteChildren = {
   KontaktRoute: KontaktRoute,
   LarareRegistreraRoute: LarareRegistreraRoute,
   ApiCronOutboxRoute: ApiCronOutboxRoute,
+  ApiPublicJobsOutboxRoute: ApiPublicJobsOutboxRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
 }
 export const routeTree = rootRouteImport

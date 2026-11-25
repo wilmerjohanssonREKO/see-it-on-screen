@@ -56,9 +56,9 @@ Required hosting secrets/settings (never commit actual values):
 - REKO_EMAIL_SENDER_VERIFIED=true only after provider verification;
 - LOVABLE_CRON_SECRET, with optional LOVABLE_CRON_SECRET_PREVIOUS during rotation.
 
-Schedule an HTTPS POST to /api/cron/outbox approximately once a minute using the
-Authorization: Bearer header with the cron secret. The endpoint refuses missing or
-incorrect credentials. Do not put the secret in a URL, browser bundle or repository.
+The managed schedule posts to /api/public/jobs/outbox once a minute using the
+managed cron credential. The endpoint refuses missing or incorrect credentials.
+Do not put the secret in a URL, browser bundle or repository.
 There is also a clearly confirmed admin action for manually processing a small batch.
 An endpoint does not configure its schedule: the hosting scheduler still must be set up.
 
