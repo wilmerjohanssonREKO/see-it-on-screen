@@ -273,7 +273,6 @@ function ProfilPage() {
         <Card className="mt-6 shadow-soft">
           <CardHeader>
             <CardTitle>Uppgifter</CardTitle>
-            <CardDescription>Ämnen och tillgänglighet är valfria och visas för skolor.</CardDescription>
           </CardHeader>
           <CardContent>
             <form className="grid gap-4" onSubmit={handleSave}>
@@ -340,7 +339,7 @@ function ProfilPage() {
 
               {!schoolId && (
                 <div className="grid gap-2">
-                  <Label>Ämnen du kan vikariera i</Label>
+                  <Label>Ämnen du vill vikariera i</Label>
                   <div className="grid gap-2 rounded-panel border border-border p-4 sm:grid-cols-2">
                     {SUBJECTS.map((s) => (
                       <label key={s} htmlFor={`subject-${s}`} className="flex min-h-11 items-center gap-2 text-sm">
