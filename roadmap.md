@@ -21,6 +21,9 @@
 - [x] Separata fält för förnamn och efternamn vid vikarie- och lärarregistrering.
 - [x] Synlig checklista med samma starka lösenordskrav vid registrering, inbjudan och lösenordsåterställning.
 - [x] Egen sida för skickad e-postbekräftelse med återsändning för vikarier och inbjudna lärare/skolansvariga.
+- [x] Godkänn lösenord som uppfyller checklistan och visa specifik svensk varning för första saknade kravet.
+- [x] Visa checklistan först vid ifyllning och dölj den när samtliga krav är uppfyllda.
+- [ ] Kontrollera faktisk leveranshändelse för e-postbekräftelse till Morris adress — väntar på godkännande att publicera mejlkopplingen.
 
 ## Krävs inför drift — inte markerat klart av kodtester
 

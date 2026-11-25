@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordChecklist } from "@/components/PasswordChecklist";
-import { strongPasswordSchema } from "@/lib/password";
+import { passwordValidationMessage } from "@/lib/password";
 export const Route = createFileRoute("/aterstall-losenord")({
   ssr: false,
   head: () => ({
@@ -43,8 +43,9 @@ function ResetPassword() {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const password = String(fd.get("password") ?? "");
-    if (!strongPasswordSchema.safeParse(password).success) {
-      setError("Lösenordet uppfyller inte alla krav i listan");
+    const passwordMessage = passwordValidationMessage(password);
+    if (passwordMessage) {
+      setError(passwordMessage);
       return;
     }
     if (password !== String(fd.get("confirm") ?? "")) {

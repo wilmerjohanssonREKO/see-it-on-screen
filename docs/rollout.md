@@ -46,6 +46,12 @@ an admin invitation, control of the exact verified email and a password set by t
 Invitations expire in 48 hours, are one-use, revoke previous pending invitations for
 the same school/email, and never return the bearer token in admin listings.
 
+Custom Swedish authentication emails use the managed auth webhook under
+/lovable/email/auth/webhook and the verified notify.rekoweb.com sender domain.
+Publish the application before verifying live signup, invitation and recovery delivery;
+then confirm each auth action in More -> Emails. Passwords meeting the four visible
+requirements are accepted without the optional breached-password blocklist.
+
 ## Transactional email and worker
 
 Required hosting secrets/settings (never commit actual values):

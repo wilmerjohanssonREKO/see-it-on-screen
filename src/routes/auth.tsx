@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { z } from "zod";
 import { accountNameSchema } from "@/lib/contact-schemas";
-import { strongPasswordSchema } from "@/lib/password";
+import { passwordValidationMessage, strongPasswordSchema } from "@/lib/password";
 import { PasswordChecklist } from "@/components/PasswordChecklist";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -112,10 +112,18 @@ function AuthPage() {
       }
       return;
     }
+    const passwordValue = String(fd.get("password") ?? "");
+    if (mode === "signup") {
+      const passwordMessage = passwordValidationMessage(passwordValue);
+      if (passwordMessage) {
+        toast.error(passwordMessage);
+        return;
+      }
+    }
     // Existing accounts keep their old passwords; new passwords must meet the visible checklist.
     const parsed = (
       mode === "signup" ? schema.extend({ password: strongPasswordSchema }) : schema
-    ).safeParse({ email, password: String(fd.get("password") ?? "") });
+    ).safeParse({ email, password: passwordValue });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0]?.message ?? "Kontrollera uppgifterna");
       return;
@@ -162,7 +170,15 @@ function AuthPage() {
       const destination = authDestination(search.next) ?? (await postAuthDestination());
       await navigate({ to: destination, replace: true });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Kunde inte logga in");
+      const errorCode =
+        error && typeof error === "object" && "code" in error ? String(error.code) : "";
+      toast.error(
+        errorCode === "weak_password"
+          ? "Lösenordet kunde inte godkännas. Välj ett annat lösenord."
+          : error instanceof Error
+            ? error.message
+            : "Kunde inte logga in",
+      );
     } finally {
       submitting.current = false;
       setBusy(false);

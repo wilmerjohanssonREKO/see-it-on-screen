@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { acceptSchoolInvitation, inspectSchoolInvitation } from "@/lib/teacher.functions";
 import { INVITATION_STORAGE_KEY, invitationToken } from "@/lib/auth-navigation";
 import { accountNameSchema, phoneField } from "@/lib/contact-schemas";
-import { strongPasswordSchema } from "@/lib/password";
+import { passwordValidationMessage } from "@/lib/password";
 import { PasswordChecklist } from "@/components/PasswordChecklist";
 import { Brand } from "@/components/AppHeader";
 import { PolicyCheckbox } from "@/components/PolicyCheckbox";
@@ -138,8 +138,9 @@ function InvitationPage() {
       phone: parsedContact.data.phone,
     };
     const password = String(fd.get("password") ?? "");
-    if (!details.has_password && !strongPasswordSchema.safeParse(password).success) {
-      setError("Lösenordet uppfyller inte alla krav i listan");
+    const passwordMessage = passwordValidationMessage(password);
+    if (!details.has_password && passwordMessage) {
+      setError(passwordMessage);
       return;
     }
     setBusy(true);

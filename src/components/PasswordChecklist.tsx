@@ -1,7 +1,9 @@
 import { Check, Circle } from "lucide-react";
-import { passwordRequirements } from "@/lib/password";
+import { passwordRequirements, shouldShowPasswordChecklist } from "@/lib/password";
 
 export function PasswordChecklist({ password }: { password: string }) {
+  if (!shouldShowPasswordChecklist(password)) return null;
+
   return (
     <div className="rounded-panel border border-border bg-muted/40 p-3 text-sm">
       <p className="font-semibold">Lösenordet ska innehålla:</p>
