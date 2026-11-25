@@ -156,7 +156,7 @@ function UppdragPage() {
       <main className="mx-auto max-w-5xl px-4 py-8">
         <h1 className="text-3xl font-bold">Schema</h1>
         <p className="mt-1 text-muted-foreground">
-          {firstName ? `God dag, ${firstName}` : "God dag"}. Anmäl intresse för ett uppdrag – skolan väljer vikarie.
+          {firstName ? `God dag, ${firstName}` : "God dag"}.&nbsp;
         </p>
 
 
