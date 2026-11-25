@@ -169,6 +169,20 @@
       "when": 1794519900000,
       "tag": "0023_flow_regressions",
       "breakpoints": false
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1795594227651,
+      "tag": "0024_order_substitute_assignments_nearest_first",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1795594273397,
+      "tag": "0025_admin_rating_summaries",
+      "breakpoints": true
     }
   ]
 }

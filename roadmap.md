@@ -14,6 +14,11 @@
 - [x] Lokala SQL-/behörighetstester inklusive två samtidiga skolval, enhetstester, bygg-/typkontroller och webbläsarkontroller.
 - [x] GitHub Actions för automatiska kontroller och dokumenterad införandeplan.
 
+## Pågående / nya önskemål
+
+- [x] Schema för vikarier: närmast kommande uppdrag först, avslutade därefter (senast först).
+- [x] Betyg ska stå bland övrig information hos vikarier och skolor i admin, inte som en separat sektion längst ned.
+
 ## Krävs inför drift — inte markerat klart av kodtester
 
 - [ ] Bekräfta backup och återställningsprov i separat miljö.

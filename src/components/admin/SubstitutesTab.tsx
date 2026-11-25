@@ -1,4 +1,3 @@
-import { RatingsTab } from "./RatingsTab";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { getAdminSubstitutes } from "@/lib/admin-data";
@@ -22,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SubstituteAvatar } from "@/components/SubstituteAvatar";
+import { RatingSummary } from "@/components/StarRating";
 import { BACKGROUND_LABELS } from "@/lib/subjects";
 
 export function SubstitutesTab() {
@@ -106,9 +106,12 @@ export function SubstitutesTab() {
               {p.school_name ?? "—"} {p.graduation_year ? `· examen ${p.graduation_year}` : ""}
             </p>
             <p className="text-sm">Ämnen: {p.subjects.join(", ") || "inga valda"}</p>
-            {p.availability && (
-              <p className="text-sm text-muted-foreground">Tillgänglighet: {p.availability}</p>
-            )}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+              <RatingSummary avg={p.rating_avg} count={p.rating_count} />
+              {p.availability && (
+                <p className="text-sm text-muted-foreground">Tillgänglighet: {p.availability}</p>
+              )}
+            </div>
             <div className="flex flex-wrap gap-2">
               <Button
                 size="sm"
@@ -162,9 +165,6 @@ export function SubstitutesTab() {
         busy={isFetching}
         onPage={setPage}
       />
-      <RatingsTab kind="ratings" />
     </div>
   );
 }
-
-/* ---------------- Betyg ---------------- */

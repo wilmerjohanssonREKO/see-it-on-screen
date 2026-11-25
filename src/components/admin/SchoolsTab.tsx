@@ -1,4 +1,3 @@
-import { RatingsTab } from "./RatingsTab";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useServerFn } from "@tanstack/react-start";
@@ -14,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RatingSummary } from "@/components/StarRating";
 
 export function SchoolsTab() {
   const { user } = useAuth();
@@ -30,6 +30,21 @@ export function SchoolsTab() {
       return data;
     },
   });
+  const { data: ratingRows } = useQuery({
+    queryKey: ["school-ratings", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("admin_school_rating_summaries");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const ratingsBySchool = new Map<string, { rating_avg: number; rating_count: number }>(
+    (ratingRows ?? []).map((row) => [
+      row.school_id,
+      { rating_avg: row.rating_avg, rating_count: row.rating_count },
+    ]),
+  );
 
   const editing = data?.find((school) => school.id === editingId);
   async function add(e: React.FormEvent<HTMLFormElement>) {
@@ -151,6 +166,12 @@ export function SchoolsTab() {
                   ? `${s.street_address}, ${s.postal_code ?? ""} ${s.city ?? ""}`
                   : "Adress saknas"}
               </p>
+              <div className="mt-1">
+                <RatingSummary
+                  avg={ratingsBySchool.get(s.id)?.rating_avg}
+                  count={ratingsBySchool.get(s.id)?.rating_count}
+                />
+              </div>
               <Button
                 className="mt-3"
                 type="button"
@@ -169,7 +190,6 @@ export function SchoolsTab() {
           </Card>
         ))}
       </div>
-      <RatingsTab kind="school_ratings" />
     </div>
   );
 }

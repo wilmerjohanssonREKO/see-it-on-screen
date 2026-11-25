@@ -13,6 +13,8 @@ export type AdminSubstitute = {
   availability: string | null;
   has_cv: boolean;
   is_test: boolean;
+  rating_avg: number;
+  rating_count: number;
 };
 
 export async function getAdminSubstitutes(

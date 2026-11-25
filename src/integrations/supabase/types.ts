@@ -1152,6 +1152,14 @@ export type Database = {
         Returns: boolean
       }
       admin_retry_email: { Args: { p_id: string }; Returns: undefined }
+      admin_school_rating_summaries: {
+        Args: never
+        Returns: {
+          rating_avg: number
+          rating_count: number
+          school_id: string
+        }[]
+      }
       admin_set_test: {
         Args: { p_id: string; p_kind: string; p_value: boolean }
         Returns: undefined
@@ -1169,6 +1177,8 @@ export type Database = {
           id: string
           is_test: boolean
           phone: string
+          rating_avg: number
+          rating_count: number
           school_name: string
           subjects: string[]
         }[]
