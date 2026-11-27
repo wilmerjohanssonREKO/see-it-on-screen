@@ -1,0 +1,17 @@
+{
+  "app_source": "5d1ecb76ff5596a073a4b28009df04a7987879cd",
+  "auth_ready": true,
+  "storage_ready": false,
+  "storage_mode": "schema-only test double; API unavailable",
+  "fixture_roles": {
+    "admin": 1,
+    "school": 4,
+    "substitute": 5
+  },
+  "network_internal": true,
+  "auth_confirmation_required": true,
+  "auth_confirmation_and_recovery_verified": true,
+  "mail_capture": "Mailpit; app sandbox outbox",
+  "public_test_url": null,
+  "scope": "local worker environment; not Lovable hosting capacity"
+}

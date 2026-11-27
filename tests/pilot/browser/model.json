@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "seed": 20261113,
+  "stage_users": [
+    5,
+    10,
+    25,
+    50,
+    100,
+    250
+  ],
+  "initial_stage_only": true,
+  "roles": "one admin, one independent school/substitute pair per two users; one spare user in even-sized cohorts browses assignments",
+  "think_seconds": {
+    "read": [
+      2,
+      8
+    ],
+    "write": [
+      15,
+      45
+    ],
+    "navigate": [
+      1,
+      4
+    ]
+  },
+  "gates": {
+    "required_task_success_rate": 1,
+    "max_page_errors": 0,
+    "max_external_messages": 0,
+    "max_overlapping_allocations": 0
+  },
+  "timeouts_seconds": {
+    "action": 30,
+    "coordination": 180,
+    "stage": 900
+  },
+  "notes": [
+    "Think times are assumptions, not measurements of real people",
+    "UI timing is local browser/app timing, not a claim about production capacity",
+    "Higher stages require enough unique fixture accounts and explicit run selection",
+    "The first model covers publishing, apply/withdraw/reapply, selection, contact, cancellation, admin decision and queue capture; onboarding/Storage/mail verification are separate integration suites"
+  ],
+  "max_users_per_run": 10,
+  "resource_note": "Current executor cgroup: 2 CPU and 8 GiB. Start5 then10. Reassess runner/app resource saturation before configuring25 or more; no production capacity inference.",
+  "runtime_scope": {
+    "app_mode": "vite-development",
+    "auth": "real local GoTrue",
+    "database": "real PostgreSQL/PostgREST",
+    "mail": "local Mailpit; app sandbox capture",
+    "storage": "not ready in current executor; explicit503"
+  }
+}
