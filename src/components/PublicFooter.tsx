@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { OPEN_COOKIE_SETTINGS } from "@/components/AnalyticsConsentBanner";
 
 export function PublicFooter() {
   return (
@@ -9,6 +10,7 @@ export function PublicFooter() {
         </span>
         <a href="mailto:hej@rekoweb.com" className="text-sm underline underline-offset-2">hej@rekoweb.com</a>
         <Link to="/integritetspolicy" className="text-sm underline underline-offset-2">Integritetspolicy</Link>
+        <button type="button" className="text-sm underline underline-offset-2" onClick={() => window.dispatchEvent(new Event(OPEN_COOKIE_SETTINGS))}>Cookie-inställningar</button>
       </div>
     </footer>
   );

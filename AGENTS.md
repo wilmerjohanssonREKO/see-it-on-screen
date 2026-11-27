@@ -31,3 +31,4 @@
 - Booking/cancellation transitions enqueue durable versioned email jobs transactionally; browser actions never drive delivery. Workers recheck recipients/test mode and require admin or cron authentication.
 - Cancellation is requested by a party and resolved by REKO admin. Only future work may reopen; clear assignment identity/time atomically. Preserve completed history during resumable account deletion.
 - Read docs/rollout.md before merging into the Lovable-connected branch. Local SQL tests must use the disposable container and never the original test-named accounts or production database.
+- Behaviour analytics is first-party: BehaviourTracker sends only after explicit analytics consent (consent.ts, ask everywhere, GPC = deny) via SECURITY DEFINER record_behaviour_events; no direct table grants, admin reads via admin_behaviour_* RPCs, 90-day retention. Never capture field values, passwords or account identity; paths are ID-normalized — keeps it GDPR-minimal.

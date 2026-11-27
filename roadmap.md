@@ -37,3 +37,5 @@
 - [ ] Bekräfta produktionsövervakning, larm och ansvarig operatör.
 
 Se docs/rollout.md. Ursprungliga konton med testnamn är inte isolerade som sandlådedata och har inte ändrats eller använts för skrivtester.
+- [x] Beteendeanalys under Admin → Data (samtycke, spårning, värmekarta, poäng, AI-förslag)
+- [ ] Sessionsinspelningar — ej byggt (integritet/prestanda); väntar på beslut

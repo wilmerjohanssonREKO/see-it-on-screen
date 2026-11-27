@@ -65,7 +65,9 @@ const sections: { title: string; body: string[] }[] = [
   {
     title: "Kakor",
     body: [
-      "Vi använder bara det som krävs för att du ska kunna vara inloggad. Inga spårnings- eller reklamkakor.",
+      "Nödvändig lagring används för att du ska kunna vara inloggad. Inga reklamkakor.",
+      "Om du godkänner analys mäter vi anonymt hur sidan används: vilka sidor du besöker, var du klickar, hur långt du scrollar, hur länge du stannar, om formulär påbörjas eller skickas samt enhetstyp. Vi sparar aldrig vad du skriver, inga lösenord och ingen koppling till ditt konto. Ett slumpmässigt besöks-id sparas i webbläsaren tills fliken stängs.",
+      "Den rättsliga grunden är ditt samtycke. Uppgifterna raderas efter 90 dagar. Du kan när som helst ändra ditt val via ”Cookie-inställningar” längst ned på sidan, och en webbläsarsignal om att inte spåras (Global Privacy Control) respekteras alltid.",
     ],
   },
 ];

@@ -14,6 +14,9 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthSessionBoundary } from "@/components/AuthSessionBoundary";
+import { AnalyticsConsentBanner } from "@/components/AnalyticsConsentBanner";
+import { BehaviourTracker } from "@/components/BehaviourTracker";
+import { CONSENT_DEFAULTS_SCRIPT } from "@/lib/consent-defaults";
 
 
 function NotFoundComponent() {
@@ -109,6 +112,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
+    scripts: [{ children: CONSENT_DEFAULTS_SCRIPT }],
   }),
 
   shellComponent: RootShell,
@@ -139,6 +143,8 @@ function RootComponent() {
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <AuthSessionBoundary><Outlet /></AuthSessionBoundary>
       <Toaster position="top-center" richColors />
+      <AnalyticsConsentBanner />
+      <BehaviourTracker />
 
     </QueryClientProvider>
   );

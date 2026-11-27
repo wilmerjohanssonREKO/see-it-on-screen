@@ -12,6 +12,7 @@ import {
 } from "@/lib/stats.functions";
 import { useAuth } from "@/hooks/useAuth";
 import { EmailOutboxPanel } from "./EmailOutboxPanel";
+import { BehaviourAnalytics } from "./BehaviourAnalytics";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -132,6 +133,7 @@ export function DataTab() {
 
   return (
     <div className="space-y-6">
+      <BehaviourAnalytics />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">

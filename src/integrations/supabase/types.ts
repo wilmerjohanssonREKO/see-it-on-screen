@@ -195,6 +195,51 @@ export type Database = {
           },
         ]
       }
+      behaviour_events: {
+        Row: {
+          device: string
+          element: string | null
+          event_type: string
+          id: number
+          occurred_at: string
+          page_view_id: string
+          path: string
+          session_id: string
+          value: number | null
+          viewport_w: number | null
+          x: number | null
+          y: number | null
+        }
+        Insert: {
+          device: string
+          element?: string | null
+          event_type: string
+          id?: never
+          occurred_at?: string
+          page_view_id: string
+          path: string
+          session_id: string
+          value?: number | null
+          viewport_w?: number | null
+          x?: number | null
+          y?: number | null
+        }
+        Update: {
+          device?: string
+          element?: string | null
+          event_type?: string
+          id?: never
+          occurred_at?: string
+          page_view_id?: string
+          path?: string
+          session_id?: string
+          value?: number | null
+          viewport_w?: number | null
+          x?: number | null
+          y?: number | null
+        }
+        Relationships: []
+      }
       cancellation_requests: {
         Row: {
           affected_substitute_id: string | null
@@ -1052,6 +1097,15 @@ export type Database = {
           substitute_phone: string
         }[]
       }
+      admin_behaviour_heatmap: {
+        Args: { p_days?: number; p_device?: string; p_path: string }
+        Returns: {
+          event_type: string
+          x: number
+          y: number
+        }[]
+      }
+      admin_behaviour_summary: { Args: { p_days?: number }; Returns: Json }
       admin_cancellation_requests: {
         Args: { p_limit?: number; p_offset?: number }
         Returns: {
@@ -1332,6 +1386,7 @@ export type Database = {
         Args: { p_assignment_id: string; p_comment: string; p_score: number }
         Returns: undefined
       }
+      record_behaviour_events: { Args: { p_events: Json }; Returns: number }
       reject_applicant: {
         Args: { p_assignment_id: string; p_substitute_id: string }
         Returns: boolean

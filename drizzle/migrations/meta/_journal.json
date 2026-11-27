@@ -183,6 +183,13 @@
       "when": 1795594273397,
       "tag": "0025_admin_rating_summaries",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1795767352229,
+      "tag": "0026_behaviour_analytics",
+      "breakpoints": true
     }
   ]
 }
